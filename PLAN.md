@@ -49,18 +49,18 @@ End date: 2025-05-23
 
 - Milestone 03 - Due 2025-04-02 - Basic frontend rendering
 
-- Milestone 04 - Due 2025-04-09 - 
+- Milestone 04 - Due 2025-04-09 - TBD
 
-- Milestone 05 - Due 2025-04-16 -
+- Milestone 05 - Due 2025-04-16 - TBD
 
-- Milestone 06 - Due 2025-04-23 -
+- Milestone 06 - Due 2025-04-23 - TBD
 
-- Milestone 07 - Due 2025-04-30 -
+- Milestone 07 - Due 2025-04-30 - TBD
 
-- Milestone 08 - Due 2025-05-07 -
+- Milestone 08 - Due 2025-05-07 - TBD
 
-- Milestone 09 - Due 2025-04-14 -
+- Milestone 09 - Due 2025-04-14 - TBD
 
-- Milestone 10 - Due 2025-04-21 -
+- Milestone 10 - Due 2025-04-21 - TBD
 
 - Milestone 11 - Due 2025-04-25 - Final review and cleanup
