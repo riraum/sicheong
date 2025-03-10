@@ -35,7 +35,7 @@ End date: 2025-05-23
 - Milestone 02 - Due 2025-03-26 - Basic DB
   - Create an SQLite db
   - Define a simple schema with a single table
-    - `Post`: `id, title, link`
+    - `Post`: `id, date, title, link`
   - Write go code to initialize the database with the table
   - Write go code to write random data into the db  
   - Write go code to read all posts from the db
@@ -48,8 +48,27 @@ End date: 2025-05-23
     - https://github.com/mattn/go-sqlite3/blob/master/_example/simple/simple.go
 
 - Milestone 03 - Due 2025-04-02 - Basic frontend rendering
+  - Update the `GET /` endpoint to:
+    - List all the posts
+    - Create and fill an html template
+    - Create a basic form to submit new Posts (don't handle it yet)
+  - Apply some basic CSS
+  - Serve the CSS from your machine
+  - Resources:
+    - https://picocss.com/ (just a basic CSS framework that looks OK)
+    - https://pkg.go.dev/html/template
+    - https://www.alexedwards.net/blog/serving-static-sites-with-go
+    - https://gist.github.com/paulmach/7271283
 
-- Milestone 04 - Due 2025-04-09 - TBD
+- Milestone 04 - Due 2025-04-09 - CRUD Posts
+  - Update `POST /api/v0/posts` to accept the new data from the form and create it in DB
+  - Add `DELETE /api/v0/posts/<id>` to delete a post from the DB
+  - Update `GET /api/v0/posts` to accept the query parameter:
+    - `sort`: `title`, `date` (default: `date`)
+    - `direction`: `asc`, `desc` (default: `desc`)
+    - E.g.
+      - `GET /api/v0/posts?sort=title&direction=asc` list posts, order by title, Z->A
+      - `GET /api/v0/posts?direction=asc` list posts, order by date, oldest -> newest
 
 - Milestone 05 - Due 2025-04-16 - TBD
 
