@@ -2,12 +2,19 @@
 
 End date: 2025-05-23
 
+> [!NOTE]
+> Write issues and milestones for all those when you can.
+> E.g. https://github.com/riraum/project451/milestone/1
+> (Those should not be really acted on, all the work should be done in the final repo)
+
 - Milestone 00 - Due 2025-03-12 - Project setup
+  - Find a name
   - Create a repository
   - Setup CI
   - Write a `script/run` script that runs the code
   - Write a dummy `main.go`
-  - Write a dummy `main_test.go` 
+  - Write a dummy `main_test.go`
+  - Write in issues at least milestone 01 and 02
 
 - Milestone 01 - Due 2025-03-19 - Basic website
   - Write a webserver that respond to `GET /` with `200 "OK"`
