@@ -9,7 +9,7 @@ End date: 2025-05-23
 
 - Milestone 00 - Due 2025-03-12 - Project setup
   - Find a name
-  - Create a repository
+  - Rename the repository
   - Setup CI
   - Write a `script/run` script that runs the code
   - Write a dummy `main.go`
