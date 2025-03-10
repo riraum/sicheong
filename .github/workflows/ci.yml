@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # Golang
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+      # Allegedly contained in golangci-lint
+      # - name: Install goimports
+      #   run: go install golang.org/x/tools/cmd/goimports@latest
+
+      # Taken from https://github.com/cli/cli/blob/trunk/.github/workflows/lint.yml
+      - name: Lint
+        run: |
+          STATUS=0
+          assert-nothing-changed() {
+            local diff
+            echo -e "\n\nRunning '$@'"
+            "$@" || (echo -e "\n'$@' failed" && STATUS=1)
+            if ! diff="$(git diff -U1 --color --exit-code)"; then
+              printf '\e[31mError: running `\e[1m%s\e[22m` results in modifications that you must check into version control:\e[0m\n%s\n\n' "$*" "$diff" >&2
+              git checkout -- .
+              STATUS=1
+            fi
+          }
+
+          assert-nothing-changed go fmt ./...
+          assert-nothing-changed go mod tidy
+
+          exit $STATUS
+
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: "go.mod"
+
+      - name: test
+        run: ./script/test
+        
+  golangci-lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+
+      - name: Launch golangci-lint
+        uses: golangci/golangci-lint-action@v6
