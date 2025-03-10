@@ -15,7 +15,7 @@
 
 # Admin features
 
-- User feature
+- User's feature
 - Create a language category
 - Delete any content
 - Create a user account
