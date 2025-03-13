@@ -9,14 +9,19 @@ import (
 type Server struct {
 }
 
-func hello(w http.ResponseWriter, _ *http.Request) {
+func getRoot(w http.ResponseWriter, _ *http.Request) {
 	fmt.Fprint(w, http.StatusOK)
 }
 
-func ServeRootDir() {
+func getAPIPosts(w http.ResponseWriter, _ *http.Request) {
+	fmt.Fprint(w, http.StatusOK, "[]")
+}
+
+func ServeDirs() {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", hello)
+	mux.HandleFunc("/", getRoot)
+	mux.HandleFunc("/api/v0/posts", getAPIPosts)
 
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }

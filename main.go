@@ -9,5 +9,5 @@ import (
 func main() {
 	fmt.Println("Hello si-cheong user")
 
-	http.ServeRootDir()
+	http.ServeDirs()
 }
