@@ -14,6 +14,7 @@ func index(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+
 	fmt.Fprint(w, http.StatusOK)
 }
 
@@ -22,6 +23,7 @@ func apiPosts(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+
 	switch r.Method {
 	case http.MethodGet:
 		fmt.Fprint(w, http.StatusOK, "[]")
