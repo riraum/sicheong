@@ -11,13 +11,11 @@ type Server struct {
 
 func getIndex(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("OK"))
 	fmt.Fprint(w, http.StatusOK)
 }
 
 func getAPIPosts(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("[]"))
 	fmt.Fprint(w, "[]")
 }
 
