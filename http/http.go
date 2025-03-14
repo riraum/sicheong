@@ -14,6 +14,7 @@ func getIndex(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
+
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, http.StatusOK)
 }
