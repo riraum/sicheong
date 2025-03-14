@@ -9,7 +9,11 @@ import (
 type Server struct {
 }
 
-func getIndex(w http.ResponseWriter, _ *http.Request) {
+func getIndex(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		http.NotFound(w, r)
+		return
+	}
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, http.StatusOK)
 }
