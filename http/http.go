@@ -32,10 +32,10 @@ func notFound(w http.ResponseWriter, _ *http.Request) {
 func ServeDirs() {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("GET /", getIndex)
+	mux.HandleFunc("GET /{$}", getIndex)
 	mux.HandleFunc("GET /api/v0/posts", getAPIPosts)
 	mux.HandleFunc("POST /api/v0/posts", postAPIPosts)
-	mux.HandleFunc("GET /{$}", notFound)
+	mux.HandleFunc("GET /", notFound)
 
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }
