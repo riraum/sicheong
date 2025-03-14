@@ -9,34 +9,24 @@ import (
 type Server struct {
 }
 
-func index(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		http.NotFound(w, r)
-		return
-	}
-
+func index(w http.ResponseWriter, _ *http.Request) {
 	fmt.Fprint(w, http.StatusOK)
 }
 
-func apiPosts(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/api/v0/posts" {
-		http.NotFound(w, r)
-		return
-	}
+func getAPIPosts(w http.ResponseWriter, _ *http.Request) {
+	fmt.Fprint(w, http.StatusOK, "[]")
+}
 
-	switch r.Method {
-	case http.MethodGet:
-		fmt.Fprint(w, http.StatusOK, "[]")
-	case http.MethodPost:
-		fmt.Fprint(w, http.StatusCreated)
-	}
+func postAPIPosts(w http.ResponseWriter, _ *http.Request) {
+	fmt.Fprint(w, http.StatusCreated)
 }
 
 func ServeDirs() {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", index)
-	mux.HandleFunc("/api/v0/posts", apiPosts)
+	mux.HandleFunc("GET /", index)
+	mux.HandleFunc("GET /api/v0/posts", getAPIPosts)
+	mux.HandleFunc("POST /api/v0/posts", postAPIPosts)
 
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }
