@@ -9,11 +9,11 @@ import (
 func TestServeMux(t *testing.T) {
 	mux := SetupMux()
 	// Create a testing server with the ServeMux
-	server := httptest.NewServer(mux)
-	defer server.Close()
+	ts := httptest.NewServer(mux)
+	defer ts.Close()
 
 	// Test GET request
-	resp, err := http.Get(server.URL + "/")
+	resp, err := http.Get(ts.URL + "/")
 	if err != nil {
 		t.Errorf("Error making GET request: %v", err)
 	}
@@ -23,7 +23,7 @@ func TestServeMux(t *testing.T) {
 	}
 
 	// Test API GET request
-	resp, err = http.Get(server.URL + "/api/v0/posts")
+	resp, err = http.Get(ts.URL + "/api/v0/posts")
 	if err != nil {
 		t.Errorf("Error making GET request: %v", err)
 	}
@@ -33,7 +33,7 @@ func TestServeMux(t *testing.T) {
 	}
 
 	// Test POST request
-	resp, err = http.Post(server.URL+"/api/v0/posts", "application/json", nil)
+	resp, err = http.Post(ts.URL+"/api/v0/posts", "application/json", nil)
 	if err != nil {
 		t.Errorf("Error making POST request: %v", err)
 	}
