@@ -24,7 +24,8 @@ func create() (*sql.DB, error) {
 		return nil, fmt.Errorf("failed to open sql %w", err)
 	}
 
-	sqlStmt := `create table posts (id integer not null primary key, date	integer, title text, link text); delete from posts;`
+	sqlStmt := `create table posts` +
+		`(id integer not null primary key, date	integer, title text, link text); delete from posts;`
 
 	_, err = db.Exec(sqlStmt)
 	if err != nil {
@@ -36,7 +37,11 @@ func create() (*sql.DB, error) {
 }
 
 func fill(db *sql.DB) (*sql.DB, error) {
-	_, err := db.Exec("insert into posts(id, date, title, link) values(1, 202500101, 'Complaint', 'https://http.cat/status/200'), (2, 20250201, 'Feedback', 'https://http.cat/status/100'), (3, 20250301, 'Announcement', 'https://http.cat/status/301')")
+	_, err := db.Exec(
+		"insert into posts(id, date, title, link) " +
+			"values(1, 202500101, 'Complaint', 'https://http.cat/status/200'), " +
+			"(2, 20250201, 'Feedback', 'https://http.cat/status/100'), " +
+			"(3, 20250301, 'Announcement', 'https://http.cat/status/301')")
 	if err != nil {
 		return nil, fmt.Errorf("failed to insert %w", err)
 	}
@@ -44,32 +49,27 @@ func fill(db *sql.DB) (*sql.DB, error) {
 	return db, nil
 }
 
-func getRows(db *sql.DB) error {
+func getRows(db *sql.DB) ([]Post, error) {
 	rows, err := db.Query("select id, date, title, link from posts")
 	if err != nil {
-		return fmt.Errorf("failed to select %w", err)
+		return nil, fmt.Errorf("failed to select %w", err)
 	}
 
 	defer rows.Close()
 
+	var posts []Post
+
+	var post Post
 	for rows.Next() {
-		var id int
-
-		var date int
-
-		var title string
-
-		var link string
-
-		err = rows.Scan(&id, &date, &title, &link)
+		err = rows.Scan(&post.id, &post.date, &post.title, &post.link)
 		if err != nil {
-			return fmt.Errorf("failed to scan %w", err)
+			return nil, fmt.Errorf("failed to scan %w", err)
 		}
 
-		fmt.Println(id, date, title, link)
+		posts = append(posts, post)
 	}
 
-	return fmt.Errorf("failed to %w", err)
+	return posts, nil
 }
 
 func All() {
@@ -83,9 +83,14 @@ func All() {
 		log.Fatal(err)
 	}
 
-	err = getRows(db)
+	post, err := getRows(db)
 	if err != nil {
 		log.Fatal(err)
+	}
+
+	for i := range post {
+		p := post[i]
+		fmt.Println(p.id, p.date, p.title, p.link)
 	}
 
 	db.Close()
