@@ -10,7 +10,7 @@ import (
 func main() {
 	fmt.Println("Hello si-cheong user")
 
-	db.DB()
+	db.All()
 
 	mux := http.SetupMux()
 	http.ServeDirs(mux)
