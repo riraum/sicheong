@@ -53,7 +53,9 @@ import (
 // }
 
 func TestFill(t *testing.T) {
-	db, err := create()
+	testDBPath := t.TempDir()
+
+	db, err := create(testDBPath)
 	if err != nil {
 		log.Fatal(err)
 	}

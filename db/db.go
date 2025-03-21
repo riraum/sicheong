@@ -16,10 +16,10 @@ type Post struct {
 	link  string
 }
 
-func create() (*sql.DB, error) {
-	os.Remove("./sq.db")
+func create(dbPath string) (*sql.DB, error) {
+	os.Remove(dbPath)
 
-	db, err := sql.Open("sqlite3", "./sq.db")
+	db, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open sql %w", err)
 	}
@@ -74,7 +74,9 @@ func getRows(db *sql.DB) ([]Post, error) {
 }
 
 func All() {
-	db, err := create()
+	dbPath := "./sq.db"
+
+	db, err := create(dbPath)
 	if err != nil {
 		log.Fatal(err)
 	}
