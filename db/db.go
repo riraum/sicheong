@@ -59,8 +59,8 @@ func getRows(db *sql.DB) ([]Post, error) {
 
 	var posts []Post
 
-	var post Post
 	for rows.Next() {
+		var post Post
 		err = rows.Scan(&post.id, &post.date, &post.title, &post.link)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan %w", err)
