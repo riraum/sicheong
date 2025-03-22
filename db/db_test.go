@@ -11,22 +11,22 @@ import (
 func TestAll(t *testing.T) {
 	testDBPath := t.TempDir()
 
-	db, err := create(testDBPath)
+	d, err := new(testDBPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = db.Query("select id, date, title, link from posts")
+	_, err = d.d.Query("select id, date, title, link from posts")
 	if err != nil {
 		t.Errorf("error selecting rows %v", err)
 	}
 
-	_, err = fill(db)
+	err = d.fill()
 	if err != nil {
 		t.Errorf("error filling db: %v", err)
 	}
 
-	got, err := getRows(db)
+	got, err := d.read()
 	if err != nil {
 		t.Errorf("error getting rows: %v", err)
 	}
@@ -38,7 +38,8 @@ func TestAll(t *testing.T) {
 			title: "Complaint",
 			link:  "https://http.cat/status/200",
 		},
-		{id: 2,
+		{
+			id:    2,
 			date:  2.02502e+07,
 			title: "Feedback",
 			link:  "https://http.cat/status/100"},

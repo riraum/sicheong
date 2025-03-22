@@ -16,41 +16,45 @@ type Post struct {
 	link  string
 }
 
-func create(dbPath string) (*sql.DB, error) {
+type DB struct {
+	d *sql.DB
+}
+
+func new(dbPath string) (DB, error) {
 	os.Remove(dbPath)
 
-	db, err := sql.Open("sqlite3", dbPath)
+	d, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to open sql %w", err)
+		return DB{}, fmt.Errorf("failed to open sql %w", err)
 	}
 
 	sqlStmt := `create table posts` +
 		`(id integer not null primary key, date	integer, title text, link text); delete from posts;`
 
-	_, err = db.Exec(sqlStmt)
+	_, err = d.Exec(sqlStmt)
 	if err != nil {
-		return nil, fmt.Errorf("%w: %s",
+		return DB{}, fmt.Errorf("%w: %s",
 			err, sqlStmt)
 	}
 
-	return db, nil
+	return DB{d}, nil
 }
 
-func fill(db *sql.DB) (*sql.DB, error) {
-	_, err := db.Exec(
+func (d DB) fill() error {
+	_, err := d.d.Exec(
 		"insert into posts(id, date, title, link) " +
 			"values(1, 202500101, 'Complaint', 'https://http.cat/status/200'), " +
 			"(2, 20250201, 'Feedback', 'https://http.cat/status/100'), " +
 			"(3, 20250301, 'Announcement', 'https://http.cat/status/301')")
 	if err != nil {
-		return nil, fmt.Errorf("failed to insert %w", err)
+		return fmt.Errorf("failed to insert %w", err)
 	}
 
-	return db, nil
+	return nil
 }
 
-func getRows(db *sql.DB) ([]Post, error) {
-	rows, err := db.Query("select id, date, title, link from posts")
+func (d DB) read() ([]Post, error) {
+	rows, err := d.d.Query("select id, date, title, link from posts")
 	if err != nil {
 		return nil, fmt.Errorf("failed to select %w", err)
 	}
@@ -76,17 +80,17 @@ func getRows(db *sql.DB) ([]Post, error) {
 func All() {
 	dbPath := "./sq.db"
 
-	db, err := create(dbPath)
+	d, err := new(dbPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	db, err = fill(db)
+	err = d.fill()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	post, err := getRows(db)
+	post, err := d.read()
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -96,5 +100,5 @@ func All() {
 		fmt.Println(p.id, p.date, p.title, p.link)
 	}
 
-	db.Close()
+	d.d.Close()
 }
