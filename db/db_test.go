@@ -2,57 +2,13 @@ package db
 
 import (
 	"log"
+	"reflect"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3" //revive be gone
 )
 
-// func TestMain(m *testing.M) {
-// 	code, err := run(m)
-// 	if err != nil {
-// 		fmt.Println(err)
-// 	}
-// 	os.Exit(code)
-// }
-
-// func run(m *testing.M) (code int, err error) {
-//  db, err := sql.Open("sqlite3", "file:../test.db?cache=shared")
-//     if err != nil {
-//         return -1, fmt.Errorf("could not connect to database: %w", err)
-//     }
-
-//     defer func() {
-//         for _, t := range string{"books", "authors"} {
-//             _, _ = db.Exec(fmt.Sprintf("DELETE FROM %s", t))
-//         }
-
-//         db.Close()
-//     }()
-
-//     return m.Run(), nil
-// }
-
-// func testCreate() (*sql.DB, error) {
-// 	os.Remove("./sq.db")
-
-// 	db, err := sql.Open("sqlite3", "./sq.db")
-// 	if err != nil {
-// 		return nil, fmt.Errorf("failed to open sql %w", err)
-// 	}
-
-// 	sqlStmt := `create table posts` +
-// 		`(id integer not null primary key, date	integer, title text, link text); delete from posts;`
-
-// 	_, err = db.Exec(sqlStmt)
-// 	if err != nil {
-// 		return nil, fmt.Errorf("%w: %s",
-// 			err, sqlStmt)
-// 	}
-
-// 	return db, nil
-// }
-
-func TestFill(t *testing.T) {
+func TestAll(t *testing.T) {
 	testDBPath := t.TempDir()
 
 	db, err := create(testDBPath)
@@ -60,13 +16,41 @@ func TestFill(t *testing.T) {
 		log.Fatal(err)
 	}
 
+	_, err = db.Query("select id, date, title, link from posts")
+	if err != nil {
+		t.Errorf("error selecting rows %v", err)
+	}
+
 	_, err = fill(db)
 	if err != nil {
 		t.Errorf("error filling db: %v", err)
 	}
 
-	_, err = getRows(db)
+	got, err := getRows(db)
 	if err != nil {
 		t.Errorf("error getting rows: %v", err)
+	}
+
+	want := []Post{
+		{
+			id:    1,
+			date:  2.025001e+08,
+			title: "Complaint",
+			link:  "https://http.cat/status/200",
+		},
+		{id: 2,
+			date:  2.02502e+07,
+			title: "Feedback",
+			link:  "https://http.cat/status/100"},
+		{
+			id:    3,
+			date:  2.02503e+07,
+			title: "Announcement",
+			link:  "https://http.cat/status/301",
+		},
+	}
+
+	if !reflect.DeepEqual(want, got) {
+		t.Fatalf("expected %v: got: %v", want, got)
 	}
 }
