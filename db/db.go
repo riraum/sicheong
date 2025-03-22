@@ -17,10 +17,10 @@ type Post struct {
 }
 
 type DB struct {
-	d *sql.DB
+	client *sql.DB
 }
 
-func new(dbPath string) (DB, error) {
+func New(dbPath string) (DB, error) {
 	os.Remove(dbPath)
 
 	d, err := sql.Open("sqlite3", dbPath)
@@ -41,7 +41,7 @@ func new(dbPath string) (DB, error) {
 }
 
 func (d DB) fill() error {
-	_, err := d.d.Exec(
+	_, err := d.client.Exec(
 		"insert into posts(id, date, title, link) " +
 			"values(1, 202500101, 'Complaint', 'https://http.cat/status/200'), " +
 			"(2, 20250201, 'Feedback', 'https://http.cat/status/100'), " +
@@ -54,7 +54,7 @@ func (d DB) fill() error {
 }
 
 func (d DB) read() ([]Post, error) {
-	rows, err := d.d.Query("select id, date, title, link from posts")
+	rows, err := d.client.Query("select id, date, title, link from posts")
 	if err != nil {
 		return nil, fmt.Errorf("failed to select %w", err)
 	}
@@ -80,7 +80,7 @@ func (d DB) read() ([]Post, error) {
 func All() {
 	dbPath := "./sq.db"
 
-	d, err := new(dbPath)
+	d, err := New(dbPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -100,5 +100,5 @@ func All() {
 		fmt.Println(p.id, p.date, p.title, p.link)
 	}
 
-	d.d.Close()
+	d.client.Close()
 }

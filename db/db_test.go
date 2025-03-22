@@ -11,18 +11,17 @@ import (
 func TestAll(t *testing.T) {
 	testDBPath := t.TempDir()
 
-	d, err := new(testDBPath)
+	d, err := New(testDBPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	_, err = d.d.Query("select id, date, title, link from posts")
+	_, err = d.client.Query("select id, date, title, link from posts")
 	if err != nil {
 		t.Errorf("error selecting rows %v", err)
 	}
 
-	err = d.fill()
-	if err != nil {
+	if err = d.fill(); err != nil {
 		t.Errorf("error filling db: %v", err)
 	}
 
