@@ -77,7 +77,7 @@ func (d DB) read() ([]Post, error) {
 	return posts, nil
 }
 
-func All() {
+func All() []Post {
 	dbPath := "./sq.db"
 
 	d, err := New(dbPath)
@@ -95,10 +95,10 @@ func All() {
 		log.Fatal(err)
 	}
 
-	for i := range post {
-		p := post[i]
-		fmt.Println(p.id, p.date, p.title, p.link)
-	}
-
+	// for i := range post {
+	// 	p := post[i]
+	// 	fmt.Println(p.id, p.date, p.title, p.link)
+	// }
 	d.client.Close()
+	return post
 }

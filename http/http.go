@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/riraum/si-cheong/db"
 )
 
 type Server struct {
@@ -11,7 +13,8 @@ type Server struct {
 
 func getIndex(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, http.StatusOK)
+	post := db.All()
+	fmt.Fprint(w, post)
 }
 
 func getAPIPosts(w http.ResponseWriter, _ *http.Request) {
