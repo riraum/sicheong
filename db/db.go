@@ -100,5 +100,6 @@ func All() []Post {
 	// 	fmt.Println(p.id, p.date, p.title, p.link)
 	// }
 	d.client.Close()
+
 	return post
 }

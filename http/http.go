@@ -13,6 +13,7 @@ type Server struct {
 
 func getIndex(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
+
 	post := db.All()
 	fmt.Fprint(w, post)
 }
