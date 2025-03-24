@@ -12,6 +12,8 @@ func main() {
 
 	db.All()
 
+	http.ServeMin()
+
 	mux := http.SetupMux()
 	http.ServeDirs(mux)
 }

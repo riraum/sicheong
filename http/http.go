@@ -1,9 +1,12 @@
 package http
 
 import (
+	"flag"
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
+	"path/filepath"
 
 	"github.com/riraum/si-cheong/db"
 )
@@ -14,8 +17,8 @@ type Server struct {
 func getIndex(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
-	post := db.All()
-	fmt.Fprint(w, post)
+	posts := db.All()
+	fmt.Fprint(w, posts)
 }
 
 func getAPIPosts(w http.ResponseWriter, _ *http.Request) {
@@ -39,5 +42,26 @@ func SetupMux() *http.ServeMux {
 }
 
 func ServeDirs(mux *http.ServeMux) {
+	// fs := http.FileServer(http.Dir("./static"))
+	// http.Handle("/", fs)
 	log.Fatal(http.ListenAndServe(":8080", mux))
+}
+
+func serveTemplate(w http.ResponseWriter, r *http.Request) {
+	lp := filepath.Join("templates", "layout.html")
+	fp := filepath.Join("templates", filepath.Clean(r.URL.Path))
+
+	tmpl, _ := template.ParseFiles(lp, fp)
+	tmpl.ExecuteTemplate(w, "layout", nil)
+}
+
+func ServeMin() {
+	port := flag.String("p", "8100", "port to serve on")
+	directory := flag.String("d", "static/", "the directory of static file to host")
+	flag.Parse()
+
+	http.Handle("/", http.FileServer(http.Dir(*directory)))
+
+	log.Printf("Serving %s on HTTP port: %s\n", *directory, *port)
+	log.Fatal(http.ListenAndServe(":"+*port, SetupMux()))
 }
