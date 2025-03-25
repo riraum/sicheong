@@ -12,7 +12,7 @@ func main() {
 
 	db.All()
 
-	http.ServeMin()
+	// http.ServeMin()
 
 	mux := http.SetupMux()
 	http.ServeDirs(mux)
