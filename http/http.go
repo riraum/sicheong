@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 
@@ -26,6 +27,11 @@ func getAPIPosts(w http.ResponseWriter, _ *http.Request) {
 func postAPIPosts(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	fmt.Fprint(w, http.StatusCreated)
+}
+
+func serveTemplate(p []int) {
+	tmpl, _ := template.New("name").Parse(`p`)
+	fmt.Println(tmpl)
 }
 
 func SetupMux() *http.ServeMux {
