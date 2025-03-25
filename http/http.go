@@ -2,10 +2,10 @@ package http
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
 	"path/filepath"
-	"text/template"
 
 	"github.com/riraum/si-cheong/db"
 )
