@@ -10,10 +10,10 @@ import (
 )
 
 type Post struct {
-	id    float32
-	date  float32
-	title string
-	link  string
+	ID    float32
+	Date  float32
+	Title string
+	Link  string
 }
 
 type DB struct {
@@ -66,7 +66,7 @@ func (d DB) read() ([]Post, error) {
 	for rows.Next() {
 		var post Post
 
-		err = rows.Scan(&post.id, &post.date, &post.title, &post.link)
+		err = rows.Scan(&post.ID, &post.Date, &post.Title, &post.Link)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan %w", err)
 		}
@@ -77,7 +77,7 @@ func (d DB) read() ([]Post, error) {
 	return posts, nil
 }
 
-func All() {
+func All() []Post {
 	dbPath := "./sq.db"
 
 	d, err := New(dbPath)
@@ -90,15 +90,12 @@ func All() {
 		log.Fatal(err)
 	}
 
-	post, err := d.read()
+	posts, err := d.read()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	for i := range post {
-		p := post[i]
-		fmt.Println(p.id, p.date, p.title, p.link)
-	}
-
 	d.client.Close()
+
+	return posts
 }
