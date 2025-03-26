@@ -19,7 +19,8 @@ func getIndex(w http.ResponseWriter, _ *http.Request) {
 		IntSlice: []int{0, 1, 2},
 	}
 
-	tmpl, _ := template.New("name").Parse(`{{ .IntSlice }}`)
+	tmpl, _ := template.New("name").Parse(`{{with $s := " IntSlice"}}{{printf "%q" $s}}
+	{{end}}`)
 
 	err := tmpl.Execute(w, d)
 	if err != nil {
