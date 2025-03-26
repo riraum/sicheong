@@ -5,18 +5,28 @@ import (
 	"html/template"
 	"log"
 	"net/http"
-
-	"github.com/riraum/si-cheong/db"
 )
 
 type Server struct {
 }
 
+type data struct {
+	IntSlice []int
+}
+
 func getIndex(w http.ResponseWriter, _ *http.Request) {
-	posts := db.All()
+	d := data{
+		IntSlice: []int{0, 1, 2},
+	}
+
+	tmpl, _ := template.New("name").Parse(`{{ .IntSlice }}`)
+
+	err := tmpl.Execute(w, d)
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, posts)
 }
 
 func getAPIPosts(w http.ResponseWriter, _ *http.Request) {
@@ -27,11 +37,6 @@ func getAPIPosts(w http.ResponseWriter, _ *http.Request) {
 func postAPIPosts(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	fmt.Fprint(w, http.StatusCreated)
-}
-
-func serveTemplate(p []int) {
-	tmpl, _ := template.New("name").Parse(`p`)
-	fmt.Println(tmpl)
 }
 
 func SetupMux() *http.ServeMux {
