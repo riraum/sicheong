@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"text/template"
 )
 
 type Server struct {
@@ -18,8 +19,8 @@ func getIndex(w http.ResponseWriter, _ *http.Request) {
 		IntSlice: []int{0, 1, 2},
 	}
 
-	tmpl, _ := template.New("name").Parse(`{{range $element := .IntSlice}}
-	{{$element}}
+	tmpl, _ := template.New("name").Parse(`{{range .IntSlice}}
+	{{.}}
 	{{end}}`)
 
 	err := tmpl.Execute(w, d)
