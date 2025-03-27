@@ -17,7 +17,6 @@ type Posts struct {
 }
 
 func getIndex(w http.ResponseWriter, _ *http.Request) {
-
 	p := Posts{
 		Posts: db.All(),
 	}
