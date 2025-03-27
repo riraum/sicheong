@@ -12,16 +12,10 @@ import (
 type Server struct {
 }
 
-type Posts struct {
-	Posts []db.Post
-}
-
 func getIndex(w http.ResponseWriter, _ *http.Request) {
-	p := Posts{
-		Posts: db.All(),
-	}
+	p := db.All()
 
-	tmpl, _ := template.New("name").Parse(`{{range .Posts}}
+	tmpl, _ := template.New("name").Parse(`{{range .}}
 	{{.}}
 	{{end}}`)
 
