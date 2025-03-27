@@ -2,20 +2,32 @@ package http
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
-
-	"github.com/riraum/si-cheong/db"
 )
 
 type Server struct {
 }
 
-func getIndex(w http.ResponseWriter, _ *http.Request) {
-	posts := db.All()
+type data struct {
+	IntSlice []int
+}
 
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, posts)
+func getIndex(w http.ResponseWriter, _ *http.Request) {
+	d := data{
+		IntSlice: []int{0, 1, 2},
+	}
+
+	tmpl, _ := template.New("name").Parse(`{{range .IntSlice}}
+	{{.}}
+	{{end}}`)
+
+	err := tmpl.Execute(w, d)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 }
 
 func getAPIPosts(w http.ResponseWriter, _ *http.Request) {
