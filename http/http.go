@@ -15,10 +15,7 @@ type Server struct {
 func getIndex(w http.ResponseWriter, _ *http.Request) {
 	p := db.All()
 
-	tmpl, _ := template.New("name").Parse(`{{range .}}
-	{{.ID}}
-	{{.Title}}
-	{{end}}`)
+	tmpl, _ := template.New("index").ParseFiles("../static/index.html")
 
 	err := tmpl.Execute(w, p)
 	if err != nil {
