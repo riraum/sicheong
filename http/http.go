@@ -27,7 +27,6 @@ func getIndex(w http.ResponseWriter, _ *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-
 }
 
 func getAPIPosts(w http.ResponseWriter, _ *http.Request) {
