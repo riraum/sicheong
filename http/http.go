@@ -17,6 +17,8 @@ func getIndex(w http.ResponseWriter, _ *http.Request) {
 
 	tmpl, _ := template.New("index").ParseFiles("../static/index.html")
 
+	tmpl, _ = template.New("name").Parse(`{{range .}}`)
+
 	err := tmpl.Execute(w, p)
 	if err != nil {
 		log.Fatal(err)
