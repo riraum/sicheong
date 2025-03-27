@@ -5,25 +5,22 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+
+	"github.com/riraum/si-cheong/db"
 )
 
 type Server struct {
 }
 
-type data struct {
-	IntSlice []int
-}
-
 func getIndex(w http.ResponseWriter, _ *http.Request) {
-	d := data{
-		IntSlice: []int{0, 1, 2},
-	}
+	p := db.All()
 
-	tmpl, _ := template.New("name").Parse(`{{range .IntSlice}}
-	{{.}}
+	tmpl, _ := template.New("name").Parse(`{{range .}}
+	{{.ID}}
+	{{.Title}}
 	{{end}}`)
 
-	err := tmpl.Execute(w, d)
+	err := tmpl.Execute(w, p)
 	if err != nil {
 		log.Fatal(err)
 	}
