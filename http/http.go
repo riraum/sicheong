@@ -2,9 +2,9 @@ package http
 
 import (
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
+	"text/template"
 
 	"github.com/riraum/si-cheong/db"
 )
@@ -12,15 +12,30 @@ import (
 type Server struct {
 }
 
-func getIndex(w http.ResponseWriter, _ *http.Request) {
+func getIndex(w http.ResponseWriter, r *http.Request) {
 	p := db.All()
 
-	tmpl, _ := template.New("index").ParseFiles("../static/index.html")
-
-	err := tmpl.Execute(w, p)
+	tmpl, err := template.ParseFiles("index.html")
 	if err != nil {
-		log.Fatal(err)
+		log.Println("parse %w", err)
 	}
+
+	// f, err := os.Create("index.html")
+	// if err != nil {
+	// 	log.Println("create %w", err)
+	// }
+
+	err = tmpl.Execute(w, p)
+	if err != nil {
+		log.Println("execute %w", err)
+	}
+
+	// http.ServeFile(w, r, "index.html")
+
+	// err = f.Close()
+	// if err != nil {
+	// 	log.Println("close %w", err)
+	// }
 }
 
 func getAPIPosts(w http.ResponseWriter, _ *http.Request) {
