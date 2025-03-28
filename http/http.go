@@ -12,30 +12,18 @@ import (
 type Server struct {
 }
 
-func getIndex(w http.ResponseWriter, r *http.Request) {
+func getIndex(w http.ResponseWriter, _ *http.Request) {
 	p := db.All()
 
-	tmpl, err := template.ParseFiles("index.html")
+	tmpl, err := template.ParseFiles("http/index.html")
 	if err != nil {
 		log.Println("parse %w", err)
 	}
-
-	// f, err := os.Create("index.html")
-	// if err != nil {
-	// 	log.Println("create %w", err)
-	// }
 
 	err = tmpl.Execute(w, p)
 	if err != nil {
 		log.Println("execute %w", err)
 	}
-
-	// http.ServeFile(w, r, "index.html")
-
-	// err = f.Close()
-	// if err != nil {
-	// 	log.Println("close %w", err)
-	// }
 }
 
 func getAPIPosts(w http.ResponseWriter, _ *http.Request) {
