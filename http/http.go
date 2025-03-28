@@ -17,12 +17,12 @@ func getIndex(w http.ResponseWriter, _ *http.Request) {
 
 	tmpl, err := template.ParseFiles("http/index.html")
 	if err != nil {
-		log.Println("parse %w", err)
+		log.Fatalln("parse %w", err)
 	}
 
 	err = tmpl.Execute(w, p)
 	if err != nil {
-		log.Println("execute %w", err)
+		log.Fatalln("execute %w", err)
 	}
 }
 
