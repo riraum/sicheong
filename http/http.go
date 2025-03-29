@@ -2,9 +2,9 @@ package http
 
 import (
 	"fmt"
-	"html/template"
 	"log"
 	"net/http"
+	"text/template"
 
 	"github.com/riraum/si-cheong/db"
 )
@@ -15,14 +15,14 @@ type Server struct {
 func getIndex(w http.ResponseWriter, _ *http.Request) {
 	p := db.All()
 
-	tmpl, _ := template.New("name").Parse(`{{range .}}
-	{{.ID}}
-	{{.Title}}
-	{{end}}`)
-
-	err := tmpl.Execute(w, p)
+	tmpl, err := template.ParseFiles("http/index.html")
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln("parse %w", err)
+	}
+
+	err = tmpl.Execute(w, p)
+	if err != nil {
+		log.Fatalln("execute %w", err)
 	}
 }
 
