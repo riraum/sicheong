@@ -9,10 +9,32 @@
 
 <body>
   Hello
-  {{range .}}
-  {{.ID}}
-  {{.Title}}
-  {{end}}
+  <br>
+  <div>
+    {{range .}}
+    <br>
+    {{.ID}}
+    <br>
+    {{.Title}}
+    <br>
+    {{end}}
+  </div>
+  <br>
+  <form>
+    <div>
+      <label for="Title">Title</label>
+      <input type="text" name="title" required />
+    </div>
+    <div>
+      <label for="Date">Date</label>
+      <input type="date" required />
+    </div>
+    <label for="Link">Link</label>
+    <input type="text" required />
+    <div>
+      <input type="submit" value="Submit" />
+    </div>
+  </form>
 </body>
 
 </html>
