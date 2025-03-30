@@ -2,9 +2,9 @@ package http
 
 import (
 	"fmt"
+	"html/template"
 	"log"
 	"net/http"
-	"text/template"
 
 	"github.com/riraum/si-cheong/db"
 )
@@ -15,10 +15,15 @@ type Server struct {
 func getIndex(w http.ResponseWriter, _ *http.Request) {
 	p := db.All()
 
-	tmpl, err := template.ParseFiles("http/index.html")
+	tmpl, err := template.ParseFiles("static/index.html", "static/pico.min.css")
 	if err != nil {
 		log.Fatalln("parse %w", err)
 	}
+
+	// css, err := os.Open("static/pico.min.css")
+	// if err != nil {
+	// 	log.Fatalln("parse %w", err)
+	// }
 
 	err = tmpl.Execute(w, p)
 	if err != nil {
@@ -37,6 +42,7 @@ func postAPIPosts(w http.ResponseWriter, _ *http.Request) {
 }
 
 func SetupMux() *http.ServeMux {
+	// http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	mux := http.NewServeMux()
 
 	mux.HandleFunc("GET /{$}", getIndex)
