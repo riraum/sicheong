@@ -12,10 +12,11 @@ import (
 type Server struct {
 }
 
-func getIndex(w http.ResponseWriter, _ *http.Request) {
+func getIndex(w http.ResponseWriter, r *http.Request) {
 	p := db.All()
-
-	tmpl, err := template.ParseFiles("static/index.html", "static/pico.min.css")
+	// path := "../../public" + r.URL.Path
+	// http.ServeFile(w, r, path)
+	tmpl, err := template.ParseFiles("static/index.html")
 	if err != nil {
 		log.Fatalln("parse %w", err)
 	}
