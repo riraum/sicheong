@@ -12,19 +12,13 @@ import (
 type Server struct {
 }
 
-func getIndex(w http.ResponseWriter, r *http.Request) {
+func getIndex(w http.ResponseWriter, _ *http.Request) {
 	p := db.All()
-	// path := "../../public" + r.URL.Path
-	// http.ServeFile(w, r, path)
+
 	tmpl, err := template.ParseFiles("static/index.html")
 	if err != nil {
 		log.Fatalln("parse %w", err)
 	}
-
-	// css, err := os.Open("static/pico.min.css")
-	// if err != nil {
-	// 	log.Fatalln("parse %w", err)
-	// }
 
 	err = tmpl.Execute(w, p)
 	if err != nil {
@@ -43,8 +37,8 @@ func postAPIPosts(w http.ResponseWriter, _ *http.Request) {
 }
 
 func SetupMux() *http.ServeMux {
-	// http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 	mux := http.NewServeMux()
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	mux.HandleFunc("GET /{$}", getIndex)
 	mux.HandleFunc("GET /api/v0/posts", getAPIPosts)
