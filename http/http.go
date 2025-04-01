@@ -12,10 +12,12 @@ import (
 type Server struct {
 }
 
+var RootDir = "static/"
+
 func getIndex(w http.ResponseWriter, _ *http.Request) {
 	p := db.All()
 
-	tmpl, err := template.ParseFiles("static/index.html")
+	tmpl, err := template.ParseFiles(RootDir + "index.html")
 	if err != nil {
 		log.Fatalln("parse %w", err)
 	}
@@ -38,7 +40,7 @@ func postAPIPosts(w http.ResponseWriter, _ *http.Request) {
 
 func SetupMux() *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
+	mux.Handle(RootDir, http.StripPrefix(RootDir, http.FileServer(http.Dir(RootDir))))
 
 	mux.HandleFunc("GET /{$}", getIndex)
 	mux.HandleFunc("GET /api/v0/posts", getAPIPosts)
