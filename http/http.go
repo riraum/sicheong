@@ -14,10 +14,6 @@ type Server struct {
 	RootDir string
 }
 
-func New(s Server) Server {
-	return s
-}
-
 func (s Server) getIndex(w http.ResponseWriter, _ *http.Request) {
 	p := db.All()
 
