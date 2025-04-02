@@ -5,19 +5,21 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"path/filepath"
 
 	"github.com/riraum/si-cheong/db"
 )
 
 type Server struct {
+	RootDir string
 }
 
-var RootDir = "static/"
+var sc = Server{RootDir: "static/"}
 
 func getIndex(w http.ResponseWriter, _ *http.Request) {
 	p := db.All()
 
-	tmpl, err := template.ParseFiles(RootDir + "index.html")
+	tmpl, err := template.ParseFiles(filepath.Join(sc.RootDir, "index.html"))
 	if err != nil {
 		log.Fatalln("parse %w", err)
 	}
@@ -40,7 +42,7 @@ func postAPIPosts(w http.ResponseWriter, _ *http.Request) {
 
 func SetupMux() *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.Handle(RootDir, http.StripPrefix(RootDir, http.FileServer(http.Dir(RootDir))))
+	mux.Handle(sc.RootDir, http.StripPrefix(sc.RootDir, http.FileServer(http.Dir(sc.RootDir))))
 
 	mux.HandleFunc("GET /{$}", getIndex)
 	mux.HandleFunc("GET /api/v0/posts", getAPIPosts)
