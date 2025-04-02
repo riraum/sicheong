@@ -44,7 +44,7 @@ func (s Server) postAPIPosts(w http.ResponseWriter, _ *http.Request) {
 
 func (s Server) SetupMux() *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.Handle(s.RootDir, http.StripPrefix(s.RootDir, http.FileServer(http.Dir(s.RootDir))))
+	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
 
 	mux.HandleFunc("GET /{$}", s.getIndex)
 	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
