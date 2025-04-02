@@ -28,9 +28,10 @@ func (s Server) getIndex(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-// func getStatic(w http.ResponseWriter, _ *http.Request) {
-// 	Handle(sc.RootDir, http.StripPrefix(sc.RootDir, http.FileServer(http.Dir(sc.RootDir))))
-// }
+func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
+	css := filepath.Join(s.RootDir, "pico.min.css")
+	http.ServeFile(w, r, css)
+}
 
 func (s Server) getAPIPosts(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
@@ -44,9 +45,8 @@ func (s Server) postAPIPosts(w http.ResponseWriter, _ *http.Request) {
 
 func (s Server) SetupMux() *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("static"))))
-
 	mux.HandleFunc("GET /{$}", s.getIndex)
+	mux.HandleFunc("GET /static/pico.min.css", s.getCSS)
 	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
 	mux.HandleFunc("POST /api/v0/posts", s.postAPIPosts)
 
