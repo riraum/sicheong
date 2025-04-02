@@ -33,12 +33,12 @@ func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, css)
 }
 
-func (s Server) getAPIPosts(w http.ResponseWriter, _ *http.Request) {
+func (_ Server) getAPIPosts(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, http.StatusOK, "[]")
 }
 
-func (s Server) postAPIPosts(w http.ResponseWriter, _ *http.Request) {
+func (_ Server) postAPIPosts(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusCreated)
 	fmt.Fprint(w, http.StatusCreated)
 }
