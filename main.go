@@ -9,6 +9,8 @@ import (
 func main() {
 	fmt.Println("Hello si-cheong user")
 
-	mux := http.SetupMux()
-	http.ServeDirs(mux)
+	s := http.Server{RootDir: "static/"}
+
+	mux := s.SetupMux()
+	http.New(mux)
 }
