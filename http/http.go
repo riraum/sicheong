@@ -14,6 +14,10 @@ type Server struct {
 	RootDir string
 }
 
+func New(s Server) Server {
+	return s
+}
+
 func (s Server) getIndex(w http.ResponseWriter, _ *http.Request) {
 	p := db.All()
 
@@ -53,6 +57,6 @@ func (s Server) SetupMux() *http.ServeMux {
 	return mux
 }
 
-func New(mux *http.ServeMux) {
+func Run(mux *http.ServeMux) {
 	log.Fatal(http.ListenAndServe(":8080", mux))
 }
