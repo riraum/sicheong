@@ -1,24 +1,19 @@
 package http
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
-func TestSetupMux(t *testing.T) {
-	// var s Server
-	// s.RootDir = t.TempDir()
-	// mux := s.SetupMux()
+func TestServeMux(t *testing.T) {
+	mux := SetupMux()
 	// Create a testing server with the ServeMux
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprint(w, "200 OK")
-	}))
+	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
 	// Test GET request
-	resp, err := http.Get(ts.URL)
+	resp, err := http.Get(ts.URL + "/")
 	if err != nil {
 		t.Errorf("Error making GET request: %v", err)
 	}
