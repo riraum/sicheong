@@ -20,7 +20,7 @@ type DB struct {
 	client *sql.DB
 }
 
-func New(dbPath string) (DB, error) {
+func Create(dbPath string) (DB, error) {
 	os.Remove(dbPath)
 
 	d, err := sql.Open("sqlite3", dbPath)
@@ -40,12 +40,22 @@ func New(dbPath string) (DB, error) {
 	return DB{d}, nil
 }
 
-func (d DB) fill() error {
+func (d DB) prefill() error {
 	_, err := d.client.Exec(
 		"insert into posts(id, date, title, link) " +
 			"values(1, 202500101, 'Complaint', 'https://http.cat/status/200'), " +
 			"(2, 20250201, 'Feedback', 'https://http.cat/status/100'), " +
 			"(3, 20250301, 'Announcement', 'https://http.cat/status/301')")
+	if err != nil {
+		return fmt.Errorf("failed to insert %w", err)
+	}
+
+	return nil
+}
+
+func (d DB) New(p Post) error {
+	_, err := d.client.Exec(
+		"insert into posts(id, date, title, link) values($1, $2, $3)", p.Date, p.Title, p.Link)
 	if err != nil {
 		return fmt.Errorf("failed to insert %w", err)
 	}
@@ -80,12 +90,12 @@ func (d DB) read() ([]Post, error) {
 func All() []Post {
 	dbPath := "./sq.db"
 
-	d, err := New(dbPath)
+	d, err := Create(dbPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	err = d.fill()
+	err = d.prefill()
 	if err != nil {
 		log.Fatal(err)
 	}

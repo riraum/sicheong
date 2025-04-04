@@ -6,12 +6,14 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"strconv"
 
 	"github.com/riraum/si-cheong/db"
 )
 
 type Server struct {
 	RootDir string
+	DB      db.DB
 }
 
 func (s Server) getIndex(w http.ResponseWriter, _ *http.Request) {
@@ -38,9 +40,27 @@ func (_ Server) getAPIPosts(w http.ResponseWriter, _ *http.Request) {
 	fmt.Fprint(w, http.StatusOK, "[]")
 }
 
-func (_ Server) postAPIPosts(w http.ResponseWriter, _ *http.Request) {
+func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
-	fmt.Fprint(w, http.StatusCreated)
+
+	var newPost db.Post
+	d := s.DBPath
+
+	convertDate, err := strconv.ParseFloat(r.FormValue("date"), 32)
+	if err != nil {
+		log.Fatalln("convert to float: %v", err)
+	}
+
+	newPost.Date = float32(convertDate)
+	newPost.Title = r.FormValue("title")
+	newPost.Link = r.FormValue("link")
+
+	err = d.New(newPost)
+	if err != nil {
+		log.Fatalln("create new post in db:", err)
+	}
+
+	fmt.Fprint(w, "Post created!", http.StatusCreated)
 }
 
 func (s Server) SetupMux() *http.ServeMux {
