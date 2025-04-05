@@ -4,17 +4,22 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"path"
 	"testing"
 )
 
 func TestServeMux(t *testing.T) {
 	var s Server
-	// s.RootDir = t.TempDir()
+	s.RootDir = t.TempDir()
 
-	f, err := os.CreateTemp("", "index.html")
+	f, err := os.Create(path.Join(s.RootDir, "index.html"))
+	if err != nil {
+		t.Fatalf("Error creating file: %v", err)
+	}
 
-	// fname := filepath.Join(s.RootDir, "index.html")
-	// fmt.Printf("fname: %v", fname)
+	if _, err = f.WriteString("Hello!"); err != nil {
+		t.Fatalf("Error writing to file: %v", err)
+	}
 
 	mux := s.SetupMux()
 	// Create a testing server with the ServeMux
@@ -22,7 +27,7 @@ func TestServeMux(t *testing.T) {
 	defer ts.Close()
 
 	// Test GET request
-	resp, err := http.Get(ts.URL + f.Name())
+	resp, err := http.Get(ts.URL)
 	if err != nil {
 		t.Errorf("Error making GET request: %v", err)
 	}
