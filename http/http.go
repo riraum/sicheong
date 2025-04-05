@@ -45,6 +45,8 @@ func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {
 
 	var newPost db.Post
 
+	s.DBPath = "./sq.db"
+
 	d, err := db.New(s.DBPath)
 	if err != nil {
 		log.Fatalf("error opening db: %v", err)
