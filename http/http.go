@@ -35,7 +35,7 @@ func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, css)
 }
 
-func (_ Server) getAPIPosts(w http.ResponseWriter, _ *http.Request) { //nolint:all
+func (Server) getAPIPosts(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, http.StatusOK, "[]")
 }
