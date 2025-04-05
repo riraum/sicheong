@@ -6,12 +6,14 @@ import (
 	"log"
 	"net/http"
 	"path/filepath"
+	"strconv"
 
 	"github.com/riraum/si-cheong/db"
 )
 
 type Server struct {
 	RootDir string
+	DBPath  string
 }
 
 func (s Server) getIndex(w http.ResponseWriter, _ *http.Request) {
@@ -33,14 +35,38 @@ func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, css)
 }
 
-func (_ Server) getAPIPosts(w http.ResponseWriter, _ *http.Request) {
+func (Server) getAPIPosts(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, http.StatusOK, "[]")
 }
 
-func (_ Server) postAPIPosts(w http.ResponseWriter, _ *http.Request) {
+func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusCreated)
-	fmt.Fprint(w, http.StatusCreated)
+
+	var newPost db.Post
+
+	s.DBPath = "./sq.db"
+
+	d, err := db.New(s.DBPath)
+	if err != nil {
+		log.Fatalf("error opening db: %v", err)
+	}
+
+	convertDate, err := strconv.ParseFloat(r.FormValue("date"), 32)
+	if err != nil {
+		log.Fatalf("convert to float: %v", err)
+	}
+
+	newPost.Date = float32(convertDate)
+	newPost.Title = r.FormValue("title")
+	newPost.Link = r.FormValue("link")
+
+	err = d.NewPost(newPost)
+	if err != nil {
+		log.Fatalln("create new post in db:", err)
+	}
+
+	fmt.Fprint(w, "Post created!", http.StatusCreated)
 }
 
 func (s Server) SetupMux() *http.ServeMux {

@@ -53,6 +53,16 @@ func (d DB) fill() error {
 	return nil
 }
 
+func (d DB) NewPost(p Post) error {
+	_, err := d.client.Exec(
+		"insert into posts(id, date, title, link) values($1, $2, $3)", p.Date, p.Title, p.Link)
+	if err != nil {
+		return fmt.Errorf("failed to insert %w", err)
+	}
+
+	return nil
+}
+
 func (d DB) read() ([]Post, error) {
 	rows, err := d.client.Query("select id, date, title, link from posts")
 	if err != nil {
