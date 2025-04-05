@@ -3,17 +3,31 @@ package http
 import (
 	"net/http"
 	"net/http/httptest"
+	"os"
+	"path"
 	"testing"
 )
 
 func TestServeMux(t *testing.T) {
-	mux := SetupMux()
+	var s Server
+	s.RootDir = t.TempDir()
+
+	f, err := os.Create(path.Join(s.RootDir, "index.html"))
+	if err != nil {
+		t.Fatalf("Error creating file: %v", err)
+	}
+
+	if _, err = f.WriteString("Hello!"); err != nil {
+		t.Fatalf("Error writing to file: %v", err)
+	}
+
+	mux := s.SetupMux()
 	// Create a testing server with the ServeMux
 	ts := httptest.NewServer(mux)
 	defer ts.Close()
 
 	// Test GET request
-	resp, err := http.Get(ts.URL + "/")
+	resp, err := http.Get(ts.URL)
 	if err != nil {
 		t.Errorf("Error making GET request: %v", err)
 	}

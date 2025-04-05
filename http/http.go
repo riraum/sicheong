@@ -19,12 +19,12 @@ func (s Server) getIndex(w http.ResponseWriter, _ *http.Request) {
 
 	tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "index.html"))
 	if err != nil {
-		log.Fatalln("parse %w", err)
+		log.Fatalf("parse %v", err)
 	}
 
 	err = tmpl.Execute(w, p)
 	if err != nil {
-		log.Fatalln("execute %w", err)
+		log.Fatalf("execute %v", err)
 	}
 }
 
