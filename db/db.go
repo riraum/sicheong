@@ -24,7 +24,7 @@ func New(dbPath string) (DB, error) {
 
 	d, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
-		return DB{d}, fmt.Errorf("failed to open sql %w", err)
+		return DB{}, fmt.Errorf("failed to open sql %w", err)
 	}
 
 	sqlStmt := `create table posts` +
@@ -32,7 +32,7 @@ func New(dbPath string) (DB, error) {
 
 	_, err = d.Exec(sqlStmt)
 	if err != nil {
-		return DB{d}, fmt.Errorf("%w: %s",
+		return DB{}, fmt.Errorf("%w: %s",
 			err, sqlStmt)
 	}
 
