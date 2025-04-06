@@ -13,11 +13,17 @@ import (
 
 type Server struct {
 	RootDir string
-	DBPath  string
+	DB      db.DB
 }
 
 func (s Server) getIndex(w http.ResponseWriter, _ *http.Request) {
-	p := db.All()
+	// p := db.All()
+	d := s.DB
+
+	p, err := d.Read()
+	if err != nil {
+		log.Fatalf("error to read posts from db: %v", err)
+	}
 
 	tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "index.html"))
 	if err != nil {
@@ -45,12 +51,14 @@ func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {
 
 	var newPost db.Post
 
-	s.DBPath = "./sq.db"
+	d := s.DB
 
-	d, err := db.New(s.DBPath)
-	if err != nil {
-		log.Fatalf("error opening db: %v", err)
-	}
+	// s.DBPath = "./sq.db"
+
+	// d, err := db.New(s.DBPath)
+	// if err != nil {
+	// 	log.Fatalf("error opening db: %v", err)
+	// }
 
 	convertDate, err := strconv.ParseFloat(r.FormValue("date"), 32)
 	if err != nil {

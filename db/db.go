@@ -3,7 +3,6 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"os"
 
 	_ "github.com/mattn/go-sqlite3" //revive be gone
@@ -37,7 +36,7 @@ func New(dbPath string) (DB, error) {
 			err, sqlStmt)
 	}
 
-	return DB{d}, nil
+	return DB{}, nil
 }
 
 func (d DB) fill() error {
@@ -63,7 +62,7 @@ func (d DB) NewPost(p Post) error {
 	return nil
 }
 
-func (d DB) read() ([]Post, error) {
+func (d DB) Read() ([]Post, error) {
 	rows, err := d.client.Query("select id, date, title, link from posts")
 	if err != nil {
 		return nil, fmt.Errorf("failed to select %w", err)
@@ -87,25 +86,25 @@ func (d DB) read() ([]Post, error) {
 	return posts, nil
 }
 
-func All() []Post {
-	dbPath := "./sq.db"
+// func All() []Post {
+// 	dbPath := "./sq.db"
 
-	d, err := New(dbPath)
-	if err != nil {
-		log.Fatal(err)
-	}
+// 	d, err := New(dbPath)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
 
-	err = d.fill()
-	if err != nil {
-		log.Fatal(err)
-	}
+// 	err = d.fill()
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
 
-	posts, err := d.read()
-	if err != nil {
-		log.Fatal(err)
-	}
+// 	posts, err := d.read()
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
 
-	d.client.Close()
+// 	d.client.Close()
 
-	return posts
-}
+// 	return posts
+// }
