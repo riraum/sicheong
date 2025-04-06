@@ -17,9 +17,7 @@ type Server struct {
 }
 
 func (s Server) getIndex(w http.ResponseWriter, _ *http.Request) {
-	d := s.DB
-
-	p, err := d.Read()
+	p, err := s.DB.Read()
 	if err != nil {
 		log.Fatalf("error to read posts from db: %v", err)
 	}
