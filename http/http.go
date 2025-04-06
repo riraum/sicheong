@@ -17,7 +17,6 @@ type Server struct {
 }
 
 func (s Server) getIndex(w http.ResponseWriter, _ *http.Request) {
-	// p := db.All()
 	d := s.DB
 
 	p, err := d.Read()
@@ -52,13 +51,6 @@ func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {
 	var newPost db.Post
 
 	d := s.DB
-
-	// s.DBPath = "./sq.db"
-
-	// d, err := db.New(s.DBPath)
-	// if err != nil {
-	// 	log.Fatalf("error opening db: %v", err)
-	// }
 
 	convertDate, err := strconv.ParseFloat(r.FormValue("date"), 32)
 	if err != nil {

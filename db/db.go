@@ -85,26 +85,3 @@ func (d DB) Read() ([]Post, error) {
 
 	return posts, nil
 }
-
-// func All() []Post {
-// 	dbPath := "./sq.db"
-
-// 	d, err := New(dbPath)
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	err = d.fill()
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	posts, err := d.read()
-// 	if err != nil {
-// 		log.Fatal(err)
-// 	}
-
-// 	d.client.Close()
-
-// 	return posts
-// }
