@@ -17,6 +17,11 @@ func main() {
 		log.Fatalf("Failed to create new db %v", err)
 	}
 
+	err = d.Fill()
+	if err != nil {
+		log.Fatalf("error filling posts into db: %v", err)
+	}
+
 	var s http.Server
 	s.RootDir = "static/"
 	s.DB = d

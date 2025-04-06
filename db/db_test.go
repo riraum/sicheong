@@ -21,7 +21,7 @@ func TestAll(t *testing.T) {
 		t.Errorf("error selecting rows %v", err)
 	}
 
-	if err = d.fill(); err != nil {
+	if err = d.Fill(); err != nil {
 		t.Errorf("error filling db: %v", err)
 	}
 

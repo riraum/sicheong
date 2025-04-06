@@ -39,7 +39,7 @@ func New(dbPath string) (DB, error) {
 	return DB{d}, nil
 }
 
-func (d DB) fill() error {
+func (d DB) Fill() error {
 	_, err := d.client.Exec(
 		"insert into posts(id, date, title, link) " +
 			"values(1, 202500101, 'Complaint', 'https://http.cat/status/200'), " +
