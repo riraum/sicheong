@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	_ "github.com/mattn/go-sqlite3"
 	"github.com/riraum/si-cheong/db"
 	"github.com/riraum/si-cheong/http"
 )
