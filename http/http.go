@@ -48,8 +48,6 @@ func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {
 
 	var newPost db.Post
 
-	d := s.DB
-
 	convertDate, err := strconv.ParseFloat(r.FormValue("date"), 32)
 	if err != nil {
 		log.Fatalf("convert to float: %v", err)
@@ -59,7 +57,7 @@ func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {
 	newPost.Title = r.FormValue("title")
 	newPost.Link = r.FormValue("link")
 
-	err = d.NewPost(newPost)
+	err = s.DB.NewPost(newPost)
 	if err != nil {
 		log.Fatalln("create new post in db:", err)
 	}
