@@ -44,8 +44,6 @@ func (Server) getAPIPosts(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusCreated)
-
 	var newPost db.Post
 
 	convertDate, err := strconv.ParseFloat(r.FormValue("date"), 32)
@@ -61,7 +59,7 @@ func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalln("create new post in db:", err)
 	}
-
+	w.WriteHeader(http.StatusCreated)
 	fmt.Fprint(w, "Post created!", http.StatusCreated)
 }
 
