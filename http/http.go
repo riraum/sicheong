@@ -13,11 +13,14 @@ import (
 
 type Server struct {
 	RootDir string
-	DBPath  string
+	DB      db.DB
 }
 
 func (s Server) getIndex(w http.ResponseWriter, _ *http.Request) {
-	p := db.All()
+	p, err := s.DB.Read()
+	if err != nil {
+		log.Fatalf("error to read posts from db: %v", err)
+	}
 
 	tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "index.html"))
 	if err != nil {
@@ -41,16 +44,7 @@ func (Server) getAPIPosts(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusCreated)
-
 	var newPost db.Post
-
-	s.DBPath = "./sq.db"
-
-	d, err := db.New(s.DBPath)
-	if err != nil {
-		log.Fatalf("error opening db: %v", err)
-	}
 
 	convertDate, err := strconv.ParseFloat(r.FormValue("date"), 32)
 	if err != nil {
@@ -61,11 +55,11 @@ func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {
 	newPost.Title = r.FormValue("title")
 	newPost.Link = r.FormValue("link")
 
-	err = d.NewPost(newPost)
+	err = s.DB.NewPost(newPost)
 	if err != nil {
 		log.Fatalln("create new post in db:", err)
 	}
-
+	w.WriteHeader(http.StatusCreated)
 	fmt.Fprint(w, "Post created!", http.StatusCreated)
 }
 

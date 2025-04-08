@@ -3,7 +3,6 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"os"
 
 	_ "github.com/mattn/go-sqlite3" //revive be gone
@@ -40,7 +39,7 @@ func New(dbPath string) (DB, error) {
 	return DB{d}, nil
 }
 
-func (d DB) fill() error {
+func (d DB) Fill() error {
 	_, err := d.client.Exec(
 		"insert into posts(id, date, title, link) " +
 			"values(1, 202500101, 'Complaint', 'https://http.cat/status/200'), " +
@@ -55,7 +54,7 @@ func (d DB) fill() error {
 
 func (d DB) NewPost(p Post) error {
 	_, err := d.client.Exec(
-		"insert into posts(id, date, title, link) values($1, $2, $3)", p.Date, p.Title, p.Link)
+		"insert into posts(id, date, title, link) values(4, ?, ?, ?)", p.Date, p.Title, p.Link)
 	if err != nil {
 		return fmt.Errorf("failed to insert %w", err)
 	}
@@ -63,7 +62,7 @@ func (d DB) NewPost(p Post) error {
 	return nil
 }
 
-func (d DB) read() ([]Post, error) {
+func (d DB) Read() ([]Post, error) {
 	rows, err := d.client.Query("select id, date, title, link from posts")
 	if err != nil {
 		return nil, fmt.Errorf("failed to select %w", err)
@@ -85,27 +84,4 @@ func (d DB) read() ([]Post, error) {
 	}
 
 	return posts, nil
-}
-
-func All() []Post {
-	dbPath := "./sq.db"
-
-	d, err := New(dbPath)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	err = d.fill()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	posts, err := d.read()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	d.client.Close()
-
-	return posts
 }

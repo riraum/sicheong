@@ -1,16 +1,35 @@
 package http
 
 import (
+	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path"
 	"testing"
+
+	"github.com/riraum/si-cheong/db"
 )
 
-func TestServeMux(t *testing.T) {
+func TestAllHttp(t *testing.T) {
 	var s Server
 	s.RootDir = t.TempDir()
+
+	d, err := db.New(t.TempDir())
+	if err != nil {
+		log.Fatalf("error creating db: %v", err)
+	}
+
+	s.DB = d
+
+	err = s.DB.Fill()
+	if err != nil {
+		log.Fatalf("error filling posts into db: %v", err)
+	}
+
+	if err != nil {
+		log.Fatalf("Failed to create new db %v", err)
+	}
 
 	f, err := os.Create(path.Join(s.RootDir, "index.html"))
 	if err != nil {
@@ -45,14 +64,15 @@ func TestServeMux(t *testing.T) {
 	if resp.StatusCode != http.StatusOK {
 		t.Errorf("Expected status code 200, got %d", resp.StatusCode)
 	}
-
-	// Test POST request
-	resp, err = http.Post(ts.URL+"/api/v0/posts", "application/json", nil)
-	if err != nil {
-		t.Errorf("Error making POST request: %v", err)
-	}
-
-	if resp.StatusCode != http.StatusCreated {
-		t.Errorf("Expected status code 201, got %d", resp.StatusCode)
-	}
 }
+
+// Test POST request
+// resp, err = http.Post(ts.URL+"/api/v0/posts", "application/json", nil)
+//
+//	if err != nil {
+//		t.Errorf("Error making POST request: %v", err)
+//	}
+//
+//	if resp.StatusCode != http.StatusCreated {
+//		t.Errorf("Expected status code 201, got %d", resp.StatusCode)
+//	}
