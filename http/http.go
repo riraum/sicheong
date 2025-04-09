@@ -57,10 +57,28 @@ func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {
 
 	err = s.DB.NewPost(newPost)
 	if err != nil {
-		log.Fatalln("create new post in db:", err)
+		log.Fatalf("create new post in db: %v", err)
 	}
+
 	w.WriteHeader(http.StatusCreated)
 	fmt.Fprint(w, "Post created!", http.StatusCreated)
+}
+
+func (s Server) deleteAPIPosts(w http.ResponseWriter, r *http.Request) {
+	convertID, err := strconv.ParseFloat(r.PathValue("id"), 32)
+	if err != nil {
+		log.Fatalf("convert to float: %v", err)
+	}
+
+	ID := float32(convertID)
+
+	err = s.DB.DeletePost(ID)
+	if err != nil {
+		log.Fatalf("delete post in db: %v", err)
+	}
+
+	w.WriteHeader(http.StatusGone)
+	fmt.Fprint(w, "Post deleted!", http.StatusGone)
 }
 
 func (s Server) SetupMux() *http.ServeMux {
@@ -69,6 +87,7 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux.HandleFunc("GET /static/pico.min.css", s.getCSS)
 	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
 	mux.HandleFunc("POST /api/v0/posts", s.postAPIPosts)
+	mux.HandleFunc("DELETE /api/v0/posts/{id}", s.deleteAPIPosts)
 
 	return mux
 }

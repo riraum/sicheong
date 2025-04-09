@@ -62,6 +62,16 @@ func (d DB) NewPost(p Post) error {
 	return nil
 }
 
+func (d DB) DeletePost(id float32) error {
+	_, err := d.client.Exec(
+		"delete from posts where id = ?", id)
+	if err != nil {
+		return fmt.Errorf("failed to delete %w", err)
+	}
+
+	return nil
+}
+
 func (d DB) Read() ([]Post, error) {
 	rows, err := d.client.Query("select id, date, title, link from posts")
 	if err != nil {
