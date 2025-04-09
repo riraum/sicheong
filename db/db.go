@@ -62,6 +62,25 @@ func (d DB) NewPost(p Post) error {
 	return nil
 }
 
+func (d DB) DeletePost(id float32) error {
+	row := d.client.QueryRow("select * from posts where id = ?", id)
+
+	dp := new(Post)
+
+	err := row.Scan(&dp.ID, &dp.Date, &dp.Title, &dp.Link)
+	if err != nil {
+		return fmt.Errorf("failed to scan %w", err)
+	}
+
+	_, err = d.client.Exec(
+		"delete from posts(id, date, title, link) values(?, ?, ?, ?)", dp.ID, dp.Date, dp.Title, dp.Link)
+	if err != nil {
+		return fmt.Errorf("failed to delete %w", err)
+	}
+
+	return nil
+}
+
 func (d DB) Read() ([]Post, error) {
 	rows, err := d.client.Query("select id, date, title, link from posts")
 	if err != nil {
