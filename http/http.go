@@ -38,8 +38,15 @@ func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, css)
 }
 
-func (Server) getAPIPosts(w http.ResponseWriter, _ *http.Request) {
+func (Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
+
+	sort := r.URL.Query()["sort"]
+	if len(sort) > 0 {
+		direction := r.URL.Query()["direction"]
+		fmt.Fprintln(w, "GET params are:", direction)
+	}
+
 	fmt.Fprint(w, http.StatusOK, "[]")
 }
 
