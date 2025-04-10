@@ -53,11 +53,21 @@ func (d DB) Fill() error {
 }
 
 func (d DB) NewPost(p Post) error {
-	_, err := d.client.Exec(
-		"insert into posts(id, date, title, link) values(4, ?, ?, ?)", p.Date, p.Title, p.Link)
+	result, err := d.client.Exec(
+		"insert into posts(id, date, title, link) values(?, ?, ?, ?)", p.Date, p.Title, p.Link)
 	if err != nil {
 		return fmt.Errorf("failed to insert %w", err)
 	}
+
+	nextID, err := result.LastInsertId()
+
+	_, err := d.client.Exec("insert")
+
+	// 	_, err := d.client.Exec(
+	// 	"insert into posts(id, date, title, link) values(?, ?, ?, ?)", p.Date, p.Title, p.Link)
+	// if err != nil {
+	// 	return fmt.Errorf("failed to insert %w", err)
+	// }
 
 	return nil
 }
