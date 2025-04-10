@@ -41,10 +41,10 @@ func New(dbPath string) (DB, error) {
 
 func (d DB) Fill() error {
 	_, err := d.client.Exec(
-		"insert into posts(id, date, title, link) " +
-			"values(1, 202500101, 'Complaint', 'https://http.cat/status/200'), " +
-			"(2, 20250201, 'Feedback', 'https://http.cat/status/100'), " +
-			"(3, 20250301, 'Announcement', 'https://http.cat/status/301')")
+		"insert into posts(date, title, link) " +
+			"values(202500101, 'Complaint', 'https://http.cat/status/200'), " +
+			"(20250201, 'Feedback', 'https://http.cat/status/100'), " +
+			"(20250301, 'Announcement', 'https://http.cat/status/301')")
 	if err != nil {
 		return fmt.Errorf("failed to insert %w", err)
 	}
@@ -54,7 +54,7 @@ func (d DB) Fill() error {
 
 func (d DB) NewPost(p Post) error {
 	_, err := d.client.Exec(
-		"insert into posts(id, date, title, link) values(4, ?, ?, ?)", p.Date, p.Title, p.Link)
+		"insert into posts(date, title, link) values(?, ?, ?)", p.Date, p.Title, p.Link)
 	if err != nil {
 		return fmt.Errorf("failed to insert %w", err)
 	}
