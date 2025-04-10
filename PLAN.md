@@ -68,11 +68,35 @@ End date: 2025-05-23
       - `GET /api/v0/posts?sort=title&direction=asc` list posts, order by title, Z->A
       - `GET /api/v0/posts?direction=asc` list posts, order by date, oldest -> newest
 
-- Milestone 05 - Due 2025-04-16 - TBD
+- Milestone 05 - Due 2025-04-16 - Posts Content and page
 
-- Milestone 06 - Due 2025-04-23 - TBD
+    - Update the post table to contain a field `content`
+    - Add content form field when creating a post
+    - Add a page to view a single post
+    - Add a page to edit a single post
 
-- Milestone 07 - Due 2025-04-30 - TBD
+- Milestone 06 - Due 2025-04-23 - Authoring
+
+    - Add a new table `Author: id, name`
+    - Update the post table with `author` that contains the ID of the author
+    - Create a couple of authors that the app knows by default
+    - Create a couple of posts per authors
+    - Add a search query `author=X` that filter only for this author, by default
+      it search for all authors.
+
+- Milestone 07 - Due 2025-04-30 - Authentication
+
+    - Setup a login page that contains a single field: the author's name.
+      When the author's name is correctly sent via `POST`, authenticate the
+      current user. This is done by setting a cookie.
+    - For all requests, get the cookie value, and ensure that it's a valid
+      autor's name, if not, you should fail with 401.
+    - Allow to create a post only when authenticated, and set the author during
+      the post submission on the backend.
+
+    - Refs:
+      - https://pkg.go.dev/net/http#Request.Cookie
+      - https://pkg.go.dev/net/http#SetCookie
 
 - Milestone 08 - Due 2025-05-07 - TBD
 
