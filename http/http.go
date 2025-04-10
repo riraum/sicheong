@@ -39,15 +39,19 @@ func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
 }
 
 func (Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusOK)
+	sort := r.FormValue("sort")
+	direction := r.FormValue("direction")
 
-	sort := r.URL.Query()["sort"]
-	if len(sort) > 0 {
-		direction := r.URL.Query()["direction"]
-		fmt.Fprintln(w, "GET params are:", direction)
+	if r.FormValue("sort") == "" {
+		sort = "date"
 	}
 
-	fmt.Fprint(w, http.StatusOK, "[]")
+	if r.FormValue("direction") == "" {
+		direction = "desc"
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintln(w, http.StatusOK, sort, direction)
 }
 
 func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {
