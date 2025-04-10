@@ -25,7 +25,7 @@ func TestAll(t *testing.T) {
 		t.Errorf("error filling db: %v", err)
 	}
 
-	got, err := d.Read()
+	got, err := d.Read("a")
 	if err != nil {
 		t.Errorf("error getting rows: %v", err)
 	}

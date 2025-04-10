@@ -17,17 +17,16 @@ type Server struct {
 }
 
 func (s Server) getIndex(w http.ResponseWriter, _ *http.Request) {
-	p, err := s.DB.Read()
-	if err != nil {
-		log.Fatalf("error to read posts from db: %v", err)
-	}
-
+	// p, err := s.DB.Read()
+	// if err != nil {
+	// 	log.Fatalf("error to read posts from db: %v", err)
+	// }
 	tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "index.html"))
 	if err != nil {
 		log.Fatalf("parse %v", err)
 	}
 
-	err = tmpl.Execute(w, p)
+	err = tmpl.Execute(w, nil)
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}
@@ -38,7 +37,9 @@ func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, css)
 }
 
-func (Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
+func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
+	// sortDirAsc := p[0].Date
+	// sortDirDesc := p[0].Date
 	sort := r.FormValue("sort")
 	direction := r.FormValue("direction")
 
