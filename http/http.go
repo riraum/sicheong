@@ -81,8 +81,8 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 	// }
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, http.StatusOK, posts, oq)
 	// fmt.Fprintln(w, http.StatusOK, sort, direction)
+	fmt.Fprintln(w, http.StatusOK, posts, oq)
 }
 
 func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {
