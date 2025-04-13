@@ -14,7 +14,7 @@ func main() {
 
 	type contextKey string
 	ctx := context.Background()
-	ctx = context.WithValue(ctx, "testKey", "testValue")
+	// ctx = context.WithValue(ctx, "testKey", "testValue")
 
 	d, err := db.New("./sq.db")
 	if err != nil {
