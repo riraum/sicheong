@@ -90,9 +90,9 @@ func getAPIPosts(ctx context.Context, s Server) http.HandlerFunc {
 		// 	direction = "desc"
 		// }
 
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintln(w, http.StatusOK, posts, oq)
-	}
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprintln(w, http.StatusOK, posts, oq)
+	// fmt.Fprintln(w, http.StatusOK, sort, direction)
 }
 
 func postAPIPosts(ctx context.Context, s Server) http.HandlerFunc {
