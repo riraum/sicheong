@@ -81,7 +81,7 @@ func (d DB) Read(params map[string]string) ([]Post, error) {
 	// case a: sort:title + direction:asc
 	// case b: sort:date + direction:asc
 	// case c: sort:date + direction:desc
-	rows, err := d.client.Query("select id, date, title, link from posts order by ? ?", params["sort"], params["direction"])
+	rows, err := d.client.Query("select id, date, title, link from posts order by ?, ?", params["sort"], params["direction"])
 	if err != nil {
 		return nil, fmt.Errorf("failed to select %w", err)
 	}
