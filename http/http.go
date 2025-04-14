@@ -1,7 +1,6 @@
 package http
 
 import (
-	"context"
 	"fmt"
 	"html/template"
 	"log"
@@ -66,9 +65,7 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(oq)
 
-	ctx := r.Context().Value(oq)
-
-	posts, err := s.DB.Read(ctx.Value())
+	posts, err := s.DB.Read(oq)
 	if err != nil {
 		log.Fatalf("read posts: %v", err)
 	}
@@ -126,10 +123,7 @@ func (s Server) deleteAPIPosts(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Post deleted!", http.StatusGone)
 }
 
-func (s Server) SetupMux(ctx context.Context) *http.ServeMux {
-	// testCtx := context.WithValue(ctx, "anotherTestKey", "hurrdurr")
-	fmt.Println("test print: %s", ctx.Value("testKey"))
-	// fmt.Println("another test print %s", ctx.Value("testCtx"))
+func (s Server) SetupMux() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.getIndex)
 	mux.HandleFunc("GET /static/pico.min.css", s.getCSS)

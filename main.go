@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 
@@ -11,10 +10,6 @@ import (
 
 func main() {
 	fmt.Println("Hello si-cheong user")
-
-	type contextKey string
-	ctx := context.Background()
-	ctx = context.WithValue(ctx, "testKey", "testValue")
 
 	d, err := db.New("./sq.db")
 	if err != nil {
@@ -30,6 +25,6 @@ func main() {
 	s.RootDir = "static/"
 	s.DB = d
 
-	mux := s.SetupMux(ctx)
+	mux := s.SetupMux()
 	http.Run(mux)
 }
