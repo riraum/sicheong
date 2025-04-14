@@ -73,12 +73,8 @@ func (d DB) DeletePost(id float32) error {
 }
 
 func (d DB) Read(par map[string]string) ([]Post, error) {
-	fmt.Println(par)
-	// default, default(if no params): sort:date + direction:desc
-	// case a: sort:title + direction:asc
-	// case b: sort:date + direction:asc
-	// case c: sort:date + direction:desc
 	q := fmt.Sprintf("select id, date, title, link from posts order by %s %s", par["sort"], par["direction"])
+
 	rows, err := d.client.Query(q)
 	if err != nil {
 		return nil, fmt.Errorf("failed to select %w", err)
