@@ -93,19 +93,22 @@ func (d DB) Read(ctx context.Context, oq []string) ([]Post, error) {
 	// }
 	fmt.Println(oq)
 
-	sort := ctx.Value("sort")
-	direction := ctx.Value("direction")
-	fmt.Println(sort, direction)
-	fmt.Printf("test print: %v", ctx.Value("testKey"))
-
-	// if oq == nil {
-	// 	oq = append(oq, "date", "desc")
-	// }
-
-	rows, err := d.client.Query("select id, date, title, link from posts order by ? ?", sort, direction)
+	if oq == nil {
+		oq = append(oq, "date", "desc")
+	}
+	// case1 := []string{"title", "asc"}
+	// case2 := []string{"date", "asc"}
+	// case3 := []string{"date", "desc"}
+	// caseDefault := []string{"date", "desc"}
+	rows, err := d.client.QueryContext(ctx, "select id, date, title, link from posts order by ? ?", oq[0], oq[1])
 	if err != nil {
 		return nil, fmt.Errorf("failed to select %w", err)
 	}
+
+	// rows, err := d.client.Query("select id, date, title, link from posts")
+	// if err != nil {
+	// 	return nil, fmt.Errorf("failed to select %w", err)
+	// }
 
 	defer rows.Close()
 
