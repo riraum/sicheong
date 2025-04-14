@@ -17,12 +17,12 @@ type Server struct {
 }
 
 func (s Server) getIndex(w http.ResponseWriter, _ *http.Request) {
-	params := map[string]string{
+	par := map[string]string{
 		"sort":      "date",
 		"direction": "asc",
 	}
 
-	p, err := s.DB.Read(params)
+	p, err := s.DB.Read(par)
 	if err != nil {
 		log.Fatalf("error to read posts from db: %v", err)
 	}
@@ -44,20 +44,20 @@ func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
-	params := map[string]string{
+	par := map[string]string{
 		"sort":      "date",
 		"direction": "asc",
 	}
 
 	if r.FormValue("sort") != "" {
-		params["sort"] = r.FormValue("sort")
+		par["sort"] = r.FormValue("sort")
 	}
 
 	if r.FormValue("direction") != "" {
-		params["direction"] = r.FormValue("direction")
+		par["direction"] = r.FormValue("direction")
 	}
 
-	posts, err := s.DB.Read(params)
+	posts, err := s.DB.Read(par)
 	if err != nil {
 		log.Fatalf("read posts: %v", err)
 	}

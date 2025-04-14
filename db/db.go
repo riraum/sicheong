@@ -1,7 +1,6 @@
 package db
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"os"
@@ -19,8 +18,6 @@ type Post struct {
 type DB struct {
 	client *sql.DB
 }
-
-var ctx context.Context
 
 func New(dbPath string) (DB, error) {
 	os.Remove(dbPath)
@@ -75,13 +72,13 @@ func (d DB) DeletePost(id float32) error {
 	return nil
 }
 
-func (d DB) Read(params map[string]string) ([]Post, error) {
-	fmt.Println(params)
+func (d DB) Read(par map[string]string) ([]Post, error) {
+	fmt.Println(par)
 	// default, default(if no params): sort:date + direction:desc
 	// case a: sort:title + direction:asc
 	// case b: sort:date + direction:asc
 	// case c: sort:date + direction:desc
-	rows, err := d.client.Query("select id, date, title, link from posts order by ?, ?", params["sort"], params["direction"])
+	rows, err := d.client.Query("select id, date, title, link from posts order by ?, ?", par["sort"], par["direction"])
 	if err != nil {
 		return nil, fmt.Errorf("failed to select %w", err)
 	}

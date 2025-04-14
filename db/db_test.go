@@ -25,7 +25,12 @@ func TestAll(t *testing.T) {
 		t.Errorf("error filling db: %v", err)
 	}
 
-	got, err := d.Read([]string{"title", "desc"})
+	par := map[string]string{
+		"sort":      "date",
+		"direction": "asc",
+	}
+
+	got, err := d.Read(par)
 	if err != nil {
 		t.Errorf("error getting rows: %v", err)
 	}
