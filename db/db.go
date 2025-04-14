@@ -75,40 +75,16 @@ func (d DB) DeletePost(id float32) error {
 	return nil
 }
 
-func (d DB) Read(oq []string) ([]Post, error) {
+func (d DB) Read(params map[string]string) ([]Post, error) {
+	fmt.Println(params)
 	// default, default(if no params): sort:date + direction:desc
 	// case a: sort:title + direction:asc
 	// case b: sort:date + direction:asc
 	// case c: sort:date + direction:desc
-	// var oq []string
-	// switch order {
-	// case "a":
-	// 	oq = []string{"title", "asc"}
-	// case "b":
-	// 	oq = []string{"date", "asc"}
-	// case "c":
-	// 	oq = []string{"date", "desc"}
-	// default:
-	// 	oq = []string{"date", "desc"}
-	// }
-	fmt.Println(oq)
-
-	if oq == nil {
-		oq = append(oq, "date", "desc")
-	}
-	// case1 := []string{"title", "asc"}
-	// case2 := []string{"date", "asc"}
-	// case3 := []string{"date", "desc"}
-	// caseDefault := []string{"date", "desc"}
-	rows, err := d.client.QueryContext(ctx, "select id, date, title, link from posts order by ? ?", oq[0], oq[1])
+	rows, err := d.client.Query("select id, date, title, link from posts order by ? ?", params["sort"], params["direction"])
 	if err != nil {
 		return nil, fmt.Errorf("failed to select %w", err)
 	}
-
-	// rows, err := d.client.Query("select id, date, title, link from posts")
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to select %w", err)
-	// }
 
 	defer rows.Close()
 

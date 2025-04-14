@@ -17,9 +17,12 @@ type Server struct {
 }
 
 func (s Server) getIndex(w http.ResponseWriter, _ *http.Request) {
-	oq := []string{"title", "asc"}
+	params := map[string]string{
+		"sort":      "date",
+		"direction": "asc",
+	}
 
-	p, err := s.DB.Read(oq)
+	p, err := s.DB.Read(params)
 	if err != nil {
 		log.Fatalf("error to read posts from db: %v", err)
 	}
@@ -41,48 +44,26 @@ func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
-	// sortDirAsc := p[0].Date
-	// sortDirDesc := p[0].Date
-	// var sort string
-	// var direction string
-	var oq []string
-
-	if r.FormValue("sort") == "title" {
-		oq = append(oq, "title")
+	params := map[string]string{
+		"sort":      "date",
+		"direction": "asc",
 	}
 
-	if r.FormValue("sort") == "date" || r.FormValue("sort") == "" {
-		oq = append(oq, "date")
+	if r.FormValue("sort") != "" {
+		params["sort"] = r.FormValue("sort")
 	}
 
-	if r.FormValue("direction") == "asc" {
-		oq = append(oq, "asc")
+	if r.FormValue("direction") != "" {
+		params["direction"] = r.FormValue("direction")
 	}
 
-	if r.FormValue("direction") == "desc" || r.FormValue("direction") == "" {
-		oq = append(oq, "desc")
-	}
-
-	fmt.Println(oq)
-
-	posts, err := s.DB.Read(oq)
+	posts, err := s.DB.Read(params)
 	if err != nil {
 		log.Fatalf("read posts: %v", err)
 	}
-	// sort := r.FormValue("sort")
-	// direction := r.FormValue("direction")
-
-	// if r.FormValue("sort") == "" {
-	// 	sort = "date"
-	// }
-
-	// if r.FormValue("direction") == "" {
-	// 	direction = "desc"
-	// }
 
 	w.WriteHeader(http.StatusOK)
-	// fmt.Fprintln(w, http.StatusOK, sort, direction)
-	fmt.Fprintln(w, http.StatusOK, posts, oq)
+	fmt.Fprintln(w, http.StatusOK, posts)
 }
 
 func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {
