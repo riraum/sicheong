@@ -73,22 +73,12 @@ func getAPIPosts(ctx context.Context, s Server) http.HandlerFunc {
 			ctx = context.WithValue(ctx, "direction", "desc")
 		}
 
-		fmt.Println(oq)
+		fmt.Println(ctx, oq)
 
-		posts, err := s.DB.Read(oq)
+		posts, err := s.DB.Read(ctx, oq)
 		if err != nil {
 			log.Fatalf("read posts: %v", err)
 		}
-		// sort := r.FormValue("sort")
-		// direction := r.FormValue("direction")
-
-		// if r.FormValue("sort") == "" {
-		// 	sort = "date"
-		// }
-
-		// if r.FormValue("direction") == "" {
-		// 	direction = "desc"
-		// }
 
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintln(w, http.StatusOK, posts, oq)
@@ -137,9 +127,8 @@ func (s Server) deleteAPIPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) SetupMux(ctx context.Context) *http.ServeMux {
-	// testCtx := context.WithValue(ctx, "anotherTestKey", "hurrdurr")
-	fmt.Println("test print: %s", ctx.Value("testKey"))
-	// fmt.Println("another test print %s", ctx.Value("testCtx"))
+	// fmt.Printf("test print: %s", ctx.Value("testKey"))
+
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", getIndex(ctx, s))
 	mux.HandleFunc("GET /static/pico.min.css", s.getCSS)
