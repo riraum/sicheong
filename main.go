@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"log"
 
@@ -12,10 +11,13 @@ import (
 func main() {
 	fmt.Println("Hello si-cheong user")
 
+<<<<<<< HEAD
 	type contextKey string
 	ctx := context.Background()
 	// ctx = context.WithValue(ctx, "testKey", "testValue")
 
+=======
+>>>>>>> parent of a5e064f (WIP add context)
 	d, err := db.New("./sq.db")
 	if err != nil {
 		log.Fatalf("Failed to create new db %v", err)
@@ -30,6 +32,6 @@ func main() {
 	s.RootDir = "static/"
 	s.DB = d
 
-	mux := s.SetupMux(ctx)
+	mux := s.SetupMux()
 	http.Run(mux)
 }

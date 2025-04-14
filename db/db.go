@@ -20,7 +20,7 @@ type DB struct {
 	client *sql.DB
 }
 
-// var ctx context.Context
+var ctx context.Context
 
 func New(dbPath string) (DB, error) {
 	os.Remove(dbPath)
@@ -75,7 +75,7 @@ func (d DB) DeletePost(id float32) error {
 	return nil
 }
 
-func (d DB) Read(ctx context.Context, oq []string) ([]Post, error) {
+func (d DB) Read(oq []string) ([]Post, error) {
 	// default, default(if no params): sort:date + direction:desc
 	// case a: sort:title + direction:asc
 	// case b: sort:date + direction:asc
