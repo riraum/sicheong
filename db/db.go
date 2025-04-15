@@ -83,18 +83,29 @@ func (d DB) Read(par map[string]string) ([]Post, error) {
 		dir = "DESC"
 	}
 
+	// sort := "DATE"
+	// if par["sort"] == "title" {
+	// 	sort = "TITLE"
+	// }
+
 	queryString := fmt.Sprintf("SELECT id, date, title, link FROM posts ORDER BY ? %s", dir)
+	// debug
+	fmt.Println("print queryString:", queryString)
 
 	stmt, err := d.client.Prepare(queryString)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare %w", err)
 	}
+	// debug
+	fmt.Println("print prepared stmt:", stmt)
+	defer stmt.Close()
 
 	rows, err := stmt.Query(par["sort"])
 	if err != nil {
 		return nil, fmt.Errorf("failed to select %w", err)
 	}
-
+	// debug
+	fmt.Println("print print query:", rows)
 	defer rows.Close()
 
 	for rows.Next() {
