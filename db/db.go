@@ -90,7 +90,7 @@ func (d DB) Read(par map[string]string) ([]Post, error) {
 		return nil, fmt.Errorf("failed to prepare %w", err)
 	}
 
-	rows, err := stmt.Query(par["sort"], par["direction"])
+	rows, err := stmt.Query(par["sort"])
 	if err != nil {
 		return nil, fmt.Errorf("failed to select %w", err)
 	}
