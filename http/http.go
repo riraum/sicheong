@@ -16,15 +16,23 @@ type Server struct {
 	DB      db.DB
 }
 
-func (s Server) getIndex(w http.ResponseWriter, _ *http.Request) {
+func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 	par := map[string]string{
 		"sort":      "date",
 		"direction": "asc",
 	}
 
-	p, err := s.DB.Read(par)
+	if r.FormValue("sort") != "" {
+		par["sort"] = r.FormValue("sort")
+	}
+
+	if r.FormValue("direction") != "" {
+		par["direction"] = r.FormValue("direction")
+	}
+
+	posts, err := s.DB.Read(par)
 	if err != nil {
-		log.Fatalf("error to read posts from db: %v", err)
+		log.Fatalf("read posts: %v", err)
 	}
 
 	tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "index.html"))
@@ -32,7 +40,7 @@ func (s Server) getIndex(w http.ResponseWriter, _ *http.Request) {
 		log.Fatalf("parse %v", err)
 	}
 
-	err = tmpl.Execute(w, p)
+	err = tmpl.Execute(w, posts)
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}

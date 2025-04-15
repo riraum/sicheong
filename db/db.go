@@ -72,23 +72,31 @@ func (d DB) DeletePost(id float32) error {
 	return nil
 }
 
-func (d DB) Read(par map[string]string) ([]Post, error) {
-	var (
-		posts []Post
-		post  Post
-	)
+func sanQry(par map[string]string) string {
+	sort := "DATE"
+	if par["sort"] == "title" {
+		sort = "TITLE"
+	}
 
 	dir := "ASC"
 	if par["direction"] == "desc" {
 		dir = "DESC"
 	}
 
-	// sort := "DATE"
-	// if par["sort"] == "title" {
-	// 	sort = "TITLE"
-	// }
+	queryString := fmt.Sprintf("SELECT id, date, title, link FROM posts ORDER BY %s %s", sort, dir)
+	// debug
+	fmt.Println("print san qry:", queryString)
 
-	queryString := fmt.Sprintf("SELECT id, date, title, link FROM posts ORDER BY ? %s", dir)
+	return queryString
+}
+
+func (d DB) Read(par map[string]string) ([]Post, error) {
+	var (
+		posts []Post
+		post  Post
+	)
+
+	queryString := sanQry(par)
 	// debug
 	fmt.Println("print queryString:", queryString)
 
@@ -100,12 +108,12 @@ func (d DB) Read(par map[string]string) ([]Post, error) {
 	fmt.Println("print prepared stmt:", stmt)
 	defer stmt.Close()
 
-	rows, err := stmt.Query(par["sort"])
+	rows, err := stmt.Query()
 	if err != nil {
 		return nil, fmt.Errorf("failed to select %w", err)
 	}
 	// debug
-	fmt.Println("print print query:", rows)
+	fmt.Println("print query:", rows)
 	defer rows.Close()
 
 	for rows.Next() {
