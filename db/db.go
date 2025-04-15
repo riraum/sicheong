@@ -75,44 +75,43 @@ func (d DB) DeletePost(id float32) error {
 func (d DB) Read(par map[string]string) ([]Post, error) {
 	var (
 		posts []Post
-
-		post Post
-
-		stmt *sql.Stmt
-
-		err error
+		post  Post
+		stmt  *sql.Stmt
+		err   error
 	)
 
-	// stmt, err := d.client.Prepare("select id, date, title, link from posts order by ? ?")
 	switch par["sort"] {
 	case "date":
-		stmt, err = d.client.Prepare("select id, date, title, link from posts order by date asc")
-		if err != nil {
-			return nil, fmt.Errorf("failed to select %w", err)
-		}
-		defer stmt.Close()
+		switch par["direction"] {
+		case "asc":
+			stmt, err := d.client.Prepare("select id, date, title, link from posts order by date asc")
+			if err != nil {
+				return nil, fmt.Errorf("failed to select %w", err)
+			}
+			defer stmt.Close()
 
+		case "desc":
+			stmt, err := d.client.Prepare("select id, date, title, link from posts order by date desc")
+			if err != nil {
+				return nil, fmt.Errorf("failed to select %w", err)
+			}
+			defer stmt.Close()
+		}
 	case "title":
-		stmt, err := d.client.Prepare("select id, date, title, link from posts order by title asc")
-		if err != nil {
-			return nil, fmt.Errorf("failed to select %w", err)
+		switch par["direction"] {
+		case "asc":
+			stmt, err := d.client.Prepare("select id, date, title, link from posts order by title asc")
+			if err != nil {
+				return nil, fmt.Errorf("failed to select %w", err)
+			}
+			defer stmt.Close()
+		case "desc":
+			stmt, err := d.client.Prepare("select id, date, title, link from posts order by title desc")
+			if err != nil {
+				return nil, fmt.Errorf("failed to select %w", err)
+			}
+			defer stmt.Close()
 		}
-		defer stmt.Close()
-	}
-
-	switch par["direction"] {
-	case "asc":
-		stmt, err := d.client.Prepare("select id, date, title, link from posts order by date asc")
-		if err != nil {
-			return nil, fmt.Errorf("failed to select %w", err)
-		}
-		defer stmt.Close()
-	case "desc":
-		stmt, err := d.client.Prepare("select id, date, title, link from posts order by date desc")
-		if err != nil {
-			return nil, fmt.Errorf("failed to select %w", err)
-		}
-		defer stmt.Close()
 	}
 
 	rows, err := stmt.Query()
