@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 
 	_ "github.com/mattn/go-sqlite3" //revive be gone
@@ -41,13 +42,27 @@ func New(dbPath string) (DB, error) {
 }
 
 func (d DB) Fill() error {
-	_, err := d.client.Exec(
-		"insert into posts(date, title, link, content) " +
-			"values(202500101, 'Complaint', 'https://http.cat/status/200', 'Text'), " +
-			"(20250201, 'Feedback', 'https://http.cat/status/100', 'Text'), " +
-			"(20250301, 'Announcement', 'https://http.cat/status/301', 'Text')")
-	if err != nil {
-		return fmt.Errorf("failed to insert %w", err)
+	posts := []Post{
+		{
+			Date:  float32(20250101), //nolint
+			Title: "Complaint",
+			Link:  "https://http.cat/status/200",
+		},
+		{
+			Date:  float32(20250201), //nolint
+			Title: "Feedback",
+			Link:  "https://http.cat/status/100"},
+		{
+			Date:  float32(20250301), //nolint
+			Title: "Announcement",
+			Link:  "https://http.cat/status/301",
+		},
+	}
+	for _, p := range posts {
+		err := d.NewPost(p)
+		if err != nil {
+			log.Fatalf("create new post in db: %v", err)
+		}
 	}
 
 	return nil
@@ -84,7 +99,7 @@ func sanQry(par map[string]string) string {
 		dir = "DESC"
 	}
 
-	queryString := fmt.Sprintf("SELECT id, date, title, link, content FROM posts ORDER BY %s %s", sort, dir)
+	queryString := fmt.Sprintf("SELECT id, date, title, link FROM posts ORDER BY %s %s", sort, dir)
 
 	return queryString
 }
