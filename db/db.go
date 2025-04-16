@@ -29,7 +29,7 @@ func New(dbPath string) (DB, error) {
 	}
 
 	sqlStmt := `create table posts` +
-		`(id integer not null primary key, date	integer, title text, link text); delete from posts;`
+		`(id integer not null primary key, date	integer, title text, link text, content text); delete from posts;`
 
 	_, err = d.Exec(sqlStmt)
 	if err != nil {
@@ -42,10 +42,10 @@ func New(dbPath string) (DB, error) {
 
 func (d DB) Fill() error {
 	_, err := d.client.Exec(
-		"insert into posts(date, title, link) " +
-			"values(202500101, 'Complaint', 'https://http.cat/status/200'), " +
-			"(20250201, 'Feedback', 'https://http.cat/status/100'), " +
-			"(20250301, 'Announcement', 'https://http.cat/status/301')")
+		"insert into posts(date, title, link, content) " +
+			"values(202500101, 'Complaint', 'https://http.cat/status/200', 'Text'), " +
+			"(20250201, 'Feedback', 'https://http.cat/status/100', 'Text'), " +
+			"(20250301, 'Announcement', 'https://http.cat/status/301', 'Text')")
 	if err != nil {
 		return fmt.Errorf("failed to insert %w", err)
 	}
@@ -55,7 +55,7 @@ func (d DB) Fill() error {
 
 func (d DB) NewPost(p Post) error {
 	_, err := d.client.Exec(
-		"insert into posts(date, title, link) values(?, ?, ?)", p.Date, p.Title, p.Link)
+		"insert into posts(date, title, link) values(?, ?, ?, ?)", p.Date, p.Title, p.Link, p.Content)
 	if err != nil {
 		return fmt.Errorf("failed to insert %w", err)
 	}
@@ -84,7 +84,7 @@ func sanQry(par map[string]string) string {
 		dir = "DESC"
 	}
 
-	queryString := fmt.Sprintf("SELECT id, date, title, link FROM posts ORDER BY %s %s", sort, dir)
+	queryString := fmt.Sprintf("SELECT id, date, title, link, content FROM posts ORDER BY %s %s", sort, dir)
 	return queryString
 }
 
@@ -109,7 +109,7 @@ func (d DB) Read(par map[string]string) ([]Post, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		err = rows.Scan(&post.ID, &post.Date, &post.Title, &post.Link)
+		err = rows.Scan(&post.ID, &post.Date, &post.Title, &post.Link, &post.Content)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan %w", err)
 		}
