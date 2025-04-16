@@ -85,6 +85,7 @@ func sanQry(par map[string]string) string {
 	}
 
 	queryString := fmt.Sprintf("SELECT id, date, title, link, content FROM posts ORDER BY %s %s", sort, dir)
+
 	return queryString
 }
 
