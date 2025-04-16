@@ -16,10 +16,23 @@ type Server struct {
 	DB      db.DB
 }
 
-func (s Server) getIndex(w http.ResponseWriter, _ *http.Request) {
-	p, err := s.DB.Read()
+func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
+	par := map[string]string{
+		"sort":      "date",
+		"direction": "asc",
+	}
+
+	if r.FormValue("sort") != "" {
+		par["sort"] = r.FormValue("sort")
+	}
+
+	if r.FormValue("direction") != "" {
+		par["direction"] = r.FormValue("direction")
+	}
+
+	posts, err := s.DB.Read(par)
 	if err != nil {
-		log.Fatalf("error to read posts from db: %v", err)
+		log.Fatalf("read posts: %v", err)
 	}
 
 	tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "index.html"))
@@ -27,7 +40,7 @@ func (s Server) getIndex(w http.ResponseWriter, _ *http.Request) {
 		log.Fatalf("parse %v", err)
 	}
 
-	err = tmpl.Execute(w, p)
+	err = tmpl.Execute(w, posts)
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}
@@ -38,20 +51,27 @@ func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, css)
 }
 
-func (Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
-	sort := r.FormValue("sort")
-	direction := r.FormValue("direction")
-
-	if r.FormValue("sort") == "" {
-		sort = "date"
+func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
+	par := map[string]string{
+		"sort":      "date",
+		"direction": "asc",
 	}
 
-	if r.FormValue("direction") == "" {
-		direction = "desc"
+	if r.FormValue("sort") != "" {
+		par["sort"] = r.FormValue("sort")
+	}
+
+	if r.FormValue("direction") != "" {
+		par["direction"] = r.FormValue("direction")
+	}
+
+	posts, err := s.DB.Read(par)
+	if err != nil {
+		log.Fatalf("read posts: %v", err)
 	}
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, http.StatusOK, sort, direction)
+	fmt.Fprintln(w, http.StatusOK, posts)
 }
 
 func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {

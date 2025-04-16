@@ -72,19 +72,42 @@ func (d DB) DeletePost(id float32) error {
 	return nil
 }
 
-func (d DB) Read() ([]Post, error) {
-	rows, err := d.client.Query("select id, date, title, link from posts")
+func sanQry(par map[string]string) string {
+	sort := "DATE"
+	if par["sort"] == "title" {
+		sort = "TITLE"
+	}
+
+	dir := "ASC"
+	if par["direction"] == "desc" {
+		dir = "DESC"
+	}
+
+	queryString := fmt.Sprintf("SELECT id, date, title, link FROM posts ORDER BY %s %s", sort, dir)
+	return queryString
+}
+
+func (d DB) Read(par map[string]string) ([]Post, error) {
+	var (
+		posts []Post
+		post  Post
+	)
+
+	queryString := sanQry(par)
+
+	stmt, err := d.client.Prepare(queryString)
+	if err != nil {
+		return nil, fmt.Errorf("failed to prepare %w", err)
+	}
+	defer stmt.Close()
+
+	rows, err := stmt.Query()
 	if err != nil {
 		return nil, fmt.Errorf("failed to select %w", err)
 	}
-
 	defer rows.Close()
 
-	var posts []Post
-
 	for rows.Next() {
-		var post Post
-
 		err = rows.Scan(&post.ID, &post.Date, &post.Title, &post.Link)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan %w", err)
