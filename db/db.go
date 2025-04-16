@@ -10,10 +10,11 @@ import (
 )
 
 type Post struct {
-	ID    float32
-	Date  float32
-	Title string
-	Link  string
+	ID      float32
+	Date    float32
+	Title   string
+	Link    string
+	Content string
 }
 
 type DB struct {
@@ -29,7 +30,7 @@ func New(dbPath string) (DB, error) {
 	}
 
 	sqlStmt := `create table posts` +
-		`(id integer not null primary key, date	integer, title text, link text); delete from posts;`
+		`(id integer not null primary key, date	integer, title text, link text, content text); delete from posts;`
 
 	_, err = d.Exec(sqlStmt)
 	if err != nil {
@@ -69,7 +70,7 @@ func (d DB) Fill() error {
 
 func (d DB) NewPost(p Post) error {
 	_, err := d.client.Exec(
-		"insert into posts(date, title, link) values(?, ?, ?)", p.Date, p.Title, p.Link)
+		"insert into posts(date, title, link) values(?, ?, ?, ?)", p.Date, p.Title, p.Link, p.Content)
 	if err != nil {
 		return fmt.Errorf("failed to insert %w", err)
 	}
@@ -124,7 +125,7 @@ func (d DB) Read(par map[string]string) ([]Post, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		err = rows.Scan(&post.ID, &post.Date, &post.Title, &post.Link)
+		err = rows.Scan(&post.ID, &post.Date, &post.Title, &post.Link, &post.Content)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan %w", err)
 		}

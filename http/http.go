@@ -85,6 +85,7 @@ func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {
 	newPost.Date = float32(convertDate)
 	newPost.Title = r.FormValue("title")
 	newPost.Link = r.FormValue("link")
+	newPost.Content = r.FormValue("content")
 
 	err = s.DB.NewPost(newPost)
 	if err != nil {
