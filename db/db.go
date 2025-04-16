@@ -84,9 +84,6 @@ func sanQry(par map[string]string) string {
 	}
 
 	queryString := fmt.Sprintf("SELECT id, date, title, link FROM posts ORDER BY %s %s", sort, dir)
-	// debug
-	fmt.Println("print san qry:", queryString)
-
 	return queryString
 }
 
@@ -97,23 +94,17 @@ func (d DB) Read(par map[string]string) ([]Post, error) {
 	)
 
 	queryString := sanQry(par)
-	// debug
-	// fmt.Println("print queryString:", queryString)
 
 	stmt, err := d.client.Prepare(queryString)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare %w", err)
 	}
-	// debug
-	fmt.Println("print prepared stmt:", stmt)
 	defer stmt.Close()
 
 	rows, err := stmt.Query()
 	if err != nil {
 		return nil, fmt.Errorf("failed to select %w", err)
 	}
-	// debug
-	fmt.Println("print query:", rows)
 	defer rows.Close()
 
 	for rows.Next() {
