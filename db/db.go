@@ -44,18 +44,22 @@ func New(dbPath string) (DB, error) {
 func (d DB) Fill() error {
 	posts := []Post{
 		{
-			Date:  float32(20250101), //nolint
-			Title: "Complaint",
-			Link:  "https://http.cat/status/200",
+			Date:    float32(20250101), //nolint
+			Title:   "Complaint",
+			Link:    "https://http.cat/status/200",
+			Content: "A",
 		},
 		{
-			Date:  float32(20250201), //nolint
-			Title: "Feedback",
-			Link:  "https://http.cat/status/100"},
+			Date:    float32(20250201), //nolint
+			Title:   "Feedback",
+			Link:    "https://http.cat/status/100",
+			Content: "B",
+		},
 		{
-			Date:  float32(20250301), //nolint
-			Title: "Announcement",
-			Link:  "https://http.cat/status/301",
+			Date:    float32(20250301), //nolint
+			Title:   "Announcement",
+			Link:    "https://http.cat/status/301",
+			Content: "C",
 		},
 	}
 	for _, p := range posts {
@@ -70,7 +74,7 @@ func (d DB) Fill() error {
 
 func (d DB) NewPost(p Post) error {
 	_, err := d.client.Exec(
-		"insert into posts(date, title, link) values(?, ?, ?, ?)", p.Date, p.Title, p.Link, p.Content)
+		"insert into posts(date, title, link, content) values(?, ?, ?, ?)", p.Date, p.Title, p.Link, p.Content)
 	if err != nil {
 		return fmt.Errorf("failed to insert %w", err)
 	}
@@ -99,7 +103,7 @@ func sanQry(par map[string]string) string {
 		dir = "DESC"
 	}
 
-	queryString := fmt.Sprintf("SELECT id, date, title, link FROM posts ORDER BY %s %s", sort, dir)
+	queryString := fmt.Sprintf("SELECT id, date, title, link, content FROM posts ORDER BY %s %s", sort, dir)
 
 	return queryString
 }
