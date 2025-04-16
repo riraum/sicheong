@@ -98,7 +98,7 @@ func (d DB) Read(par map[string]string) ([]Post, error) {
 
 	queryString := sanQry(par)
 	// debug
-	fmt.Println("print queryString:", queryString)
+	// fmt.Println("print queryString:", queryString)
 
 	stmt, err := d.client.Prepare(queryString)
 	if err != nil {
