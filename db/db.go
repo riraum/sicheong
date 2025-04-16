@@ -9,10 +9,11 @@ import (
 )
 
 type Post struct {
-	ID    float32
-	Date  float32
-	Title string
-	Link  string
+	ID      float32
+	Date    float32
+	Title   string
+	Link    string
+	Content string
 }
 
 type DB struct {
