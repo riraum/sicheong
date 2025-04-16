@@ -41,24 +41,18 @@ func New(dbPath string) (DB, error) {
 }
 
 func (d DB) Fill() error {
-	const (
-		date1 = float32(20250101)
-		date2 = float32(20250201)
-		date3 = float32(20250301)
-	)
-
 	posts := []Post{
 		{
-			Date:  date1,
+			Date:  float32(20250101), //nolint
 			Title: "Complaint",
 			Link:  "https://http.cat/status/200",
 		},
 		{
-			Date:  date2,
+			Date:  float32(20250201), //nolint
 			Title: "Feedback",
 			Link:  "https://http.cat/status/100"},
 		{
-			Date:  date3,
+			Date:  float32(20250301), //nolint
 			Title: "Announcement",
 			Link:  "https://http.cat/status/301",
 		},
