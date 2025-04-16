@@ -114,23 +114,15 @@ func (s Server) deleteAPIPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
-	convertID, err := strconv.ParseFloat(r.PathValue("id"), 32)
+	ID, err := strconv.ParseFloat(r.PathValue("id"), 32)
 	if err != nil {
 		log.Fatalf("convert to float: %v", err)
 	}
 
-	ID := int(convertID)
-
-	// if r.FormValue("post") != "" {
-	// 	par["post"] = r.FormValue("post")
-	// }
-
-	p, err := s.DB.ReadSinglePost(ID)
+	p, err := s.DB.ReadSinglePost(int(ID))
 	if err != nil {
 		log.Fatalf("read posts: %v", err)
 	}
-
-	// post := posts[int(ID)]
 
 	w.WriteHeader(http.StatusOK)
 	fmt.Fprint(w, p, http.StatusOK)
