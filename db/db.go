@@ -41,18 +41,24 @@ func New(dbPath string) (DB, error) {
 }
 
 func (d DB) Fill() error {
+	const (
+		date1 = float32(20250101)
+		date2 = float32(20250201)
+		date3 = float32(20250301)
+	)
+
 	posts := []Post{
 		{
-			Date:  202500101,
+			Date:  date1, //golint
 			Title: "Complaint",
 			Link:  "https://http.cat/status/200",
 		},
 		{
-			Date:  20250201,
+			Date:  date2,
 			Title: "Feedback",
 			Link:  "https://http.cat/status/100"},
 		{
-			Date:  20250301,
+			Date:  date3,
 			Title: "Announcement",
 			Link:  "https://http.cat/status/301",
 		},
@@ -63,6 +69,7 @@ func (d DB) Fill() error {
 			log.Fatalf("create new post in db: %v", err)
 		}
 	}
+
 	return nil
 }
 
@@ -98,6 +105,7 @@ func sanQry(par map[string]string) string {
 	}
 
 	queryString := fmt.Sprintf("SELECT id, date, title, link FROM posts ORDER BY %s %s", sort, dir)
+
 	return queryString
 }
 
