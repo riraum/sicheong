@@ -124,8 +124,15 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("read posts: %v", err)
 	}
 
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, p, http.StatusOK)
+	tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "post.html"))
+	if err != nil {
+		log.Fatalf("parse %v", err)
+	}
+
+	err = tmpl.Execute(w, p)
+	if err != nil {
+		log.Fatalf("execute %v", err)
+	}
 }
 
 func (s Server) SetupMux() *http.ServeMux {
