@@ -3,6 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"os"
 
 	_ "github.com/mattn/go-sqlite3" //revive be gone
@@ -40,15 +41,28 @@ func New(dbPath string) (DB, error) {
 }
 
 func (d DB) Fill() error {
-	_, err := d.client.Exec(
-		"insert into posts(date, title, link) " +
-			"values(202500101, 'Complaint', 'https://http.cat/status/200'), " +
-			"(20250201, 'Feedback', 'https://http.cat/status/100'), " +
-			"(20250301, 'Announcement', 'https://http.cat/status/301')")
-	if err != nil {
-		return fmt.Errorf("failed to insert %w", err)
+	posts := []Post{
+		{
+			Date:  202500101,
+			Title: "Complaint",
+			Link:  "https://http.cat/status/200",
+		},
+		{
+			Date:  20250201,
+			Title: "Feedback",
+			Link:  "https://http.cat/status/100"},
+		{
+			Date:  20250301,
+			Title: "Announcement",
+			Link:  "https://http.cat/status/301",
+		},
 	}
-
+	for _, p := range posts {
+		err := d.NewPost(p)
+		if err != nil {
+			log.Fatalf("create new post in db: %v", err)
+		}
+	}
 	return nil
 }
 
