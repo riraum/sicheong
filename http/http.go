@@ -119,26 +119,21 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("convert to float: %v", err)
 	}
 
-	ID := float32(convertID)
+	ID := int(convertID)
 
-	par := map[string]string{
-		"sort":      "date",
-		"direction": "asc",
-	}
+	// if r.FormValue("post") != "" {
+	// 	par["post"] = r.FormValue("post")
+	// }
 
-	if r.FormValue("post") != "" {
-		par["post"] = r.FormValue("post")
-	}
-
-	posts, err := s.DB.Read(par)
+	p, err := s.DB.ReadSinglePost(ID)
 	if err != nil {
 		log.Fatalf("read posts: %v", err)
 	}
 
-	post := posts[int(ID)]
+	// post := posts[int(ID)]
 
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, post, http.StatusOK)
+	fmt.Fprint(w, p, http.StatusOK)
 }
 
 func (s Server) SetupMux() *http.ServeMux {

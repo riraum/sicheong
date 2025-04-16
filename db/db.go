@@ -139,3 +139,20 @@ func (d DB) Read(par map[string]string) ([]Post, error) {
 
 	return posts, nil
 }
+
+func (d DB) ReadSinglePost(i int) (Post, error) {
+	var p Post
+
+	stmt, err := d.client.Prepare("SELECT id, date, title, link, content FROM posts where id = ?")
+	if err != nil {
+		return p, fmt.Errorf("failed to select single post: %w", err)
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRow(i).Scan(&p.ID, &p.Date, &p.Title, &p.Link, &p.Content)
+	if err != nil {
+		return p, fmt.Errorf("failed to queryRow: %w", err)
+	}
+
+	return p, nil
+}
