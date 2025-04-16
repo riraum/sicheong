@@ -49,7 +49,7 @@ func (d DB) Fill() error {
 
 	posts := []Post{
 		{
-			Date:  date1, //golint
+			Date:  date1,
 			Title: "Complaint",
 			Link:  "https://http.cat/status/200",
 		},
