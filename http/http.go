@@ -113,11 +113,40 @@ func (s Server) deleteAPIPosts(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Post deleted!", http.StatusGone)
 }
 
+func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
+	convertID, err := strconv.ParseFloat(r.PathValue("id"), 32)
+	if err != nil {
+		log.Fatalf("convert to float: %v", err)
+	}
+
+	ID := float32(convertID)
+
+	par := map[string]string{
+		"sort":      "date",
+		"direction": "asc",
+	}
+
+	if r.FormValue("post") != "" {
+		par["post"] = r.FormValue("post")
+	}
+
+	posts, err := s.DB.Read(par)
+	if err != nil {
+		log.Fatalf("read posts: %v", err)
+	}
+
+	post := posts[int(ID)]
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, post, http.StatusOK)
+}
+
 func (s Server) SetupMux() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.getIndex)
 	mux.HandleFunc("GET /static/pico.min.css", s.getCSS)
 	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
+	mux.HandleFunc("GET /post/{id}", s.viewPost)
 	mux.HandleFunc("POST /api/v0/posts", s.postAPIPosts)
 	mux.HandleFunc("DELETE /api/v0/posts/{id}", s.deleteAPIPosts)
 
