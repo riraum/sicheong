@@ -171,7 +171,7 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux.HandleFunc("POST /api/v0/posts", s.postAPIPosts)
 	mux.HandleFunc("DELETE /api/v0/posts/{id}", s.deleteAPIPosts)
 	mux.HandleFunc("GET /post/{id}", s.viewPost)
-	mux.HandleFunc("POST /post/{id}", s.editPost)
+	mux.HandleFunc("POST api/v0/post/{id}", s.editPost)
 
 	return mux
 }
