@@ -92,6 +92,19 @@ func (d DB) DeletePost(id float32) error {
 	return nil
 }
 
+/* func sanEditQry(p Post) Post {
+	return fmt.Sprintf("UPDATE posts SET date = %v, title = %v, link = %v, content = %v, WHERE id =  %v", p.Date, p.Title, p.Link, p.Content, p.ID)
+ } */
+
+func (d DB) EditPost(p Post) error {
+	_, err := d.client.Exec("UPDATE posts SET date = ?, title = ?, link = ?, content = %?, WHERE id = ?", p.Date, p.Title, p.Link, p.Content, p.ID)
+	if err != nil {
+		return fmt.Errorf("failed to update %w", err)
+	}
+
+	return nil
+}
+
 func sanQry(par map[string]string) string {
 	sort := "DATE"
 	if par["sort"] == "title" {
