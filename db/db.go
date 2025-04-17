@@ -98,7 +98,7 @@ func (d DB) DeletePost(id float32) error {
 // }
 
 func (d DB) EditPost(p Post) error {
-	sqlStmt := `UPDATE posts SET date = ?, title = ?, link = ?, content = %?, WHERE id = ?`
+	sqlStmt := `UPDATE posts SET date = ?, title = ?, link = ?, content = ? WHERE id = ?`
 
 	_, err := d.client.Exec(sqlStmt, p.Date, p.Title, p.Link, p.Content, p.ID)
 	if err != nil {
