@@ -92,7 +92,7 @@ func (d DB) DeletePost(id float32) error {
 	return nil
 }
 
-func (d DB) EditPost(p Post) error {
+func (d DB) UpdatePost(p Post) error {
 	sqlStmt := `UPDATE posts SET date = ?, title = ?, link = ?, content = ? WHERE id = ?`
 
 	_, err := d.client.Exec(sqlStmt, p.Date, p.Title, p.Link, p.Content, p.ID)
@@ -119,7 +119,7 @@ func sanQry(par map[string]string) string {
 	return queryString
 }
 
-func (d DB) Read(par map[string]string) ([]Post, error) {
+func (d DB) ReadPosts(par map[string]string) ([]Post, error) {
 	var (
 		posts []Post
 		post  Post
@@ -151,7 +151,7 @@ func (d DB) Read(par map[string]string) ([]Post, error) {
 	return posts, nil
 }
 
-func (d DB) ReadSinglePost(i int) (Post, error) {
+func (d DB) ReadPost(i int) (Post, error) {
 	var p Post
 
 	stmt, err := d.client.Prepare("SELECT id, date, title, link, content FROM posts where id = ?")
