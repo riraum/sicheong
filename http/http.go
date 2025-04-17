@@ -135,14 +135,43 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
+	ID, err := strconv.ParseFloat(r.PathValue("id"), 32)
+	if err != nil {
+		log.Fatalf("convert to float: %v", err)
+	}
+
+	var p db.Post
+
+	date, err := strconv.ParseFloat(r.FormValue("date"), 32)
+	if err != nil {
+		log.Fatalf("convert to float: %v", err)
+	}
+
+	p.ID = float32(ID)
+	p.Date = float32(date)
+	p.Title = r.FormValue("title")
+	p.Link = r.FormValue("link")
+	p.Content = r.FormValue("content")
+
+	err = s.DB.EditPost(p)
+	if err != nil {
+		log.Fatalf("edit post in db: %v", err)
+	}
+
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, "Post updated!", http.StatusOK)
+}
+
 func (s Server) SetupMux() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.getIndex)
 	mux.HandleFunc("GET /static/pico.min.css", s.getCSS)
 	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
-	mux.HandleFunc("GET /post/{id}", s.viewPost)
 	mux.HandleFunc("POST /api/v0/posts", s.postAPIPosts)
 	mux.HandleFunc("DELETE /api/v0/posts/{id}", s.deleteAPIPosts)
+	mux.HandleFunc("GET /post/{id}", s.viewPost)
+	mux.HandleFunc("POST /post/{id}", s.editPost)
 
 	return mux
 }
