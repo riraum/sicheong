@@ -74,20 +74,35 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, http.StatusOK, p)
 }
 
-func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {
-	var newPost db.Post
+func parseRValues(r *http.Request) db.Post {
+	var p db.Post
 
-	convertDate, err := strconv.ParseFloat(r.FormValue("date"), 32)
+	if r.PathValue("id") != "" {
+		ID, err := strconv.ParseFloat(r.PathValue("id"), 32)
+		if err != nil {
+			log.Fatalf("convert to float: %v", err)
+		}
+
+		p.ID = float32(ID)
+	}
+
+	date, err := strconv.ParseFloat(r.FormValue("date"), 32)
 	if err != nil {
 		log.Fatalf("convert to float: %v", err)
 	}
 
-	newPost.Date = float32(convertDate)
-	newPost.Title = r.FormValue("title")
-	newPost.Link = r.FormValue("link")
-	newPost.Content = r.FormValue("content")
+	p.Date = float32(date)
+	p.Title = r.FormValue("title")
+	p.Link = r.FormValue("link")
+	p.Content = r.FormValue("content")
 
-	err = s.DB.NewPost(newPost)
+	return p
+}
+
+func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {
+	p := parseRValues(r)
+
+	err := s.DB.NewPost(p)
 	if err != nil {
 		log.Fatalf("create new post in db: %v", err)
 	}
@@ -136,25 +151,9 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
-	ID, err := strconv.ParseFloat(r.PathValue("id"), 32)
-	if err != nil {
-		log.Fatalf("convert to float: %v", err)
-	}
+	p := parseRValues(r)
 
-	var p db.Post
-
-	date, err := strconv.ParseFloat(r.FormValue("date"), 32)
-	if err != nil {
-		log.Fatalf("convert to float: %v", err)
-	}
-
-	p.ID = float32(ID)
-	p.Date = float32(date)
-	p.Title = r.FormValue("title")
-	p.Link = r.FormValue("link")
-	p.Content = r.FormValue("content")
-
-	err = s.DB.UpdatePost(p)
+	err := s.DB.UpdatePost(p)
 	if err != nil {
 		log.Fatalf("edit post in db: %v", err)
 	}
@@ -171,7 +170,7 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux.HandleFunc("POST /api/v0/posts", s.postAPIPosts)
 	mux.HandleFunc("DELETE /api/v0/posts/{id}", s.deleteAPIPosts)
 	mux.HandleFunc("GET /post/{id}", s.viewPost)
-	mux.HandleFunc("POST api/v0/post/{id}", s.editPost)
+	mux.HandleFunc("POST /api/v0/post/{id}", s.editPost)
 
 	return mux
 }
