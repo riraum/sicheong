@@ -148,18 +148,6 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}
-
-	if r.FormValue("submit") != "" {
-		p := parseRValues(r)
-
-		err := s.DB.UpdatePost(p)
-		if err != nil {
-			log.Fatalf("edit post in db: %v", err)
-		}
-
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprint(w, "Post updated!", http.StatusOK)
-	}
 }
 
 func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
