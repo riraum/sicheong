@@ -80,18 +80,21 @@ func parseRValues(r *http.Request) db.Post {
 	if r.PathValue("id") != "" {
 		ID, err := strconv.ParseFloat(r.PathValue("id"), 32)
 		if err != nil {
-			log.Fatalf("convert to float: %v", err)
+			log.Fatalf("ID convert to float: %v", err)
 		}
 
 		p.ID = float32(ID)
 	}
 
-	date, err := strconv.ParseFloat(r.FormValue("date"), 32)
-	if err != nil {
-		log.Fatalf("convert to float: %v", err)
+	if r.FormValue("date") != "" {
+		date, err := strconv.ParseFloat(r.FormValue("date"), 32)
+		if err != nil {
+			log.Fatalf("date convert to float: %v", err)
+		}
+
+		p.Date = float32(date)
 	}
 
-	p.Date = float32(date)
 	p.Title = r.FormValue("title")
 	p.Link = r.FormValue("link")
 	p.Content = r.FormValue("content")
