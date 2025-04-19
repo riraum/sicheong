@@ -9,12 +9,18 @@ import (
 	_ "github.com/mattn/go-sqlite3" //revive be gone
 )
 
+type Author struct {
+	ID   float32
+	Name string
+}
+
 type Post struct {
-	ID      float32
-	Date    float32
-	Title   string
-	Link    string
-	Content string
+	ID       float32
+	Date     float32
+	Title    string
+	Link     string
+	Content  string
+	AuthorID Author
 }
 
 type DB struct {
@@ -29,13 +35,20 @@ func New(dbPath string) (DB, error) {
 		return DB{}, fmt.Errorf("failed to open sql %w", err)
 	}
 
-	sqlStmt := `create table posts` +
+	sqlStmtP := `create table posts` +
 		`(id integer not null primary key, date	integer, title text, link text, content text); delete from posts;`
 
-	_, err = d.Exec(sqlStmt)
+	_, err = d.Exec(sqlStmtP)
 	if err != nil {
 		return DB{}, fmt.Errorf("%w: %s",
-			err, sqlStmt)
+			err, sqlStmtP)
+	}
+
+	sqlStmtA := `create table authors` + `(id integer not null primary key, name text); delete from authors;`
+
+	_, err = d.Exec(sqlStmtA)
+	if err != nil {
+		return DB{}, fmt.Errorf("%w: %s", err, sqlStmtA)
 	}
 
 	return DB{d}, nil
@@ -67,6 +80,33 @@ func (d DB) Fill() error {
 		if err != nil {
 			log.Fatalf("create new post in db: %v", err)
 		}
+	}
+
+	authors := []Author{
+		{
+			Name: "Alpha",
+		},
+		{
+			Name: "Beta",
+		},
+		{
+			Name: "Charlie",
+		},
+	}
+	for _, a := range authors {
+		err := d.NewAuthor(a)
+		if err != nil {
+			log.Fatalf("create new author in db: %v", err)
+		}
+	}
+
+	return nil
+}
+
+func (d DB) NewAuthor(a Author) error {
+	_, err := d.client.Exec("insert into authors(name) values (?)", a.Name)
+	if err != nil {
+		return fmt.Errorf("failed to insert %w", err)
 	}
 
 	return nil
