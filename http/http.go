@@ -102,7 +102,7 @@ func parseRValues(r *http.Request) db.Post {
 	return p
 }
 
-func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {
+func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 	p := parseRValues(r)
 
 	err := s.DB.NewPost(p)
@@ -114,7 +114,7 @@ func (s Server) postAPIPosts(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Post created!", http.StatusCreated)
 }
 
-func (s Server) deleteAPIPosts(w http.ResponseWriter, r *http.Request) {
+func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 	p := parseRValues(r)
 
 	err := s.DB.DeletePost(p.ID)
@@ -162,8 +162,8 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux.HandleFunc("GET /{$}", s.getIndex)
 	mux.HandleFunc("GET /static/pico.min.css", s.getCSS)
 	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
-	mux.HandleFunc("POST /api/v0/posts", s.postAPIPosts)
-	mux.HandleFunc("DELETE /api/v0/post/{id}", s.deleteAPIPosts)
+	mux.HandleFunc("POST /api/v0/post", s.postAPIPost)
+	mux.HandleFunc("DELETE /api/v0/post/{id}", s.deleteAPIPost)
 	mux.HandleFunc("GET /post/{id}", s.viewPost)
 	mux.HandleFunc("POST /api/v0/post/{id}", s.editPost)
 
