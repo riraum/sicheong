@@ -43,7 +43,8 @@ func New(dbPath string) (DB, error) {
 	}
 
 	sqlStmtP := `create table posts` +
-		`(id integer not null primary key, date	integer, title text, link text, content text, author integer); delete from posts;`
+		`(id integer not null primary key, date	integer, title text, link text, content text, author integer);
+		delete from posts;`
 
 	_, err = d.Exec(sqlStmtP)
 	if err != nil {
@@ -117,7 +118,8 @@ func (d DB) NewAuthor(a Author) error {
 
 func (d DB) NewPost(p Post) error {
 	_, err := d.client.Exec(
-		"insert into posts(date, title, link, content, author) values(?, ?, ?, ?, ?)", p.Date, p.Title, p.Link, p.Content, p.Author)
+		"insert into posts(date, title, link, content, author) values(?, ?, ?, ?, ?)",
+		p.Date, p.Title, p.Link, p.Content, p.Author)
 	if err != nil {
 		return fmt.Errorf("failed to insert %w", err)
 	}
