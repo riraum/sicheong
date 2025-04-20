@@ -16,7 +16,7 @@ func TestAll(t *testing.T) {
 		log.Fatal(err)
 	}
 
-	_, err = d.client.Query("select ID, Date, Title, Link, Content from posts")
+	_, err = d.client.Query("select ID, Date, Title, Link, Content, Author from posts")
 	if err != nil {
 		t.Errorf("error selecting rows %v", err)
 	}
@@ -42,6 +42,7 @@ func TestAll(t *testing.T) {
 			Title:   "Complaint",
 			Link:    "https://http.cat/status/200",
 			Content: "A",
+			Author:  1,
 		},
 		{
 			ID:      2,
@@ -49,6 +50,7 @@ func TestAll(t *testing.T) {
 			Title:   "Feedback",
 			Link:    "https://http.cat/status/100",
 			Content: "B",
+			Author:  2,
 		},
 		{
 			ID:      3,
@@ -56,6 +58,7 @@ func TestAll(t *testing.T) {
 			Title:   "Announcement",
 			Link:    "https://http.cat/status/301",
 			Content: "C",
+			Author:  3,
 		},
 	}
 
