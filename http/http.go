@@ -55,6 +55,7 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 	par := map[string]string{
 		"sort":      "date",
 		"direction": "asc",
+		"author":    "",
 	}
 
 	if r.FormValue("sort") != "" {
@@ -63,6 +64,10 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 
 	if r.FormValue("direction") != "" {
 		par["direction"] = r.FormValue("direction")
+	}
+
+	if r.FormValue("author") != "" {
+		par["author"] = r.FormValue("author")
 	}
 
 	p, err := s.DB.ReadPosts(par)
@@ -93,6 +98,15 @@ func parseRValues(r *http.Request) db.Post {
 		}
 
 		p.Date = float32(date)
+	}
+
+	if r.FormValue("author") != "" {
+		author, err := strconv.ParseFloat(r.FormValue("author"), 32)
+		if err != nil {
+			log.Fatalf("author convert to float: %v", err)
+		}
+
+		p.Author = float32(author)
 	}
 
 	p.Title = r.FormValue("title")

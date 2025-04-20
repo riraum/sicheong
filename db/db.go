@@ -159,6 +159,14 @@ func sanQry(par map[string]string) string {
 		dir = "DESC"
 	}
 
+	if par["author"] != "" {
+		queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts,"+
+			"WHERE author = %v ORDER BY %s %s",
+			par["author"], sort, dir)
+
+		return queryString
+	}
+
 	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts ORDER BY %s %s", sort, dir)
 
 	return queryString
@@ -211,34 +219,4 @@ func (d DB) ReadPost(i int) (Post, error) {
 	}
 
 	return p, nil
-}
-
-func (d DB) ReadAuthor(i int) ([]Post, error) {
-	var (
-		posts []Post
-		post  Post
-	)
-
-	stmt, err := d.client.Prepare("SELECT id, date, title, link, content, author from posts where author = ?")
-	if err != nil {
-		return nil, fmt.Errorf("failed to select posts from author: %w", err)
-	}
-	defer stmt.Close()
-
-	rows, err := stmt.Query(i)
-	if err != nil {
-		return nil, fmt.Errorf("failed to select %w", err)
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		err = rows.Scan(&post.ID, &post.Date, &post.Title, &post.Link, &post.Content, &post.Author)
-		if err != nil {
-			return nil, fmt.Errorf("failed to scan %w", err)
-		}
-
-		posts = append(posts, post)
-	}
-
-	return posts, nil
 }
