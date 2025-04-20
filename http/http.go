@@ -157,6 +157,22 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Post updated!", http.StatusOK)
 }
 
+func (s Server) getLogin(w http.ResponseWriter, r *http.Request) {
+	tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "login.html"))
+	if err != nil {
+		log.Fatalf("parse %v", err)
+	}
+
+	err = tmpl.Execute(w, nil)
+	if err != nil {
+		log.Fatalf("execute %v", err)
+	}
+}
+
+func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
+
+}
+
 func (s Server) SetupMux() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.getIndex)
@@ -166,6 +182,8 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux.HandleFunc("DELETE /api/v0/post/{id}", s.deleteAPIPost)
 	mux.HandleFunc("GET /post/{id}", s.viewPost)
 	mux.HandleFunc("POST /api/v0/post/{id}", s.editPost)
+	mux.HandleFunc("GET /login", s.getLogin)
+	mux.HandleFunc("POST /api/v0/login", s.postLogin)
 
 	return mux
 }
