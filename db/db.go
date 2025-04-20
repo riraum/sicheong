@@ -160,9 +160,9 @@ func sanQry(par map[string]string) string {
 	}
 
 	if par["author"] != "" {
-		queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts,"+
-			"WHERE author = %v ORDER BY %s %s",
-			par["author"], sort, dir)
+		queryString :=
+			fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts WHERE author = %v ORDER BY %s %s",
+				par["author"], sort, dir)
 
 		return queryString
 	}
