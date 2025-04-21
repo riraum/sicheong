@@ -106,7 +106,7 @@ func parseRValues(r *http.Request) db.Post {
 			log.Fatalf("author convert to float: %v", err)
 		}
 
-		p.Author = float32(author)
+		p.AuthorID = float32(author)
 	}
 
 	p.Title = r.FormValue("title")
