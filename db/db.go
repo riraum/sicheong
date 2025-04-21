@@ -35,11 +35,20 @@ func New(dbPath string) (DB, error) {
 		return DB{}, fmt.Errorf("failed to open sql %w", err)
 	}
 
+	err = createTables(d)
+	if err != nil {
+		return DB{}, fmt.Errorf("failed to create tables %w", err)
+	}
+
+	return DB{d}, nil
+}
+
+func createTables(d *sql.DB) error {
 	sqlStmtA := `create table authors` + `(id integer not null primary key, name text); delete from authors;`
 
-	_, err = d.Exec(sqlStmtA)
+	_, err := d.Exec(sqlStmtA)
 	if err != nil {
-		return DB{}, fmt.Errorf("%w: %s", err, sqlStmtA)
+		return fmt.Errorf("%w: %s", err, sqlStmtA)
 	}
 
 	sqlStmtP := `create table posts` +
@@ -48,11 +57,11 @@ func New(dbPath string) (DB, error) {
 
 	_, err = d.Exec(sqlStmtP)
 	if err != nil {
-		return DB{}, fmt.Errorf("%w: %s",
+		return fmt.Errorf("%w: %s",
 			err, sqlStmtP)
 	}
 
-	return DB{d}, nil
+	return nil
 }
 
 func (d DB) Fill() error {
