@@ -158,25 +158,25 @@ func (d DB) UpdatePost(p Post) error {
 }
 
 func sanQry(par map[string]string) string {
-	sort := "DATE"
-	if par["sort"] == "title" {
-		sort = "TITLE"
+	sort := "date"
+	dir := "asc"
+	where := ""
+
+	if par["sort"] != "" {
+		sort = par["sort"]
 	}
 
-	dir := "ASC"
-	if par["direction"] == "desc" {
-		dir = "DESC"
+	if par["direction"] != "" {
+		dir = par["direction"]
 	}
 
 	if par["author"] != "" {
-		queryString :=
-			fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts WHERE author = %v ORDER BY %s %s",
-				par["author"], sort, dir)
-
-		return queryString
+		where = fmt.Sprintf("WHERE author = %s", par["author"])
 	}
 
-	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts ORDER BY %s %s", sort, dir)
+	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts %s ORDER BY %s %s", where, sort, dir)
+
+	fmt.Printf("print sanQry: %v", queryString)
 
 	return queryString
 }
@@ -213,7 +213,7 @@ func (d DB) ReadPosts(par map[string]string) ([]Post, error) {
 	return posts, nil
 }
 
-func (d DB) ReadPost(i int) (Post, error) {
+func (d DB) ReadPost(ID int) (Post, error) {
 	var p Post
 
 	stmt, err := d.client.Prepare("SELECT id, date, title, link, content, author FROM posts where id = ?")
@@ -222,7 +222,7 @@ func (d DB) ReadPost(i int) (Post, error) {
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRow(i).Scan(&p.ID, &p.Date, &p.Title, &p.Link, &p.Content, &p.AuthorID)
+	err = stmt.QueryRow(ID).Scan(&p.ID, &p.Date, &p.Title, &p.Link, &p.Content, &p.AuthorID)
 	if err != nil {
 		return p, fmt.Errorf("failed to queryRow: %w", err)
 	}
