@@ -157,7 +157,7 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Post updated!", http.StatusOK)
 }
 
-func (s Server) getLogin(w http.ResponseWriter, r *http.Request) {
+func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
 	tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "login.html"))
 	if err != nil {
 		log.Fatalf("parse %v", err)
@@ -169,8 +169,14 @@ func (s Server) getLogin(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
-
+func (s Server) postLogin(w http.ResponseWriter, _ *http.Request) {
+	cookie := http.Cookie{
+		Name: "TestAuthor",
+	}
+	// author := r.FormValue("author")
+	http.SetCookie(w, &cookie)
+	w.WriteHeader(http.StatusOK)
+	fmt.Fprint(w, "Cookie set!")
 }
 
 func (s Server) SetupMux() *http.ServeMux {
