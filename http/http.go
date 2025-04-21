@@ -17,46 +17,31 @@ type Server struct {
 }
 
 func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
-	par := map[string]string{
-		"sort":      "date",
-		"direction": "asc",
+	par, err := parseRValuesMap(r)
+	if err != nil {
+		log.Fatalf("parse to map %v", err)
 	}
 
-	if r.FormValue("sort") != "" {
-		par["sort"] = r.FormValue("sort")
-	}
-
-	if r.FormValue("direction") != "" {
-		par["direction"] = r.FormValue("direction")
-	}
-
-	posts, err := s.DB.ReadPosts(par)
+	p, err := s.DB.ReadPosts(par)
 	if err != nil {
 		log.Fatalf("read posts: %v", err)
 	}
 
 	tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "index.html"))
+
 	if err != nil {
 		log.Fatalf("parse %v", err)
 	}
 
-	err = tmpl.Execute(w, posts)
+	err = tmpl.Execute(w, p)
+
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}
 }
 
-func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
-	css := filepath.Join(s.RootDir, "pico.min.css")
-	http.ServeFile(w, r, css)
-}
-
-func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
-	par := map[string]string{
-		"sort":      "date",
-		"direction": "asc",
-		"author":    "",
-	}
+func parseRValuesMap(r *http.Request) (map[string]string, error) {
+	par := map[string]string{}
 
 	if r.FormValue("sort") != "" {
 		par["sort"] = r.FormValue("sort")
@@ -70,6 +55,20 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 		par["author"] = r.FormValue("author")
 	}
 
+	return par, nil
+}
+
+func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
+	css := filepath.Join(s.RootDir, "pico.min.css")
+	http.ServeFile(w, r, css)
+}
+
+func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
+	par, err := parseRValuesMap(r)
+	if err != nil {
+		log.Fatalf("parse to map %v", err)
+	}
+
 	p, err := s.DB.ReadPosts(par)
 	if err != nil {
 		log.Fatalf("read posts: %v", err)
@@ -79,13 +78,13 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, http.StatusOK, p)
 }
 
-func parseRValues(r *http.Request) db.Post {
+func parseRValues(r *http.Request) (db.Post, error) {
 	var p db.Post
 
 	if r.PathValue("id") != "" {
 		ID, err := strconv.ParseFloat(r.PathValue("id"), 32)
 		if err != nil {
-			log.Fatalf("ID convert to float: %v", err)
+			return p, fmt.Errorf("ID convert to float %w", err)
 		}
 
 		p.ID = float32(ID)
@@ -94,7 +93,7 @@ func parseRValues(r *http.Request) db.Post {
 	if r.FormValue("date") != "" {
 		date, err := strconv.ParseFloat(r.FormValue("date"), 32)
 		if err != nil {
-			log.Fatalf("date convert to float: %v", err)
+			return p, fmt.Errorf("date convert to float: %w", err)
 		}
 
 		p.Date = float32(date)
@@ -103,23 +102,26 @@ func parseRValues(r *http.Request) db.Post {
 	if r.FormValue("author") != "" {
 		author, err := strconv.ParseFloat(r.FormValue("author"), 32)
 		if err != nil {
-			log.Fatalf("author convert to float: %v", err)
+			return p, fmt.Errorf("author convert to float: %w", err)
 		}
 
-		p.Author = float32(author)
+		p.AuthorID = float32(author)
 	}
 
 	p.Title = r.FormValue("title")
 	p.Link = r.FormValue("link")
 	p.Content = r.FormValue("content")
 
-	return p
+	return p, nil
 }
 
 func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
-	p := parseRValues(r)
+	p, err := parseRValues(r)
+	if err != nil {
+		log.Fatalf("failed to parse values: %v", err)
+	}
 
-	err := s.DB.NewPost(p)
+	err = s.DB.NewPost(p)
 	if err != nil {
 		log.Fatalf("create new post in db: %v", err)
 	}
@@ -129,9 +131,12 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
-	p := parseRValues(r)
+	p, err := parseRValues(r)
+	if err != nil {
+		log.Fatalf("failed to parse values: %v", err)
+	}
 
-	err := s.DB.DeletePost(p.ID)
+	err = s.DB.DeletePost(p.ID)
 	if err != nil {
 		log.Fatalf("delete post in db: %v", err)
 	}
@@ -141,9 +146,12 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
-	p := parseRValues(r)
+	p, err := parseRValues(r)
+	if err != nil {
+		log.Fatalf("failed to parse values: %v", err)
+	}
 
-	p, err := s.DB.ReadPost(int(p.ID))
+	p, err = s.DB.ReadPost(int(p.ID))
 	if err != nil {
 		log.Fatalf("read posts: %v", err)
 	}
@@ -160,9 +168,12 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
-	p := parseRValues(r)
+	p, err := parseRValues(r)
+	if err != nil {
+		log.Fatalf("failed to parse values: %v", err)
+	}
 
-	err := s.DB.UpdatePost(p)
+	err = s.DB.UpdatePost(p)
 	if err != nil {
 		log.Fatalf("edit post in db: %v", err)
 	}
