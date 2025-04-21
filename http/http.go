@@ -146,6 +146,11 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
+	// cookie, err := r.Cookie("Test")
+	// if err != nil {
+	// 	log.Fatalf("failed to read cookie: %v", err)
+	// }
+
 	p, err := parseRValues(r)
 	if err != nil {
 		log.Fatalf("failed to parse values: %v", err)
@@ -194,14 +199,15 @@ func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func (s Server) postLogin(w http.ResponseWriter, _ *http.Request) {
+func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
+	author := r.FormValue("author")
 	cookie := http.Cookie{
-		Name: "TestAuthor",
+		Name: author,
 	}
-	// author := r.FormValue("author")
+
 	http.SetCookie(w, &cookie)
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, "Cookie set!")
+	fmt.Fprintf(w, "Cookie %s author set!", author)
 }
 
 func (s Server) SetupMux() *http.ServeMux {

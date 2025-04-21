@@ -125,6 +125,25 @@ func (d DB) NewAuthor(a Author) error {
 	return nil
 }
 
+func (d DB) ReadAuthors(a int) (bool, error) {
+	// check if author name (Author.Name) is in DB
+	// input author name as string, look up all rows of Author.ID in Post struct, get list of float32s and query
+	var authorChecked int
+
+	stmt, err := d.client.Prepare("SELECT AuthorID from posts")
+	if err != nil {
+		return false, fmt.Errorf("failed to select AuthorID: %w", err)
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRow(a).Scan(&authorChecked)
+	if err != nil {
+		return false, fmt.Errorf("failed to queryRow: %w", err)
+	}
+
+	if 
+}
+
 func (d DB) NewPost(p Post) error {
 	_, err := d.client.Exec(
 		"insert into posts(date, title, link, content, author) values(?, ?, ?, ?, ?)",
