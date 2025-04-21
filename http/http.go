@@ -27,15 +27,16 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("read posts: %v", err)
 	}
 
-	tmpl, err := parseAndExecTmpl(s.RootDir)
+	err = parseAndExecTmpl(s.RootDir, w, p)
 	if err != nil {
-		log.Fatalf("execute %v", err)
+		log.Fatalf("execute: %v", err)
 	}
-
-	err = tmpl.Execute(w, p)
-	if err != nil {
-		log.Fatalf("execute %v", err)
-	}
+	// err = tmpl.Execute(w, p)
+	//
+	//	if err != nil {
+	//		log.Fatalf("execute %v", err)
+	//	}
+	//
 	// tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "index.html"))
 	//
 	//	if err != nil {
@@ -49,13 +50,18 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 	//	}
 }
 
-func parseAndExecTmpl(path string) (*template.Template, error) {
+func parseAndExecTmpl(path string, w http.ResponseWriter, p []db.Post) error {
 	tmpl, err := template.ParseFiles(filepath.Join(path, "index.html"))
 	if err != nil {
-		log.Fatalf("parse %v", err)
+		return fmt.Errorf("parse %w", err)
 	}
 
-	return tmpl, nil
+	err = tmpl.Execute(w, p)
+	if err != nil {
+		return fmt.Errorf("execute %w", err)
+	}
+
+	return nil
 }
 
 func parseRValuesMap(r *http.Request) (map[string]string, error) {
