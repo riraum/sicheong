@@ -27,15 +27,35 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("read posts: %v", err)
 	}
 
-	tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "index.html"))
+	tmpl, err := parseAndExecTmpl(s.RootDir)
 	if err != nil {
-		log.Fatalf("parse %v", err)
+		log.Fatalf("execute %v", err)
 	}
 
 	err = tmpl.Execute(w, p)
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}
+	// tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "index.html"))
+	//
+	//	if err != nil {
+	//		log.Fatalf("parse %v", err)
+	//	}
+	//
+	// err = tmpl.Execute(w, p)
+	//
+	//	if err != nil {
+	//		log.Fatalf("execute %v", err)
+	//	}
+}
+
+func parseAndExecTmpl(path string) (*template.Template, error) {
+	tmpl, err := template.ParseFiles(filepath.Join(path, "index.html"))
+	if err != nil {
+		log.Fatalf("parse %v", err)
+	}
+
+	return tmpl, nil
 }
 
 func parseRValuesMap(r *http.Request) (map[string]string, error) {
