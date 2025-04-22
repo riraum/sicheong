@@ -147,7 +147,7 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
-	_, err := r.Cookie("Test")
+	_, err := r.Cookie("TestAuthor")
 	if err != nil {
 		switch {
 		case errors.Is(err, http.ErrNoCookie):
@@ -212,15 +212,15 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	authorInput := r.FormValue("author")
 	cookie := http.Cookie{
 		Name:  authorInput,
-		Value: "Test",
+		Value: "TestValue",
 	}
 
-	if authorInput != "Test" {
+	if authorInput != "TestAuthor" {
 		w.WriteHeader(http.StatusForbidden)
 		fmt.Fprintf(w, "User '%s'(Password) combination invalid", authorInput)
 	}
 
-	if authorInput == "Test" {
+	if authorInput == "TestAuthor" {
 		http.SetCookie(w, &cookie)
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, "Cookie author '%s' set! Cookie name field '%s'", authorInput, cookie.Name)
