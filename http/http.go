@@ -147,7 +147,7 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
-	_, err := r.Cookie("TestAuthor")
+	cookie, err := r.Cookie("authorName")
 	if err != nil {
 		switch {
 		case errors.Is(err, http.ErrNoCookie):
@@ -158,25 +158,27 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if err == nil {
-		p, err := parseRValues(r)
-		if err != nil {
-			log.Fatalf("failed to parse values: %v", err)
-		}
+	if cookie.Value == "TestAuthor" {
+		if err == nil {
+			p, err := parseRValues(r)
+			if err != nil {
+				log.Fatalf("failed to parse values: %v", err)
+			}
 
-		p, err = s.DB.ReadPost(int(p.ID))
-		if err != nil {
-			log.Fatalf("read posts: %v", err)
-		}
+			p, err = s.DB.ReadPost(int(p.ID))
+			if err != nil {
+				log.Fatalf("read posts: %v", err)
+			}
 
-		tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "post.html"))
-		if err != nil {
-			log.Fatalf("parse %v", err)
-		}
+			tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "post.html"))
+			if err != nil {
+				log.Fatalf("parse %v", err)
+			}
 
-		err = tmpl.Execute(w, p)
-		if err != nil {
-			log.Fatalf("execute %v", err)
+			err = tmpl.Execute(w, p)
+			if err != nil {
+				log.Fatalf("execute %v", err)
+			}
 		}
 	}
 }
@@ -211,8 +213,8 @@ func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
 func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	authorInput := r.FormValue("author")
 	cookie := http.Cookie{
-		Name:  authorInput,
-		Value: "TestValue",
+		Name:  "authorName",
+		Value: authorInput,
 	}
 
 	if authorInput != "TestAuthor" {
@@ -223,7 +225,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	if authorInput == "TestAuthor" {
 		http.SetCookie(w, &cookie)
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "Cookie author '%s' set! Cookie name field '%s'", authorInput, cookie.Name)
+		fmt.Fprintf(w, "Cookie author '%s' set! Cookie name field '%s'", authorInput, cookie.Value)
 	}
 }
 
