@@ -2,7 +2,6 @@ package http
 
 import (
 	"encoding/base64"
-	"errors"
 	"fmt"
 	"html/template"
 	"log"
@@ -147,7 +146,7 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Post deleted!", http.StatusGone)
 }
 
-func readCookie(r *http.Request) (string, error) {
+func authorNameFromCookie(r *http.Request) (string, error) {
 	cookie, err := r.Cookie("authorName")
 	if err != nil {
 		return "", fmt.Errorf("failed to read cookie author name: %w", err)
@@ -162,40 +161,32 @@ func readCookie(r *http.Request) (string, error) {
 }
 
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
-	_, err := r.Cookie("authorName")
+	cookieAuthor, err := authorNameFromCookie(r)
 	if err != nil {
-		switch {
-		case errors.Is(err, http.ErrNoCookie):
-			fmt.Fprintf(w, "cookie error %d, cookie name", http.StatusNotFound)
-		default:
-			fmt.Fprint(w, "cookie error", http.StatusTeapot)
-			log.Fatalf("cookie error %d", err)
-		}
+		fmt.Fprint(w, "cookie error", http.StatusTeapot)
+		log.Fatalf("cookie error %d", err)
 	}
 
-	cookieAuthor, _ := readCookie(r)
-	fmt.Fprint(w, "\nprint cookieAuthStr:", cookieAuthor)
+	fmt.Fprintf(w, "\nprint cookieAuthStr: %s", cookieAuthor)
 
-	if err == nil {
-		p, err := parseRValues(r)
-		if err != nil {
-			log.Fatalf("failed to parse values: %v", err)
-		}
+	p, err := parseRValues(r)
+	if err != nil {
+		log.Fatalf("failed to parse values: %v", err)
+	}
 
-		p, err = s.DB.ReadPost(int(p.ID))
-		if err != nil {
-			log.Fatalf("read posts: %v", err)
-		}
+	p, err = s.DB.ReadPost(int(p.ID))
+	if err != nil {
+		log.Fatalf("read posts: %v", err)
+	}
 
-		tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "post.html"))
-		if err != nil {
-			log.Fatalf("parse %v", err)
-		}
+	tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "post.html"))
+	if err != nil {
+		log.Fatalf("parse %v", err)
+	}
 
-		err = tmpl.Execute(w, p)
-		if err != nil {
-			log.Fatalf("execute %v", err)
-		}
+	err = tmpl.Execute(w, p)
+	if err != nil {
+		log.Fatalf("execute %v", err)
 	}
 }
 
