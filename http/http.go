@@ -1,6 +1,7 @@
 package http
 
 import (
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"html/template"
@@ -146,39 +147,54 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Post deleted!", http.StatusGone)
 }
 
-func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
+func readCookie(r *http.Request) (string, error) {
 	cookie, err := r.Cookie("authorName")
+	if err != nil {
+		return "", fmt.Errorf("failed to read cookie author name: %w", err)
+	}
+
+	value, err := base64.URLEncoding.DecodeString(cookie.Value)
+	if err != nil {
+		return "", fmt.Errorf("failed to decode cookie author name: %w", err)
+	}
+
+	return string(value), nil
+}
+
+func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
+	_, err := r.Cookie("authorName")
 	if err != nil {
 		switch {
 		case errors.Is(err, http.ErrNoCookie):
-			fmt.Fprintf(w, "cookie error %d, cookie name ", http.StatusNotFound)
+			fmt.Fprintf(w, "cookie error %d, cookie name", http.StatusNotFound)
 		default:
 			fmt.Fprint(w, "cookie error", http.StatusTeapot)
 			log.Fatalf("cookie error %d", err)
 		}
 	}
 
-	if cookie.Value == "TestAuthor" {
-		if err == nil {
-			p, err := parseRValues(r)
-			if err != nil {
-				log.Fatalf("failed to parse values: %v", err)
-			}
+	cookieAuthor, err := readCookie(r)
+	fmt.Println("print cookieAuthStr:", cookieAuthor)
 
-			p, err = s.DB.ReadPost(int(p.ID))
-			if err != nil {
-				log.Fatalf("read posts: %v", err)
-			}
+	if err == nil {
+		p, err := parseRValues(r)
+		if err != nil {
+			log.Fatalf("failed to parse values: %v", err)
+		}
 
-			tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "post.html"))
-			if err != nil {
-				log.Fatalf("parse %v", err)
-			}
+		p, err = s.DB.ReadPost(int(p.ID))
+		if err != nil {
+			log.Fatalf("read posts: %v", err)
+		}
 
-			err = tmpl.Execute(w, p)
-			if err != nil {
-				log.Fatalf("execute %v", err)
-			}
+		tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "post.html"))
+		if err != nil {
+			log.Fatalf("parse %v", err)
+		}
+
+		err = tmpl.Execute(w, p)
+		if err != nil {
+			log.Fatalf("execute %v", err)
 		}
 	}
 }
