@@ -173,8 +173,8 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	cookieAuthor, err := readCookie(r)
-	fmt.Println("print cookieAuthStr:", cookieAuthor)
+	cookieAuthor, _ := readCookie(r)
+	fmt.Fprint(w, "\nprint cookieAuthStr:", cookieAuthor)
 
 	if err == nil {
 		p, err := parseRValues(r)
