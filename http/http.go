@@ -1,6 +1,7 @@
 package http
 
 import (
+	"errors"
 	"fmt"
 	"html/template"
 	"log"
@@ -146,29 +147,37 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
-	// cookie, err := r.Cookie("Test")
-	// if err != nil {
-	// 	log.Fatalf("failed to read cookie: %v", err)
-	// }
-
-	p, err := parseRValues(r)
+	_, err := r.Cookie("Test")
 	if err != nil {
-		log.Fatalf("failed to parse values: %v", err)
+		switch {
+		case errors.Is(err, http.ErrNoCookie):
+			fmt.Fprintf(w, "cookie error %d, cookie name ", http.StatusNotFound)
+		default:
+			fmt.Fprint(w, "cookie error", http.StatusTeapot)
+			log.Fatalf("cookie error %d", err)
+		}
 	}
 
-	p, err = s.DB.ReadPost(int(p.ID))
-	if err != nil {
-		log.Fatalf("read posts: %v", err)
-	}
+	if err == nil {
+		p, err := parseRValues(r)
+		if err != nil {
+			log.Fatalf("failed to parse values: %v", err)
+		}
 
-	tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "post.html"))
-	if err != nil {
-		log.Fatalf("parse %v", err)
-	}
+		p, err = s.DB.ReadPost(int(p.ID))
+		if err != nil {
+			log.Fatalf("read posts: %v", err)
+		}
 
-	err = tmpl.Execute(w, p)
-	if err != nil {
-		log.Fatalf("execute %v", err)
+		tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "post.html"))
+		if err != nil {
+			log.Fatalf("parse %v", err)
+		}
+
+		err = tmpl.Execute(w, p)
+		if err != nil {
+			log.Fatalf("execute %v", err)
+		}
 	}
 }
 
@@ -200,14 +209,22 @@ func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
-	author := r.FormValue("author")
+	authorInput := r.FormValue("author")
 	cookie := http.Cookie{
-		Name: author,
+		Name:  authorInput,
+		Value: "Test",
 	}
 
-	http.SetCookie(w, &cookie)
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, "Cookie %s author set!", author)
+	if authorInput != "Test" {
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Fprintf(w, "User '%s'(Password) combination invalid", authorInput)
+	}
+
+	if authorInput == "Test" {
+		http.SetCookie(w, &cookie)
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "Cookie author '%s' set! Cookie name field '%s'", authorInput, cookie.Name)
+	}
 }
 
 func (s Server) SetupMux() *http.ServeMux {
