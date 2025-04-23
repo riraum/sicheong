@@ -1,6 +1,7 @@
 package http
 
 import (
+	"encoding/base64"
 	"fmt"
 	"html/template"
 	"log"
@@ -145,7 +146,29 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Post deleted!", http.StatusGone)
 }
 
+func authorNameFromCookie(r *http.Request) (string, error) {
+	cookie, err := r.Cookie("authorName")
+	if err != nil {
+		return "", fmt.Errorf("failed to read cookie author name: %w", err)
+	}
+
+	value, err := base64.URLEncoding.DecodeString(cookie.Value)
+	if err != nil {
+		return "", fmt.Errorf("failed to decode cookie author name: %w", err)
+	}
+
+	return string(value), nil
+}
+
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
+	cookieAuthor, err := authorNameFromCookie(r)
+	if err != nil {
+		fmt.Fprint(w, "cookie error", http.StatusTeapot)
+		log.Fatalf("cookie error %d", err)
+	}
+
+	fmt.Fprintf(w, "\nprint cookieAuthStr: %s", cookieAuthor)
+
 	p, err := parseRValues(r)
 	if err != nil {
 		log.Fatalf("failed to parse values: %v", err)
@@ -182,6 +205,37 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Post updated!", http.StatusOK)
 }
 
+func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
+	tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "login.html"))
+	if err != nil {
+		log.Fatalf("parse %v", err)
+	}
+
+	err = tmpl.Execute(w, nil)
+	if err != nil {
+		log.Fatalf("execute %v", err)
+	}
+}
+
+func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
+	authorInput := r.FormValue("author")
+	cookie := http.Cookie{
+		Name:  "authorName",
+		Value: authorInput,
+	}
+
+	if authorInput != "TestAuthor" {
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Fprintf(w, "User '%s'(Password) combination invalid", authorInput)
+	}
+
+	if authorInput == "TestAuthor" {
+		http.SetCookie(w, &cookie)
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "Cookie author '%s' set! Cookie name field '%s'", authorInput, cookie.Value)
+	}
+}
+
 func (s Server) SetupMux() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.getIndex)
@@ -191,6 +245,8 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux.HandleFunc("DELETE /api/v0/post/{id}", s.deleteAPIPost)
 	mux.HandleFunc("GET /post/{id}", s.viewPost)
 	mux.HandleFunc("POST /api/v0/post/{id}", s.editPost)
+	mux.HandleFunc("GET /login", s.getLogin)
+	mux.HandleFunc("POST /api/v0/login", s.postLogin)
 
 	return mux
 }
