@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/base64"
 	"fmt"
 	"html/template"
 	"log"
@@ -146,27 +145,27 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Post deleted!", http.StatusGone)
 }
 
-func authorNameFromCookie(r *http.Request) (string, error) {
-	cookie, err := r.Cookie("authorName")
-	if err != nil {
-		return "", fmt.Errorf("failed to read cookie author name: %w", err)
-	}
+// func authorNameFromCookie(r *http.Request) (string, error) {
+// 	cookie, err := r.Cookie("authorName")
+// 	if err != nil {
+// 		return "", fmt.Errorf("failed to read cookie author name: %w", err)
+// 	}
 
-	value, err := base64.URLEncoding.DecodeString(cookie.Value)
-	if err != nil {
-		return "", fmt.Errorf("failed to decode cookie author name: %w", err)
-	}
+// 	value, err := base64.URLEncoding.DecodeString(cookie.Value)
+// 	if err != nil {
+// 		return "", fmt.Errorf("failed to decode cookie author name: %w", err)
+// 	}
 
-	return string(value), nil
-}
+// 	return string(value), nil
+// }
 
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
-	cookieAuthor, err := authorNameFromCookie(r)
+	cookieAuthor, err := r.Cookie("authorName")
 	if err != nil {
 		log.Fatalf("cookie error: %v", err)
 	}
 
-	fmt.Fprintf(w, "\nprint cookieAuthStr: %s", cookieAuthor)
+	fmt.Fprintf(w, "\nprint cookieAuthStr: %s", cookieAuthor.Value)
 
 	p, err := parseRValues(r)
 	if err != nil {
@@ -216,24 +215,35 @@ func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
 	}
 }
 
-func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
-	authorInput := r.FormValue("author")
+func (s Server) postLogin(w http.ResponseWriter, _ *http.Request) {
 	cookie := http.Cookie{
 		Name:  "authorName",
-		Value: authorInput,
+		Value: "TestAuthor",
 	}
 
-	if authorInput != "TestAuthor" {
-		w.WriteHeader(http.StatusForbidden)
-		fmt.Fprintf(w, "User '%s'(Password) combination invalid", authorInput)
-	}
+	http.SetCookie(w, &cookie)
 
-	if authorInput == "TestAuthor" {
-		http.SetCookie(w, &cookie)
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "Cookie author '%s' set! Cookie name field '%s'", authorInput, cookie.Value)
-	}
+	fmt.Fprint(w, "Author cookie set!")
 }
+
+// func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
+// 	authorInput := r.FormValue("author")
+// 	cookie := http.Cookie{
+// 		Name:  "authorName",
+// 		Value: authorInput,
+// 	}
+
+// 	if authorInput != "TestAuthor" {
+// 		w.WriteHeader(http.StatusForbidden)
+// 		fmt.Fprintf(w, "User '%s'(Password) combination invalid", authorInput)
+// 	}
+
+// 	if authorInput == "TestAuthor" {
+// 		http.SetCookie(w, &cookie)
+// 		w.WriteHeader(http.StatusOK)
+// 		fmt.Fprintf(w, "Cookie author '%s' set! Cookie name field '%s'", authorInput, cookie.Value)
+// 	}
+// }
 
 func (s Server) SetupMux() *http.ServeMux {
 	mux := http.NewServeMux()
