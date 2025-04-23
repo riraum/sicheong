@@ -127,9 +127,10 @@ func (d DB) NewAuthor(a Author) error {
 }
 
 func (d DB) AuthorExists(a string) (bool, error) {
-	// check if author name (Author.Name) is in DB
-	// input author name as string, look up all rows of Author.ID in Post struct, get list of float32s and query
-	var authors []string
+	var (
+		author  string
+		authors []string
+	)
 
 	stmt, err := d.client.Prepare("SELECT name FROM authors")
 	if err != nil {
@@ -144,10 +145,12 @@ func (d DB) AuthorExists(a string) (bool, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		err = rows.Scan(&authors)
+		err = rows.Scan(&author)
 		if err != nil {
 			return false, fmt.Errorf("failed to scan %w", err)
 		}
+
+		authors = append(authors, author)
 	}
 
 	if slices.Contains(authors, a) {
