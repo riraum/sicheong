@@ -223,7 +223,8 @@ func (s Server) postLogin(w http.ResponseWriter, _ *http.Request) {
 
 	http.SetCookie(w, &cookie)
 
-	fmt.Fprint(w, "Author cookie set!")
+	// fmt.Fprint(w, "Author cookie set!")
+	w.Write([]byte("Author cookie set!"))
 }
 
 // func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
@@ -255,7 +256,7 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux.HandleFunc("GET /post/{id}", s.viewPost)
 	mux.HandleFunc("POST /api/v0/post/{id}", s.editPost)
 	mux.HandleFunc("GET /login", s.getLogin)
-	mux.HandleFunc("POST /api/v0/login", s.postLogin)
+	mux.HandleFunc("GET /api/v0/login", s.postLogin)
 
 	return mux
 }
