@@ -207,15 +207,20 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		Path:  "/",
 	}
 
-	if authorInput != "TestAuthor" {
-		w.WriteHeader(http.StatusForbidden)
-		fmt.Fprintf(w, "User '%s'(Password) combination invalid", authorInput)
+	authorExists, err := s.DB.AuthorExists(authorInput)
+	if err != nil {
+		log.Fatalf("failed sql author exist check: %v", err)
 	}
 
-	if authorInput == "TestAuthor" {
+	if authorExists {
 		http.SetCookie(w, &cookie)
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, "Cookie author '%s' set! Cookie name field '%s'", authorInput, cookie.Value)
+	}
+
+	if !authorExists {
+		w.WriteHeader(http.StatusForbidden)
+		fmt.Fprintf(w, "User '%s'(Password) combination invalid", authorInput)
 	}
 }
 

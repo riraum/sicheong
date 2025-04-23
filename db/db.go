@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"slices"
 
 	_ "github.com/mattn/go-sqlite3" //revive be gone
 )
@@ -125,24 +126,39 @@ func (d DB) NewAuthor(a Author) error {
 	return nil
 }
 
-// func (d DB) ReadAuthors(a int) (bool, error) {
-// 	// check if author name (Author.Name) is in DB
-// 	// input author name as string, look up all rows of Author.ID in Post struct, get list of float32s and query
-// 	var authorChecked int
+func (d DB) AuthorExists(a string) (bool, error) {
+	var (
+		author  string
+		authors []string
+	)
 
-// 	stmt, err := d.client.Prepare("SELECT AuthorID from posts")
-// 	if err != nil {
-// 		return false, fmt.Errorf("failed to select AuthorID: %w", err)
-// 	}
-// 	defer stmt.Close()
+	stmt, err := d.client.Prepare("SELECT name FROM authors")
+	if err != nil {
+		return false, fmt.Errorf("failed to select name: %w", err)
+	}
+	defer stmt.Close()
 
-// 	err = stmt.QueryRow(a).Scan(&authorChecked)
-// 	if err != nil {
-// 		return false, fmt.Errorf("failed to queryRow: %w", err)
-// 	}
+	rows, err := stmt.Query()
+	if err != nil {
+		return false, fmt.Errorf("failed to query: %w", err)
+	}
+	defer rows.Close()
 
-// 	if
-// }
+	for rows.Next() {
+		err = rows.Scan(&author)
+		if err != nil {
+			return false, fmt.Errorf("failed to scan %w", err)
+		}
+
+		authors = append(authors, author)
+	}
+
+	if slices.Contains(authors, a) {
+		return true, nil
+	}
+
+	return false, nil
+}
 
 func (d DB) NewPost(p Post) error {
 	_, err := d.client.Exec(
