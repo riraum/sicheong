@@ -1,7 +1,6 @@
 package http
 
 import (
-	"encoding/base64"
 	"fmt"
 	"html/template"
 	"log"
@@ -146,28 +145,11 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Post deleted!", http.StatusGone)
 }
 
-func authorNameFromCookie(r *http.Request) (string, error) {
-	cookie, err := r.Cookie("authorName")
-	if err != nil {
-		return "", fmt.Errorf("failed to read cookie author name: %w", err)
-	}
-
-	value, err := base64.URLEncoding.DecodeString(cookie.Value)
-	if err != nil {
-		return "", fmt.Errorf("failed to decode cookie author name: %w", err)
-	}
-
-	return string(value), nil
-}
-
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
-	cookieAuthor, err := authorNameFromCookie(r)
+	_, err := r.Cookie("authorName")
 	if err != nil {
-		fmt.Fprint(w, "cookie error", http.StatusTeapot)
-		log.Fatalf("cookie error %d", err)
+		log.Fatalf("cookie error: %v", err)
 	}
-
-	fmt.Fprintf(w, "\nprint cookieAuthStr: %s", cookieAuthor)
 
 	p, err := parseRValues(r)
 	if err != nil {
@@ -222,6 +204,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	cookie := http.Cookie{
 		Name:  "authorName",
 		Value: authorInput,
+		Path:  "/",
 	}
 
 	if authorInput != "TestAuthor" {
