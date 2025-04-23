@@ -163,8 +163,7 @@ func authorNameFromCookie(r *http.Request) (string, error) {
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 	cookieAuthor, err := authorNameFromCookie(r)
 	if err != nil {
-		fmt.Fprint(w, "cookie error", http.StatusTeapot)
-		log.Fatalf("cookie error %d", err)
+		log.Fatalf("cookie error: %v", err)
 	}
 
 	fmt.Fprintf(w, "\nprint cookieAuthStr: %s", cookieAuthor)
