@@ -118,6 +118,8 @@ func parseRValues(r *http.Request) (db.Post, error) {
 func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 	_, err := r.Cookie("authorName")
 	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
 		log.Fatalf("cookie error: %v", err)
 	}
 
@@ -138,6 +140,8 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 	_, err := r.Cookie("authorName")
 	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
 		log.Fatalf("cookie error: %v", err)
 	}
 
@@ -180,6 +184,8 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 	_, err := r.Cookie("authorName")
 	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
 		log.Fatalf("cookie error: %v", err)
 	}
 
