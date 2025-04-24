@@ -116,11 +116,11 @@ func parseRValues(r *http.Request) (db.Post, error) {
 }
 
 func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
-	_, err := r.Cookie("authorName")
-	if err != nil {
+	if !authenticated(r) {
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
-		log.Fatalf("cookie error: %v", err)
+
+		return
 	}
 
 	p, err := parseRValues(r)
@@ -138,11 +138,11 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
-	_, err := r.Cookie("authorName")
-	if err != nil {
+	if !authenticated(r) {
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
-		log.Fatalf("cookie error: %v", err)
+
+		return
 	}
 
 	p, err := parseRValues(r)
@@ -181,12 +181,17 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
+func authenticated(r *http.Request) bool {
 	_, err := r.Cookie("authorName")
-	if err != nil {
+	return err == nil
+}
+
+func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
+	if !authenticated(r) {
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
-		log.Fatalf("cookie error: %v", err)
+
+		return
 	}
 
 	p, err := parseRValues(r)
