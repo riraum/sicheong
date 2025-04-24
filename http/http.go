@@ -125,6 +125,20 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to parse values: %v", err)
 	}
 
+	cookie, err := r.Cookie("authorName")
+	if err != nil {
+		log.Fatal("no author cookie", err)
+	}
+
+	authorName := cookie.Value
+
+	authorID, err := s.DB.AuthorNametoID(authorName)
+	if err != nil {
+		log.Fatalf("failed to lookup AuthorID %v", err)
+	}
+
+	p.AuthorID = authorID
+
 	err = s.DB.NewPost(p)
 	if err != nil {
 		log.Fatalf("create new post in db: %v", err)

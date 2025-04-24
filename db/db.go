@@ -146,6 +146,23 @@ func (d DB) AuthorExists(a string) (bool, error) {
 	return false, nil
 }
 
+func (d DB) AuthorNametoID(a string) (float32, error) {
+	var AuthorID float32
+
+	stmt, err := d.client.Prepare("SELECT ID FROM authors WHERE name = ?")
+	if err != nil {
+		return AuthorID, fmt.Errorf("failed to select name: %w", err)
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRow(a).Scan(&AuthorID)
+	if err != nil {
+		return AuthorID, fmt.Errorf("failed to query: %w", err)
+	}
+
+	return AuthorID, nil
+}
+
 func (d DB) NewPost(p Post) error {
 	_, err := d.client.Exec(
 		"insert into posts(date, title, link, content, author) values(?, ?, ?, ?, ?)",
