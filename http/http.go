@@ -116,10 +116,7 @@ func parseRValues(r *http.Request) (db.Post, error) {
 }
 
 func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
-	if !authenticated(r) {
-		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
-
+	if !authenticated(r, w) {
 		return
 	}
 
@@ -138,10 +135,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
-	if !authenticated(r) {
-		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
-
+	if !authenticated(r, w) {
 		return
 	}
 
@@ -181,16 +175,17 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func authenticated(r *http.Request) bool {
+func authenticated(r *http.Request, w http.ResponseWriter) bool {
 	_, err := r.Cookie("authorName")
-	return err == nil
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
+	}
+	return true
 }
 
 func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
-	if !authenticated(r) {
-		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
-
+	if !authenticated(r, w) {
 		return
 	}
 
