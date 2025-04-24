@@ -178,10 +178,10 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
-	// _, err := r.Cookie("authorName")
-	// if err != nil {
-	// 	log.Fatalf("cookie error: %v", err)
-	// }
+	_, err := r.Cookie("authorName")
+	if err != nil {
+		log.Fatalf("cookie error: %v", err)
+	}
 
 	p, err := parseRValues(r)
 	if err != nil {
