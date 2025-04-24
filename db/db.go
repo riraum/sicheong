@@ -134,7 +134,7 @@ func (d DB) AuthorExists(a string) (bool, error) {
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRow().Scan(&author)
+	err = stmt.QueryRow(a).Scan(&author)
 	if err != nil {
 		return false, fmt.Errorf("failed to query: %w", err)
 	}
