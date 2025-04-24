@@ -130,9 +130,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("no author cookie", err)
 	}
 
-	authorName := cookie.Value
-
-	authorID, err := s.DB.AuthorNametoID(authorName)
+	authorID, err := s.DB.AuthorNametoID(cookie.Value)
 	if err != nil {
 		log.Fatalf("failed to lookup AuthorID %v", err)
 	}
