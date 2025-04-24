@@ -181,6 +181,7 @@ func authenticated(r *http.Request, w http.ResponseWriter) bool {
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
 	}
+
 	return true
 }
 
