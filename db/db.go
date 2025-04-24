@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"slices"
 
 	_ "github.com/mattn/go-sqlite3" //revive be gone
 )
@@ -127,33 +126,20 @@ func (d DB) NewAuthor(a Author) error {
 }
 
 func (d DB) AuthorExists(a string) (bool, error) {
-	var (
-		author  string
-		authors []string
-	)
+	var author string
 
-	stmt, err := d.client.Prepare("SELECT name FROM authors")
+	stmt, err := d.client.Prepare("SELECT name FROM authors WHERE name = ?")
 	if err != nil {
 		return false, fmt.Errorf("failed to select name: %w", err)
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.Query()
+	err = stmt.QueryRow(a).Scan(&author)
 	if err != nil {
 		return false, fmt.Errorf("failed to query: %w", err)
 	}
-	defer rows.Close()
 
-	for rows.Next() {
-		err = rows.Scan(&author)
-		if err != nil {
-			return false, fmt.Errorf("failed to scan %w", err)
-		}
-
-		authors = append(authors, author)
-	}
-
-	if slices.Contains(authors, a) {
+	if author != "" {
 		return true, nil
 	}
 
