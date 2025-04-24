@@ -116,7 +116,7 @@ func parseRValues(r *http.Request) (db.Post, error) {
 }
 
 func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
-	if !authenticated(r, w) {
+	if !s.authenticated(r, w) {
 		return
 	}
 
@@ -135,7 +135,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
-	if !authenticated(r, w) {
+	if !s.authenticated(r, w) {
 		return
 	}
 
@@ -175,11 +175,21 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func authenticated(r *http.Request, w http.ResponseWriter) bool {
-	_, err := r.Cookie("authorName")
+func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
+	cookie, err := r.Cookie("authorName")
 	if err != nil {
+		log.Fatalf("failed to read cookie: %v", err)
+	}
+
+	authorExists, err := s.DB.AuthorExists(cookie.Value)
+	if err != nil {
+		log.Fatalf("failed sql author exist check: %v", err)
+	}
+
+	if !authorExists {
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
+
 		return false
 	}
 
@@ -187,7 +197,7 @@ func authenticated(r *http.Request, w http.ResponseWriter) bool {
 }
 
 func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
-	if !authenticated(r, w) {
+	if !s.authenticated(r, w) {
 		return
 	}
 
