@@ -128,7 +128,9 @@ func (d DB) NewAuthor(a Author) error {
 func (d DB) AuthorExists(a string) (bool, error) {
 	var author string
 
-	stmt, err := d.client.Prepare("SELECT name FROM authors WHERE name = ?")
+	queryString := fmt.Sprintf("SELECT name FROM authors WHERE name = %s", a)
+
+	stmt, err := d.client.Prepare(queryString)
 	if err != nil {
 		return false, fmt.Errorf("failed to select name: %w", err)
 	}
