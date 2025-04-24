@@ -28,7 +28,7 @@
   <div>
     Edit post to
   </div>
-  <form action="/api/v0/post/{id}" method="POST" novalidate>
+  <form action="/api/v0/post/{{.ID}}" method="POST" novalidate>
     <div>
       <label for="Title">Title</label>
       <input type="text" name="title" required />
