@@ -134,6 +134,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		w.WriteHeader(http.StatusUnauthorized)
 		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
+
 		return
 	}
 
