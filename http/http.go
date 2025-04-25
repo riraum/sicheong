@@ -125,6 +125,21 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to parse values: %v", err)
 	}
 
+	cookie, err := r.Cookie("authorName")
+	if err != nil {
+		log.Fatal("no author cookie", err)
+	}
+
+	authorID, err := s.DB.AuthorNametoID(cookie.Value)
+	if err != nil {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
+
+		return
+	}
+
+	p.AuthorID = authorID
+
 	err = s.DB.NewPost(p)
 	if err != nil {
 		log.Fatalf("create new post in db: %v", err)
@@ -178,7 +193,10 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	cookie, err := r.Cookie("authorName")
 	if err != nil {
-		log.Fatalf("failed to read cookie: %v", err)
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
+
+		return false
 	}
 
 	authorExists, err := s.DB.AuthorExists(cookie.Value)
