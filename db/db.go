@@ -9,6 +9,8 @@ import (
 	_ "github.com/mattn/go-sqlite3" //revive be gone
 )
 
+const invalidID = -1
+
 type Author struct {
 	ID   float32
 	Name string
@@ -151,13 +153,13 @@ func (d DB) AuthorNametoID(a string) (float32, error) {
 
 	stmt, err := d.client.Prepare("SELECT ID FROM authors WHERE name = ?")
 	if err != nil {
-		return AuthorID, fmt.Errorf("failed to select name: %w", err)
+		return invalidID, fmt.Errorf("failed to select name: %w", err)
 	}
 	defer stmt.Close()
 
 	err = stmt.QueryRow(a).Scan(&AuthorID)
 	if err != nil {
-		return AuthorID, fmt.Errorf("failed to query: %w", err)
+		return invalidID, fmt.Errorf("failed to query: %w", err)
 	}
 
 	return AuthorID, nil

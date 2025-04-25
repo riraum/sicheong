@@ -132,7 +132,8 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 
 	authorID, err := s.DB.AuthorNametoID(cookie.Value)
 	if err != nil {
-		log.Fatalf("failed to lookup AuthorID %v", err)
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
 	}
 
 	p.AuthorID = authorID
@@ -190,7 +191,10 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	cookie, err := r.Cookie("authorName")
 	if err != nil {
-		log.Fatalf("failed to read cookie: %v", err)
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
+
+		return false
 	}
 
 	authorExists, err := s.DB.AuthorExists(cookie.Value)
