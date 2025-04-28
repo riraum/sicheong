@@ -27,13 +27,15 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("read posts: %v", err)
 	}
 
-	tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "index.html"))
+	// tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "index.html"))
 
-	if err != nil {
-		log.Fatalf("parse %v", err)
-	}
+	// if err != nil {
+	// 	log.Fatalf("parse %v", err)
+	// }
 
-	err = tmpl.Execute(w, p)
+	err = t.ExecuteTemplate(w, "index.html.tmpl", p)
+
+	// err = tmpl.Execute(w, p)
 
 	if err != nil {
 		log.Fatalf("execute %v", err)

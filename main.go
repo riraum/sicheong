@@ -1,12 +1,19 @@
 package main
 
 import (
+	"embed"
 	"fmt"
 	"log"
+	"text/template"
 
 	"github.com/riraum/si-cheong/db"
 	"github.com/riraum/si-cheong/http"
 )
+
+//go:embed templates/*
+var resources embed.FS
+
+var t = template.Must(template.ParseFS(resources, "../templates/*"))
 
 func main() {
 	fmt.Println("Hello si-cheong user")

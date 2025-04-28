@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="../static/pico.min.css" rel="stylesheet" />
+  <title>Post</title>
+</head>
+
+<body>
+  <br>
+  <div>
+    <br>
+    {{.ID}}
+    <br>
+    {{.Date}}
+    <br>
+    {{.Title}}
+    <br>
+    {{.Link}}
+    <br>
+    {{.Content}}
+    <br>
+    {{.AuthorID}}
+  </div>
+  <br>
+  <div>
+    Edit post to
+  </div>
+  <form action="/api/v0/post/{{.ID}}" method="POST" novalidate>
+    <div>
+      <label for="Title">Title</label>
+      <input type="text" name="title" required />
+    </div>
+    <div>
+      <label for="Date">Date</label>
+      <input type="date" required />
+    </div>
+    <div>
+      <label for="Link">Link</label>
+      <input type="text" required />
+    </div>
+    <div>
+      <label for="Content">Content</label>
+      <input type="text" name="content" required />
+    </div>
+    <div>
+      <input type="submit" value="Submit" />
+    </div>
+  </form>
+</body>
+
+</html>
