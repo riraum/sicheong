@@ -3,8 +3,8 @@ package main
 import (
 	"embed"
 	"fmt"
+	"html/template"
 	"log"
-	"text/template"
 
 	"github.com/riraum/si-cheong/db"
 	"github.com/riraum/si-cheong/http"
@@ -13,7 +13,7 @@ import (
 //go:embed templates/*
 var resources embed.FS
 
-var t = template.Must(template.ParseFS(resources, "../templates/*"))
+var t = template.Must(template.ParseFS(resources, "templates/*"))
 
 func main() {
 	fmt.Println("Hello si-cheong user")
@@ -31,6 +31,7 @@ func main() {
 	var s http.Server
 	s.RootDir = "static/"
 	s.DB = d
+	s.T = t
 
 	mux := s.SetupMux()
 	http.Run(mux)

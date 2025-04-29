@@ -14,6 +14,7 @@ import (
 type Server struct {
 	RootDir string
 	DB      db.DB
+	T       *template.Template
 }
 
 func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
@@ -27,15 +28,7 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("read posts: %v", err)
 	}
 
-	// tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "index.html"))
-
-	// if err != nil {
-	// 	log.Fatalf("parse %v", err)
-	// }
-
-	err = t.ExecuteTemplate(w, "index.html.tmpl", p)
-
-	// err = tmpl.Execute(w, p)
+	err = s.T.ExecuteTemplate(w, "index.html.tmpl", p)
 
 	if err != nil {
 		log.Fatalf("execute %v", err)
@@ -181,12 +174,8 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("read posts: %v", err)
 	}
 
-	tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "post.html"))
-	if err != nil {
-		log.Fatalf("parse %v", err)
-	}
+	err = s.T.ExecuteTemplate(w, "post.html.tmpl", p)
 
-	err = tmpl.Execute(w, p)
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}
@@ -236,12 +225,7 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
-	tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "login.html"))
-	if err != nil {
-		log.Fatalf("parse %v", err)
-	}
-
-	err = tmpl.Execute(w, nil)
+	err := s.T.ExecuteTemplate(w, "login.html.tmpl", nil)
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}
