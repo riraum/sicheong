@@ -12,10 +12,10 @@ import (
 )
 
 type Server struct {
-	RootDir    string
-	DB         db.DB
-	T          *template.Template
-	EmbeddRoot embed.FS
+	RootDir      string
+	EmbedRootDir embed.FS
+	DB           db.DB
+	T            *template.Template
 }
 
 func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
@@ -55,7 +55,7 @@ func parseRValuesMap(r *http.Request) (map[string]string, error) {
 }
 
 func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
-	css, err := s.EmbeddRoot.ReadFile("pico.min.css")
+	css, err := s.EmbedRootDir.ReadFile("pico.min.css")
 	if err != nil {
 		log.Fatalf("failed to read %v", err)
 	}
