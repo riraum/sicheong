@@ -10,10 +10,10 @@ import (
 	"github.com/riraum/si-cheong/http"
 )
 
-//go:embed templates/*
-var resources embed.FS
+//go:embed static/*
+var static embed.FS
 
-var t = template.Must(template.ParseFS(resources, "templates/*"))
+var t = template.Must(template.ParseFS(static, "static/*"))
 
 func main() {
 	fmt.Println("Hello si-cheong user")
