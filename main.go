@@ -32,6 +32,7 @@ func main() {
 	s.RootDir = "static/"
 	s.DB = d
 	s.T = t
+	s.EmbeddRoot = static
 
 	mux := s.SetupMux()
 	http.Run(mux)

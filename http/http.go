@@ -1,20 +1,21 @@
 package http
 
 import (
+	"embed"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
-	"path/filepath"
 	"strconv"
 
 	"github.com/riraum/si-cheong/db"
 )
 
 type Server struct {
-	RootDir string
-	DB      db.DB
-	T       *template.Template
+	RootDir    string
+	DB         db.DB
+	T          *template.Template
+	EmbeddRoot embed.FS
 }
 
 func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
@@ -54,8 +55,12 @@ func parseRValuesMap(r *http.Request) (map[string]string, error) {
 }
 
 func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
-	css := filepath.Join(s.RootDir, "pico.min.css")
-	http.ServeFile(w, r, css)
+	css, err := s.EmbeddRoot.ReadFile("pico.min.css")
+	if err != nil {
+		log.Fatalf("failed to read %v", err)
+	}
+
+	http.ServeFile(w, r, string(css))
 }
 
 func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
