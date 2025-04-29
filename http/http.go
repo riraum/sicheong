@@ -1,19 +1,21 @@
 package http
 
 import (
+	"embed"
 	"fmt"
 	"html/template"
 	"log"
 	"net/http"
-	"path/filepath"
 	"strconv"
 
 	"github.com/riraum/si-cheong/db"
 )
 
 type Server struct {
-	RootDir string
-	DB      db.DB
+	RootDir      string
+	EmbedRootDir embed.FS
+	DB           db.DB
+	T            *template.Template
 }
 
 func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
@@ -27,13 +29,7 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("read posts: %v", err)
 	}
 
-	tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "index.html"))
-
-	if err != nil {
-		log.Fatalf("parse %v", err)
-	}
-
-	err = tmpl.Execute(w, p)
+	err = s.T.ExecuteTemplate(w, "index.html.tmpl", p)
 
 	if err != nil {
 		log.Fatalf("execute %v", err)
@@ -59,8 +55,12 @@ func parseRValuesMap(r *http.Request) (map[string]string, error) {
 }
 
 func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
-	css := filepath.Join(s.RootDir, "pico.min.css")
-	http.ServeFile(w, r, css)
+	css, err := s.EmbedRootDir.ReadFile("pico.min.css")
+	if err != nil {
+		log.Fatalf("failed to read %v", err)
+	}
+
+	http.ServeFile(w, r, string(css))
 }
 
 func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
@@ -179,12 +179,8 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("read posts: %v", err)
 	}
 
-	tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "post.html"))
-	if err != nil {
-		log.Fatalf("parse %v", err)
-	}
+	err = s.T.ExecuteTemplate(w, "post.html.tmpl", p)
 
-	err = tmpl.Execute(w, p)
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}
@@ -234,12 +230,7 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
-	tmpl, err := template.ParseFiles(filepath.Join(s.RootDir, "login.html"))
-	if err != nil {
-		log.Fatalf("parse %v", err)
-	}
-
-	err = tmpl.Execute(w, nil)
+	err := s.T.ExecuteTemplate(w, "login.html.tmpl", nil)
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}
