@@ -54,8 +54,14 @@ func parseRValuesMap(r *http.Request) (map[string]string, error) {
 	return par, nil
 }
 
-func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
-	http.ServeFile(w, r, "static/pico.min.css")
+func (s Server) getCSS(w http.ResponseWriter, _ *http.Request) {
+	css, err := s.EmbedRootDir.ReadFile("static/pico.min.css")
+	if err != nil {
+		log.Fatalf("failed to read %v", err)
+	}
+
+	w.Header().Add("Content-Type", "text/css")
+	fmt.Fprint(w, string(css))
 }
 
 func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
