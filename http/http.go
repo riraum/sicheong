@@ -146,8 +146,8 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("create new post in db: %v", err)
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	fmt.Fprint(w, "Post created!", http.StatusCreated)
+	// w.WriteHeader(http.StatusCreated)
+	http.Redirect(w, r, "/done", http.StatusSeeOther)
 }
 
 func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
@@ -226,8 +226,8 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("edit post in db: %v", err)
 	}
 
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, "Post updated!", http.StatusOK)
+	// w.WriteHeader(http.StatusOK)
+	http.Redirect(w, r, "/done", http.StatusSeeOther)
 }
 
 func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
@@ -262,6 +262,13 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (s Server) getDone(w http.ResponseWriter, _ *http.Request) {
+	err := s.T.ExecuteTemplate(w, "done.html.tmpl", nil)
+	if err != nil {
+		log.Fatalf("execute %v", err)
+	}
+}
+
 func (s Server) SetupMux() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.getIndex)
@@ -273,6 +280,7 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux.HandleFunc("POST /api/v0/post/{id}", s.editPost)
 	mux.HandleFunc("GET /login", s.getLogin)
 	mux.HandleFunc("POST /api/v0/login", s.postLogin)
+	mux.HandleFunc("GET /done", s.getDone)
 
 	return mux
 }
