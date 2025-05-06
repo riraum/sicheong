@@ -190,9 +190,8 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	cookie, err := r.Cookie("authorName")
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
-
+		// w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/fail", http.StatusSeeOther)
 		return false
 	}
 
@@ -202,8 +201,8 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	}
 
 	if !authorExists {
-		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
+		// w.WriteHeader(http.StatusUnauthorized)
+		http.Redirect(w, r, "/fail", http.StatusUnauthorized)
 
 		return false
 	}
@@ -253,17 +252,24 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	if authorExists {
 		http.SetCookie(w, &cookie)
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "Cookie author '%s' set! Cookie name field '%s'", authorInput, cookie.Value)
+		http.Redirect(w, r, "/done", http.StatusSeeOther)
 	}
 
 	if !authorExists {
 		w.WriteHeader(http.StatusForbidden)
-		fmt.Fprintf(w, "User '%s'(Password) combination invalid", authorInput)
+		http.Redirect(w, r, "/fail", http.StatusForbidden)
 	}
 }
 
 func (s Server) getDone(w http.ResponseWriter, _ *http.Request) {
 	err := s.T.ExecuteTemplate(w, "done.html.tmpl", nil)
+	if err != nil {
+		log.Fatalf("execute %v", err)
+	}
+}
+
+func (s Server) getFail(w http.ResponseWriter, _ *http.Request) {
+	err := s.T.ExecuteTemplate(w, "fail.html.tmpl", nil)
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}
@@ -281,6 +287,7 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux.HandleFunc("GET /login", s.getLogin)
 	mux.HandleFunc("POST /api/v0/login", s.postLogin)
 	mux.HandleFunc("GET /done", s.getDone)
+	mux.HandleFunc("GET /fail", s.getFail)
 
 	return mux
 }
