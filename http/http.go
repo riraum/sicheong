@@ -191,7 +191,7 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	cookie, err := r.Cookie("authorName")
 	if err != nil {
 		// w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/fail", http.StatusSeeOther)
+		http.Redirect(w, r, "/fail?reason=cookieDoesntExist", http.StatusSeeOther)
 		return false
 	}
 
@@ -202,7 +202,7 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 
 	if !authorExists {
 		// w.WriteHeader(http.StatusUnauthorized)
-		http.Redirect(w, r, "/fail", http.StatusUnauthorized)
+		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
 
 		return false
 	}
@@ -246,18 +246,19 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 
 	authorExists, err := s.DB.AuthorExists(authorInput)
 	if err != nil {
-		log.Fatalf("failed sql author exist check: %v", err)
+		// w.WriteHeader(http.StatusForbidden)
+		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusSeeOther)
 	}
 
 	if authorExists {
 		http.SetCookie(w, &cookie)
-		w.WriteHeader(http.StatusOK)
+		// w.WriteHeader(http.StatusOK)
 		http.Redirect(w, r, "/done", http.StatusSeeOther)
 	}
 
 	if !authorExists {
-		w.WriteHeader(http.StatusForbidden)
-		http.Redirect(w, r, "/fail", http.StatusForbidden)
+		// w.WriteHeader(http.StatusForbidden)
+		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusSeeOther)
 	}
 }
 
