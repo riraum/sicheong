@@ -139,6 +139,50 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 
 	authorID, err := s.DB.AuthorNametoID(cookie.Value)
 	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotAcceptable)
+
+		err = json.NewEncoder(w).Encode(cookie.Value)
+		if err != nil {
+			log.Fatalf("failed to encode %v", err)
+		}
+
+		return
+	}
+
+	p.AuthorID = authorID
+
+	err = s.DB.NewPost(p)
+	if err != nil {
+		log.Fatalf("create new post in db: %v", err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	err = json.NewEncoder(w).Encode(p)
+	if err != nil {
+		log.Fatalf("failed to encode %v", err)
+	}
+}
+
+func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
+	if !s.authenticated(r, w) {
+		return
+	}
+
+	p, err := parseRValues(r)
+	if err != nil {
+		log.Fatalf("failed to parse values: %v", err)
+	}
+
+	cookie, err := r.Cookie("authorName")
+	if err != nil {
+		log.Fatal("no author cookie", err)
+	}
+
+	authorID, err := s.DB.AuthorNametoID(cookie.Value)
+	if err != nil {
 		http.Redirect(w, r, "/fail?reason=authorCookieError", http.StatusUnauthorized)
 
 		return
@@ -286,6 +330,7 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux.HandleFunc("GET /static/pico.min.css", s.getCSS)
 	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
 	mux.HandleFunc("POST /api/v0/post", s.postAPIPost)
+	mux.HandleFunc("POST /api/v0/index/post", s.postPost)
 	mux.HandleFunc("DELETE /api/v0/post/{id}", s.deleteAPIPost)
 	mux.HandleFunc("GET /post/{id}", s.viewPost)
 	mux.HandleFunc("POST /api/v0/post/{id}", s.editPost)
