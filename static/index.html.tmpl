@@ -9,15 +9,22 @@
 </head>
 
 <body>
-  Hello
-  <br>
+  Posts
   <div>
-    {{range .}}
     <br>
+    {{range .}}
     {{.ID}}
+    <br>
+    {{.Date}}
     <br>
     {{.Title}}
     <br>
+    {{.Link}}
+    <br>
+    {{.Content}}
+    <br>
+    ---
+   <br>
     {{end}}
   </div>
   <br>
