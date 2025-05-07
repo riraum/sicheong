@@ -2,6 +2,7 @@ package http
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -75,8 +76,13 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("read posts: %v", err)
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	fmt.Fprintln(w, http.StatusOK, p)
+
+	err = json.NewEncoder(w).Encode(p)
+	if err != nil {
+		log.Fatalf("failed to encode %v", err)
+	}
 }
 
 func parseRValues(r *http.Request) (db.Post, error) {
@@ -133,8 +139,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 
 	authorID, err := s.DB.AuthorNametoID(cookie.Value)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
+		http.Redirect(w, r, "/fail?reason=authorCookieError", http.StatusUnauthorized)
 
 		return
 	}
@@ -164,8 +169,13 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("delete post in db: %v", err)
 	}
 
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusGone)
-	fmt.Fprint(w, "Post deleted!", http.StatusGone)
+
+	err = json.NewEncoder(w).Encode(p)
+	if err != nil {
+		log.Fatalf("failed to encode %v", err)
+	}
 }
 
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
