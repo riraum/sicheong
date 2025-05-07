@@ -168,6 +168,25 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprint(w, "Post deleted!", http.StatusGone)
 }
 
+func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
+	if !s.authenticated(r, w) {
+		return
+	}
+
+	p, err := parseRValues(r)
+	if err != nil {
+		log.Fatalf("failed to parse values: %v", err)
+	}
+
+	err = s.DB.DeletePost(p.ID)
+	if err != nil {
+		log.Fatalf("delete post in db: %v", err)
+	}
+
+	w.WriteHeader(http.StatusGone)
+	fmt.Fprint(w, "Post deleted!", http.StatusGone)
+}
+
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 	p, err := parseRValues(r)
 	if err != nil {
@@ -276,8 +295,10 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
 	mux.HandleFunc("POST /api/v0/post", s.postAPIPost)
 	mux.HandleFunc("DELETE /api/v0/post/{id}", s.deleteAPIPost)
+	mux.HandleFunc("DELETE /post", s.deletePost)
 	mux.HandleFunc("GET /post/{id}", s.viewPost)
-	mux.HandleFunc("POST /api/v0/post/{id}", s.editPost)
+	mux.HandleFunc("POST /api/v0/post/{id}", s.editAPIPost)
+	mux.HandleFunc("POST /post/{id}", s.editPost)
 	mux.HandleFunc("GET /login", s.getLogin)
 	mux.HandleFunc("POST /api/v0/login", s.postLogin)
 	mux.HandleFunc("GET /done", s.getDone)
