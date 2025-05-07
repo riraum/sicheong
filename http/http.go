@@ -265,6 +265,7 @@ func (s Server) getDone(w http.ResponseWriter, _ *http.Request) {
 
 func (s Server) getFail(w http.ResponseWriter, r *http.Request) {
 	reason := r.URL.Query().Get("reason")
+
 	err := s.T.ExecuteTemplate(w, "fail.html.tmpl", reason)
 	if err != nil {
 		log.Fatalf("execute %v", err)
