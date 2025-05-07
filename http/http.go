@@ -330,7 +330,7 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux.HandleFunc("GET /static/pico.min.css", s.getCSS)
 	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
 	mux.HandleFunc("POST /api/v0/post", s.postAPIPost)
-	mux.HandleFunc("POST /api/v0/index/post", s.postPost)
+	mux.HandleFunc("POST /post", s.postPost)
 	mux.HandleFunc("DELETE /api/v0/post/{id}", s.deleteAPIPost)
 	mux.HandleFunc("GET /post/{id}", s.viewPost)
 	mux.HandleFunc("POST /api/v0/post/{id}", s.editPost)
