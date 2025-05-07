@@ -156,6 +156,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 
 func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 	if !s.authenticated(r, w) {
+		fmt.Fprintln(w, http.StatusUnauthorized, "not authenticated")
 		return
 	}
 
