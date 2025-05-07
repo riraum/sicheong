@@ -146,8 +146,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("create new post in db: %v", err)
 	}
 
-	w.WriteHeader(http.StatusCreated)
-	fmt.Fprint(w, "Post created!", http.StatusCreated)
+	http.Redirect(w, r, "/done", http.StatusSeeOther)
 }
 
 func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
@@ -190,9 +189,7 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	cookie, err := r.Cookie("authorName")
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
-
+		http.Redirect(w, r, "/fail?reason=cookieDoesntExist", http.StatusSeeOther)
 		return false
 	}
 
@@ -202,8 +199,7 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	}
 
 	if !authorExists {
-		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
+		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
 
 		return false
 	}
@@ -226,8 +222,7 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("edit post in db: %v", err)
 	}
 
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprint(w, "Post updated!", http.StatusOK)
+	http.Redirect(w, r, "/done", http.StatusSeeOther)
 }
 
 func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
@@ -247,18 +242,30 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 
 	authorExists, err := s.DB.AuthorExists(authorInput)
 	if err != nil {
-		log.Fatalf("failed sql author exist check: %v", err)
+		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusSeeOther)
 	}
 
 	if authorExists {
 		http.SetCookie(w, &cookie)
-		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "Cookie author '%s' set! Cookie name field '%s'", authorInput, cookie.Value)
+		http.Redirect(w, r, "/done", http.StatusSeeOther)
 	}
 
 	if !authorExists {
-		w.WriteHeader(http.StatusForbidden)
-		fmt.Fprintf(w, "User '%s'(Password) combination invalid", authorInput)
+		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusSeeOther)
+	}
+}
+
+func (s Server) getDone(w http.ResponseWriter, _ *http.Request) {
+	err := s.T.ExecuteTemplate(w, "done.html.tmpl", nil)
+	if err != nil {
+		log.Fatalf("execute %v", err)
+	}
+}
+
+func (s Server) getFail(w http.ResponseWriter, _ *http.Request) {
+	err := s.T.ExecuteTemplate(w, "fail.html.tmpl", nil)
+	if err != nil {
+		log.Fatalf("execute %v", err)
 	}
 }
 
@@ -273,6 +280,8 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux.HandleFunc("POST /api/v0/post/{id}", s.editPost)
 	mux.HandleFunc("GET /login", s.getLogin)
 	mux.HandleFunc("POST /api/v0/login", s.postLogin)
+	mux.HandleFunc("GET /done", s.getDone)
+	mux.HandleFunc("GET /fail", s.getFail)
 
 	return mux
 }
