@@ -22,7 +22,11 @@
     <br>
     {{.AuthorID}}
     <br>
-    <button name="delete">Delete</button>
+    <form action="/api/v0/post/{{.ID}}" method="POST" novalidate>
+    <div>
+      <input type="submit" value="Delete" />
+    </div>
+  </form>
   </div>
   <br>
   <div>
