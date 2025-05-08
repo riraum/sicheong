@@ -18,7 +18,7 @@ type Author struct {
 
 type Post struct {
 	ID       float32
-	Date     float32
+	Date     string
 	Title    string
 	Link     string
 	Content  string
@@ -87,21 +87,21 @@ func (d DB) Fill() error {
 
 	posts := []Post{
 		{
-			Date:     float32(20250101), //nolint:mnd
+			Date:     "20250101", //nolint:mnd
 			Title:    "Complaint",
 			Link:     "https://http.cat/status/200",
 			Content:  "A",
 			AuthorID: 1,
 		},
 		{
-			Date:     float32(20250201), //nolint:mnd
+			Date:     "20250201", //nolint:mnd
 			Title:    "Feedback",
 			Link:     "https://http.cat/status/100",
 			Content:  "B",
 			AuthorID: 2, //nolint:mnd
 		},
 		{
-			Date:     float32(20250301), //nolint:mnd
+			Date:     "20250301", //nolint:mnd
 			Title:    "Announcement",
 			Link:     "https://http.cat/status/301",
 			Content:  "C",

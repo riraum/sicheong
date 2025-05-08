@@ -92,12 +92,12 @@ func parseRValues(r *http.Request) (db.Post, error) {
 	}
 
 	if r.FormValue("date") != "" {
-		date, err := strconv.ParseFloat(r.FormValue("date"), 32)
-		if err != nil {
-			return p, fmt.Errorf("date convert to float: %w", err)
-		}
+		date := r.FormValue("date")
+		// if err != nil {
+		// 	return p, fmt.Errorf("date convert to float: %w", err)
+		// }
 
-		p.Date = float32(date)
+		p.Date = date
 	}
 
 	if r.FormValue("author") != "" {
