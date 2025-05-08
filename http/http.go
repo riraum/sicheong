@@ -2,6 +2,7 @@ package http
 
 import (
 	"embed"
+	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -242,6 +243,30 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/done", http.StatusSeeOther)
+}
+
+func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
+	if !s.authenticated(r, w) {
+		return
+	}
+
+	p, err := parseRValues(r)
+	if err != nil {
+		log.Fatalf("failed to parse values: %v", err)
+	}
+
+	err = s.DB.UpdatePost(p)
+	if err != nil {
+		log.Fatalf("edit post in db: %v", err)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	err = json.NewEncoder(w).Encode(p)
+	if err != nil {
+		log.Fatalf("failed to encode %v", err)
+	}
 }
 
 func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
