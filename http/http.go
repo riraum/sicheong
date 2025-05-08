@@ -165,8 +165,13 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("delete post in db: %v", err)
 	}
 
-	w.WriteHeader(http.StatusGone)
-	fmt.Fprint(w, "Post deleted!", http.StatusGone)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	err = json.NewEncoder(w).Encode(p)
+	if err != nil {
+		log.Fatalf("failed to encode %v", err)
+	}
 }
 
 func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
@@ -320,7 +325,7 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
 	mux.HandleFunc("POST /api/v0/post", s.postAPIPost)
 	mux.HandleFunc("DELETE /api/v0/post/{id}", s.deleteAPIPost)
-	mux.HandleFunc("DELETE /post", s.deletePost)
+	mux.HandleFunc("DELETE /post/{id}", s.deletePost)
 	mux.HandleFunc("GET /post/{id}", s.viewPost)
 	mux.HandleFunc("POST /api/v0/post/{id}", s.editAPIPost)
 	mux.HandleFunc("POST /post/{id}", s.editPost)
