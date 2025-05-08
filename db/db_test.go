@@ -38,7 +38,7 @@ func TestAll(t *testing.T) {
 	want := []Post{
 		{
 			ID:       1,
-			Date:     "2.02501e+07",
+			Date:     "20250101",
 			Title:    "Complaint",
 			Link:     "https://http.cat/status/200",
 			Content:  "A",
@@ -46,7 +46,7 @@ func TestAll(t *testing.T) {
 		},
 		{
 			ID:       2,
-			Date:     "2.02502e+07",
+			Date:     "20250201",
 			Title:    "Feedback",
 			Link:     "https://http.cat/status/100",
 			Content:  "B",
@@ -54,7 +54,7 @@ func TestAll(t *testing.T) {
 		},
 		{
 			ID:       3,
-			Date:     "2.02503e+07",
+			Date:     "20250301",
 			Title:    "Announcement",
 			Link:     "https://http.cat/status/301",
 			Content:  "C",
