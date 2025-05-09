@@ -9,9 +9,7 @@
 </head>
 
 <body>
-  <br>
   <div>
-    <br>
     {{.ID}}
     <br>
     {{.Date}}
@@ -23,6 +21,12 @@
     {{.Content}}
     <br>
     {{.AuthorID}}
+    <br>
+    <form action="/api/v0/post/{{.ID}}" method="POST" novalidate>
+    <div>
+      <input type="submit" value="Delete" />
+    </div>
+  </form>
   </div>
   <br>
   <div>
