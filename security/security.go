@@ -3,9 +3,13 @@ package security
 import (
 	"crypto/aes"
 	"crypto/cipher"
+	"crypto/hmac"
 	"crypto/rand"
+	"crypto/sha512"
 	"errors"
 	"io"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 func NewEncryptionKey() *[32]byte {
@@ -54,4 +58,18 @@ func Decrypt(ciphertxt []byte, key *[32]byte) (plaintxt []byte, err error) {
 		ciphertxt[gcm.NonceSize():],
 		nil,
 	)
+}
+
+func Hash(tag string, data []byte) []byte {
+	h := hmac.New(sha512.New512_256, []byte(tag))
+	h.Write(data)
+	return h.Sum(nil)
+}
+
+func HashPassword(password []byte) ([]byte, error) {
+	return bcrypt.GenerateFromPassword(password, 14)
+}
+
+func CheckPasswordHash(hash, password []byte) error {
+	return bcrypt.CompareHashAndPassword(hash, password)
 }
