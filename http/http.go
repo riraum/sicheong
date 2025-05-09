@@ -235,9 +235,10 @@ func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
 func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	authorInput := r.FormValue("author")
 	cookie := http.Cookie{
-		Name:  "authorName",
-		Value: authorInput,
-		Path:  "/",
+		Name:   "authorName",
+		Value:  authorInput,
+		Path:   "/",
+		Secure: true,
 	}
 
 	authorExists, err := s.DB.AuthorExists(authorInput)

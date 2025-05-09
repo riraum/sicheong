@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"encoding/hex"
 	"fmt"
 	"html/template"
 	"log"
@@ -10,13 +11,21 @@ import (
 	"github.com/riraum/si-cheong/http"
 )
 
+var secretKey []byte
+
 //go:embed static/*
 var static embed.FS
 
 var t = template.Must(template.ParseFS(static, "static/*"))
 
 func main() {
+	var err error
 	fmt.Println("Hello si-cheong user")
+
+	secretKey, err = hex.DecodeString("SECRET_STRING")
+	if err != nil {
+		log.Fatal(err)
+	}
 
 	d, err := db.New("./sq.db")
 	if err != nil {
