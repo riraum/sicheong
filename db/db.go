@@ -71,7 +71,7 @@ func (d DB) Fill() error {
 	authors := []Author{
 		{
 			Name:     "Alpha",
-			Password: {{ secrets.ALPHA_PW }}
+			Password: ALPHA_PW,
 		},
 		{
 			Name:     "Bravo",
