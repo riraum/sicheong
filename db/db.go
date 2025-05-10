@@ -12,9 +12,8 @@ import (
 const invalidID = -1
 
 type Author struct {
-	ID       float32
-	Name     string
-	Password string
+	ID   float32
+	Name string
 }
 
 type Post struct {
@@ -70,16 +69,13 @@ func createTables(d *sql.DB) error {
 func (d DB) Fill() error {
 	authors := []Author{
 		{
-			Name:     "Alpha",
-			Password: "ALPHA_PW",
+			Name: "Alpha",
 		},
 		{
-			Name:     "Bravo",
-			Password: "BRAVO_PW",
+			Name: "Bravo",
 		},
 		{
-			Name:     "Charlie",
-			Password: "CHARLIE_PW",
+			Name: "Charlie",
 		},
 	}
 	for _, a := range authors {
