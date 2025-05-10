@@ -195,7 +195,17 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 		return false
 	}
 
-	authorExists, err := s.DB.AuthorExists(cookie.Value)
+	encryptedAuthor := cookie.Value
+	fmt.Printf("%x", encryptedAuthor)
+
+	decryptedAuthor, err := security.Decrypt([]byte(cookie.Value), s.Key)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println("decrypted author:", decryptedAuthor)
+
+	authorExists, err := s.DB.AuthorExists(fmt.Sprintf("%x", decryptedAuthor))
 	if err != nil {
 		log.Fatalf("failed sql author exist check: %v", err)
 	}
