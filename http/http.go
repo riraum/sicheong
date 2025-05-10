@@ -236,20 +236,19 @@ func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
 func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	key := security.NewEncryptionKey()
 	authorInput := r.FormValue("author")
-	passwordInput := r.FormValue("password")
 
-	fmt.Println("plain password:", passwordInput)
+	fmt.Println("plain author:", authorInput)
 
-	encryptedPassword, err := security.Encrypt([]byte(passwordInput), key)
+	encryptedAuthor, err := security.Encrypt([]byte(authorInput), key)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	fmt.Printf("%x", encryptedPassword)
+	fmt.Printf("%x", encryptedAuthor)
 
 	cookie := http.Cookie{
-		Name:   authorInput,
-		Value:  fmt.Sprintf("%x", encryptedPassword),
+		Name:   "authorName",
+		Value:  fmt.Sprintf("%x", encryptedAuthor),
 		Path:   "/",
 		Secure: true,
 	}
