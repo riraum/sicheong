@@ -17,6 +17,7 @@ type Server struct {
 	EmbedRootDir embed.FS
 	DB           db.DB
 	T            *template.Template
+	Key          *[32]byte
 }
 
 func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
@@ -234,12 +235,11 @@ func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
-	key := security.NewEncryptionKey()
 	authorInput := r.FormValue("author")
 
 	fmt.Println("plain author:", authorInput)
 
-	encryptedAuthor, err := security.Encrypt([]byte(authorInput), key)
+	encryptedAuthor, err := security.Encrypt([]byte(authorInput), s.Key)
 	if err != nil {
 		log.Fatal(err)
 	}
