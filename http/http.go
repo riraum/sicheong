@@ -237,7 +237,12 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	key := security.NewEncryptionKey()
 	authorInput := r.FormValue("author")
 	passwordInput := r.FormValue("password")
+
 	encryptedPassword, err := security.Encrypt([]byte(passwordInput), key)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	cookie := http.Cookie{
 		Name:   "authorName",
 		Value:  string(encryptedPassword),

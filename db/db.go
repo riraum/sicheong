@@ -71,15 +71,15 @@ func (d DB) Fill() error {
 	authors := []Author{
 		{
 			Name:     "Alpha",
-			Password: ALPHA_PW,
+			Password: "ALPHA_PW",
 		},
 		{
 			Name:     "Bravo",
-			Password: BRAVO_PW,
+			Password: "BRAVO_PW",
 		},
 		{
 			Name:     "Charlie",
-			Password: CHARLIE_PW,
+			Password: "CHARLIE_PW",
 		},
 	}
 	for _, a := range authors {
