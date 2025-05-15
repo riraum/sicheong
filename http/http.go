@@ -203,7 +203,7 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 		log.Fatal(err)
 	}
 
-	// fmt.Println("decrypted author:", string(decryptedAuthor))
+	fmt.Println("decrypted author:", string(decryptedAuthor))
 
 	authorExists, err := s.DB.AuthorExists(fmt.Sprintf("%x", decryptedAuthor))
 	if err != nil {
