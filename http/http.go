@@ -200,7 +200,7 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 
 	decryptedAuthor, err := security.Decrypt([]byte(cookie.Value), s.Key)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("failed to decrypt: %v", err)
 	}
 
 	fmt.Println("decrypted author:", string(decryptedAuthor))
