@@ -9,6 +9,7 @@ import (
 
 func TestEncryptDecrypt(t *testing.T) {
 	key := &[32]byte{}
+
 	_, err := io.ReadFull(rand.Reader, key[:])
 	if err != nil {
 		t.Fatal(err)
@@ -36,10 +37,11 @@ func TestEncryptDecrypt(t *testing.T) {
 		}
 
 		if !bytes.Equal(plaintxt, test.plaintxt) {
-			t.Errorf("plaintexts don't match")
+			t.Errorf("plaintxts don't match")
 		}
 
 		ciphertxt[0] ^= 0xdd
+
 		plaintxt, err = Decrypt(ciphertxt, test.key)
 		if err == nil {
 			t.Errorf("gcmOpen should not have worked, but did")
