@@ -59,26 +59,18 @@ func Decrypt(ciphertxt []byte, key *[32]byte) (plaintxt []byte, err error) {
 		return nil, fmt.Errorf("mailformed ciphertxt: %w", err)
 	}
 
-	return gcm.Open(nil,
+	decrypted, err := gcm.Open(nil,
+
 		ciphertxt[:gcm.NonceSize()],
 		ciphertxt[gcm.NonceSize():],
 		nil,
 	)
 
-	// TODO: fix sql error
-	// decrypted, err := gcm.Open(nil,
-	//
-	//	ciphertxt[:gcm.NonceSize()],
-	//	ciphertxt[gcm.NonceSize():],
-	//	nil,
-	//
-	// )
-	//
-	//	if err != nil {
-	//		return decrypted, nil
-	//	}
-	//
-	// return nil, fmt.Errorf("failed to gcmOpen: %w", err)
+	if err != nil {
+		return nil, fmt.Errorf("failed to gcmOpen: %w", err)
+	}
+
+	return decrypted, nil
 }
 
 func Hash(tag string, data []byte) []byte {
@@ -91,17 +83,17 @@ func Hash(tag string, data []byte) []byte {
 func HashPassword(password []byte) ([]byte, error) {
 	hashedPassword, err := bcrypt.GenerateFromPassword(password, 14) //nolint:mnd
 	if err != nil {
-		return hashedPassword, nil
+		return nil, fmt.Errorf("failed to hash password: %w", err)
 	}
 
-	return nil, fmt.Errorf("failed to hash password: %w", err)
+	return hashedPassword, nil
 }
 
 func CheckPasswordHash(hash, password []byte) error {
 	err := bcrypt.CompareHashAndPassword(hash, password)
 	if err != nil {
-		return nil
+		return fmt.Errorf("failed to check hashed password: %w", err)
 	}
 
-	return fmt.Errorf("failed to check hashed password: %w", err)
+	return nil
 }

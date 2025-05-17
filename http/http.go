@@ -210,6 +210,9 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 
 	fmt.Println("decrypted author:", string(decryptedAuthor))
 
+	decryptedAuthorStr := string(decryptedAuthor)
+	fmt.Println("decryptedAuthorStr:", decryptedAuthorStr)
+
 	authorExists, err := s.DB.AuthorExists(fmt.Sprintf("%x", decryptedAuthor))
 	if err != nil {
 		log.Fatalf("failed sql author exist check: %v", err)
@@ -252,24 +255,24 @@ func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
 func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	authorInput := r.FormValue("author")
 
-	plainAuthor := []byte(authorInput)
+	plainAuthorByte := []byte(authorInput)
 
-	fmt.Println("plain author:", string(plainAuthor))
+	fmt.Println("plain author:", string(plainAuthorByte))
 
-	encryptedAuthor, err := security.Encrypt(plainAuthor, s.Key)
+	encryptedAuthor, err := security.Encrypt(plainAuthorByte, s.Key)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	encryptedAuthorStr := fmt.Sprintf("%x", encryptedAuthor)
 
-	fmt.Printf("encrypted author: %x", string(encryptedAuthor))
+	fmt.Println("encrypted author:", encryptedAuthorStr)
 
 	fmt.Println("login func, key:", s.Key)
 
 	cookie := http.Cookie{
 		Name:   "authorName",
-		Value:  fmt.Sprintf("%x", encryptedAuthor),
+		Value:  encryptedAuthorStr,
 		Path:   "/",
 		Secure: true,
 	}
