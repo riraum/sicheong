@@ -199,7 +199,7 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	fmt.Println("auth func, encrypted author:", encryptedAuthor)
 
 	encryptedAuthorByte := []byte(encryptedAuthor)
-	// fmt.Println("auth func, encrypted author:", encryptedAuthor)
+	fmt.Println("auth func, encrypted author byte:", encryptedAuthorByte)
 
 	fmt.Println("auth func, key:", s.Key)
 
@@ -208,7 +208,7 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
 
-	fmt.Println("decrypted author:", string(decryptedAuthor))
+	fmt.Println("decrypted author byte:", decryptedAuthor)
 
 	decryptedAuthorStr := string(decryptedAuthor)
 	fmt.Println("decryptedAuthorStr:", decryptedAuthorStr)
@@ -267,6 +267,8 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	encryptedAuthorStr := fmt.Sprintf("%x", encryptedAuthor)
 
 	fmt.Println("encrypted author:", encryptedAuthorStr)
+
+	fmt.Println("encrypted author byte:", encryptedAuthor)
 
 	fmt.Println("login func, key:", s.Key)
 
