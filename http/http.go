@@ -2,6 +2,7 @@ package http
 
 import (
 	"embed"
+	"encoding/base64"
 	"fmt"
 	"html/template"
 	"log"
@@ -198,7 +199,7 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	encryptedAuthor := cookie.Value
 	fmt.Println("auth func, encrypted author:", encryptedAuthor)
 
-	encryptedAuthorByte := []byte(encryptedAuthor)
+	encryptedAuthorByte, _ := base64.StdEncoding.DecodeString(encryptedAuthor)
 	fmt.Println("auth func, encrypted author byte:", encryptedAuthorByte)
 
 	fmt.Println("auth func, key:", s.Key)
