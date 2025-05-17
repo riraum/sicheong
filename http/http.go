@@ -195,10 +195,15 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 		return false
 	}
 
-	encryptedAuthor := []byte(cookie.Value)
-	fmt.Printf("%x", encryptedAuthor)
+	encryptedAuthor := cookie.Value
+	fmt.Println("auth func, encrypted author:", encryptedAuthor)
 
-	decryptedAuthor, err := security.Decrypt(encryptedAuthor, s.Key)
+	encryptedAuthorByte := []byte(encryptedAuthor)
+	// fmt.Println("auth func, encrypted author:", encryptedAuthor)
+
+	fmt.Println("auth func, key:", s.Key)
+
+	decryptedAuthor, err := security.Decrypt(encryptedAuthorByte, s.Key)
 	if err != nil {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
@@ -260,6 +265,8 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Printf("encrypted author: %x", string(encryptedAuthor))
 
+	fmt.Println("login func, key:", s.Key)
+
 	cookie := http.Cookie{
 		Name:   "authorName",
 		Value:  fmt.Sprintf("%x", encryptedAuthor),
@@ -280,6 +287,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		if cookie.Value == encryptedAuthorStr {
 			fmt.Println("author name encrypted, set cookie value does match!")
 		}
+
 		http.Redirect(w, r, "/done", http.StatusSeeOther)
 	}
 
