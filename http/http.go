@@ -199,6 +199,12 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	encryptedAuthor := cookie.Value
 	fmt.Println("auth func, encrypted author:", encryptedAuthor)
 
+	encryptedAuthorRune := []rune(encryptedAuthor)
+	fmt.Println("auth func, encrypted author rune:", encryptedAuthorRune)
+
+	encryptedAuthorByte2 := []byte(encryptedAuthor)
+	fmt.Println("auth func, encrypted author byte2:", encryptedAuthorByte2)
+
 	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(encryptedAuthor)
 	if err != nil {
 		log.Fatalf("failed to convert string to byte: %v", err)
