@@ -2,6 +2,7 @@ package http
 
 import (
 	"embed"
+	"encoding/base64"
 	"fmt"
 	"html/template"
 	"log"
@@ -267,10 +268,14 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("login func, key:", s.Key)
 
-	AuthorByte := []byte(authorInput)
-	fmt.Println("byte author:", AuthorByte)
+	authorByte := []byte(authorInput)
+	fmt.Println("byte author:", authorByte)
 
-	encryptedAuthorByte, err := security.Encrypt(AuthorByte, s.Key)
+	authorByte2 := make([]byte, base64.StdEncoding.EncodedLen(len(authorInput)))
+	base64.StdEncoding.Encode(authorByte2, []byte(authorInput))
+	fmt.Println("author string2byte2:", authorByte2)
+
+	encryptedAuthorByte, err := security.Encrypt(authorByte2, s.Key)
 	if err != nil {
 		log.Fatal(err)
 	}
