@@ -196,22 +196,22 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 		return false
 	}
 
-	encryptedAuthor := cookie.Value
-	fmt.Println("auth func, encrypted author:", encryptedAuthor)
+	fmt.Println("auth func, key:", s.Key)
 
-	encryptedAuthorRune := []rune(encryptedAuthor)
+	encryptedAuthorStr := cookie.Value
+	fmt.Println("auth func, encrypted author:", encryptedAuthorStr)
+
+	encryptedAuthorRune := []rune(encryptedAuthorStr)
 	fmt.Println("auth func, encrypted author rune:", encryptedAuthorRune)
 
-	encryptedAuthorByte2 := []byte(encryptedAuthor)
+	encryptedAuthorByte2 := []byte(encryptedAuthorStr)
 	fmt.Println("auth func, encrypted author byte2:", encryptedAuthorByte2)
 
-	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(encryptedAuthor)
+	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(encryptedAuthorStr)
 	if err != nil {
 		log.Fatalf("failed to convert string to byte: %v", err)
 	}
 	fmt.Println("auth func, encrypted author byte:", encryptedAuthorByte)
-
-	fmt.Println("auth func, key:", s.Key)
 
 	decryptedAuthor, err := security.Decrypt(encryptedAuthorByte, s.Key)
 	if err != nil {
@@ -265,22 +265,25 @@ func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
 func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	authorInput := r.FormValue("author")
 
+	fmt.Println("login func, key:", s.Key)
+
 	plainAuthorByte := []byte(authorInput)
+	fmt.Println("plain author byte:", plainAuthorByte)
 
-	fmt.Println("plain author:", string(plainAuthorByte))
+	plainAuthorSt := string(plainAuthorByte)
+	fmt.Println("plain author:", plainAuthorSt)
 
-	encryptedAuthor, err := security.Encrypt(plainAuthorByte, s.Key)
+	encryptedAuthorByte, err := security.Encrypt(plainAuthorByte, s.Key)
 	if err != nil {
 		log.Fatal(err)
 	}
+	fmt.Println("encrypted author byte:", encryptedAuthorByte)
 
-	encryptedAuthorStr := fmt.Sprintf("%x", encryptedAuthor)
-
+	encryptedAuthorStr := fmt.Sprintf("%x", encryptedAuthorByte)
 	fmt.Println("encrypted author:", encryptedAuthorStr)
 
-	fmt.Println("encrypted author byte:", encryptedAuthor)
-
-	fmt.Println("login func, key:", s.Key)
+	encryptedAuthorRune := []rune(encryptedAuthorStr)
+	fmt.Println("encrypted author rune:", encryptedAuthorRune)
 
 	cookie := http.Cookie{
 		Name:   "authorName",
