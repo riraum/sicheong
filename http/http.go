@@ -205,20 +205,21 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	fmt.Println("auth func, encrypted author rune:", encryptedAuthorRune)
 
 	encryptedAuthorByte2 := []byte(encryptedAuthorStr)
-	fmt.Println("auth func, encrypted author byte2:", encryptedAuthorByte2)
+	fmt.Println("auth func, encrypted author byte2:", string(encryptedAuthorByte2))
 
 	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(encryptedAuthorStr)
 	if err != nil {
 		log.Fatalf("failed to convert string to byte: %v", err)
 	}
-	fmt.Println("auth func, encrypted author byte:", encryptedAuthorByte)
+
+	fmt.Println("auth func, encrypted author byte:", string(encryptedAuthorByte))
 
 	decryptedAuthor, err := security.Decrypt(encryptedAuthorByte, s.Key)
 	if err != nil {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
 
-	fmt.Println("decrypted author byte:", decryptedAuthor)
+	fmt.Println("decrypted author byte:", string(decryptedAuthor))
 
 	decryptedAuthorStr := string(decryptedAuthor)
 	fmt.Println("decryptedAuthorStr:", decryptedAuthorStr)
@@ -268,7 +269,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("login func, key:", s.Key)
 
 	plainAuthorByte := []byte(authorInput)
-	fmt.Println("plain author byte:", plainAuthorByte)
+	fmt.Println("plain author byte:", string(plainAuthorByte))
 
 	plainAuthorSt := string(plainAuthorByte)
 	fmt.Println("plain author:", plainAuthorSt)
@@ -277,7 +278,8 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("encrypted author byte:", encryptedAuthorByte)
+
+	fmt.Println("encrypted author byte:", string(encryptedAuthorByte))
 
 	encryptedAuthorStr := fmt.Sprintf("%x", encryptedAuthorByte)
 	fmt.Println("encrypted author:", encryptedAuthorStr)
