@@ -2,7 +2,6 @@ package http
 
 import (
 	"embed"
-	"encoding/base64"
 	"fmt"
 	"html/template"
 	"log"
@@ -207,14 +206,13 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	encryptedAuthorByte2 := []byte(encryptedAuthorStr)
 	fmt.Println("auth func, encrypted author byte2:", string(encryptedAuthorByte2))
 
-	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(encryptedAuthorStr)
-	if err != nil {
-		log.Fatalf("failed to convert string to byte: %v", err)
-	}
+	// encryptedAuthorByte, err := base64.StdEncoding.DecodeString(encryptedAuthorStr)
+	// if err != nil {
+	// 	log.Fatalf("failed to convert string to byte: %v", err)
+	// }
+	// fmt.Println("auth func, encrypted author byte:", string(encryptedAuthorByte))
 
-	fmt.Println("auth func, encrypted author byte:", string(encryptedAuthorByte))
-
-	decryptedAuthor, err := security.Decrypt(encryptedAuthorByte, s.Key)
+	decryptedAuthor, err := security.Decrypt(encryptedAuthorByte2, s.Key)
 	if err != nil {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
