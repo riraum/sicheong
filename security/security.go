@@ -67,7 +67,7 @@ func Decrypt(ciphertxt []byte, key *[32]byte) (plaintxt []byte, err error) {
 	)
 
 	if err != nil {
-		return nil, fmt.Errorf("failed to gcmOpen: %w", err)
+		return decrypted, fmt.Errorf("failed to gcmOpen: %w", err)
 	}
 
 	return decrypted, nil

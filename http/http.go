@@ -263,31 +263,31 @@ func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
 
 func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	authorInput := r.FormValue("author")
+	fmt.Println("plain author:", authorInput)
 
 	fmt.Println("login func, key:", s.Key)
 
-	plainAuthorByte := []byte(authorInput)
-	fmt.Println("plain author byte:", string(plainAuthorByte))
+	AuthorByte := []byte(authorInput)
+	fmt.Println("byte author:", AuthorByte)
 
-	plainAuthorSt := string(plainAuthorByte)
-	fmt.Println("plain author:", plainAuthorSt)
-
-	encryptedAuthorByte, err := security.Encrypt(plainAuthorByte, s.Key)
+	encryptedAuthorByte, err := security.Encrypt(AuthorByte, s.Key)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	fmt.Println("encrypted author byte:", string(encryptedAuthorByte))
+	fmt.Println("encrypted author byte:", encryptedAuthorByte)
 
 	encryptedAuthorStr := fmt.Sprintf("%x", encryptedAuthorByte)
 	fmt.Println("encrypted author:", encryptedAuthorStr)
+
+	encryptedAuthorStr2 := string(encryptedAuthorByte)
+	fmt.Println("encrypted author byte2:", encryptedAuthorStr2)
 
 	encryptedAuthorRune := []rune(encryptedAuthorStr)
 	fmt.Println("encrypted author rune:", encryptedAuthorRune)
 
 	cookie := http.Cookie{
 		Name:   "authorName",
-		Value:  encryptedAuthorStr,
+		Value:  encryptedAuthorStr2,
 		Path:   "/",
 		Secure: true,
 	}
