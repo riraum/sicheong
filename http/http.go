@@ -196,27 +196,27 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 
 	// fmt.Println("auth func, key:", s.Key)
 
-	encryptedAuthorBaseStr := cookie.Value
+	// encryptedAuthorBaseStr := cookie.Value
 	// fmt.Println("auth func, encryptedAuthorBaseStr:", encryptedAuthorBaseStr)
 
-	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(encryptedAuthorBaseStr)
+	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
 	if err != nil {
-		log.Fatalf("failed to convert string to byte: %v", err)
+		log.Fatalf("failed to decode base64 string to byte: %v", err)
 	}
 
 	// fmt.Println("auth func, encrypted author byte:", string(encryptedAuthorByte))
 
-	decryptedAuthor, err := security.Decrypt(encryptedAuthorByte, s.Key)
+	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
 	if err != nil {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
 
 	// fmt.Println("decrypted author byte:", string(decryptedAuthor))
 
-	decryptedAuthorStr := string(decryptedAuthor)
-	fmt.Println("decryptedAuthorStr:", decryptedAuthorStr)
+	// decryptedAuthorStr := string(decryptedAuthorByte)
+	fmt.Println("decryptedAuthorStr:", string(decryptedAuthorByte))
 
-	authorExists, err := s.DB.AuthorExists(decryptedAuthorStr)
+	authorExists, err := s.DB.AuthorExists(string(decryptedAuthorByte))
 	if err != nil {
 		log.Fatalf("failed sql author exist check: %v", err)
 	}
@@ -257,26 +257,26 @@ func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
 
 func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	authorInput := r.FormValue("author")
-	fmt.Println("plain author:", authorInput)
+	// fmt.Println("plain author:", authorInput)
 
 	// fmt.Println("login func, key:", s.Key)
 
-	authorByte := []byte(authorInput)
-	fmt.Println("byte author:", string(authorByte))
+	// authorByte := []byte(authorInput)
+	// fmt.Println("byte author:", string(authorByte))
 
-	encryptedAuthorByte, err := security.Encrypt(authorByte, s.Key)
+	encryptedAuthorByte, err := security.Encrypt([]byte(authorInput), s.Key)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// fmt.Println("encrypted author byte:", string(encryptedAuthorByte))
 
-	encryptedAuthorBaseStr := base64.StdEncoding.EncodeToString(encryptedAuthorByte)
+	// encryptedAuthorBaseStr := base64.StdEncoding.EncodeToString(encryptedAuthorByte)
 	// fmt.Println("encryptedAuthorBaseStr", encryptedAuthorBaseStr)
 
 	cookie := http.Cookie{
 		Name:   "authorName",
-		Value:  encryptedAuthorBaseStr,
+		Value:  base64.StdEncoding.EncodeToString(encryptedAuthorByte),
 		Path:   "/",
 		Secure: true,
 	}
@@ -288,13 +288,6 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 
 	if authorExists {
 		http.SetCookie(w, &cookie)
-
-		// fmt.Println("encrypted cookie value:", cookie.Value)
-
-		if cookie.Value == encryptedAuthorBaseStr {
-			fmt.Println("author name encrypted, set cookie value does match!")
-		}
-
 		http.Redirect(w, r, "/done", http.StatusSeeOther)
 	}
 
