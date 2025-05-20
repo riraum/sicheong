@@ -9,18 +9,35 @@
 </head>
 
 <body>
-  Hello
-  <br>
+    <div>
+        <a href="login">
+<button>Login</button>
+        </a>
+    </div>
+<br>
+  Posts
   <div>
-    {{range .}}
     <br>
+    {{range .}}
     {{.ID}}
+    <br>
+    {{.Date}}
     <br>
     {{.Title}}
     <br>
+    {{.Link}}
+    <br>
+    {{.Content}}
+    <br>
+    <a href="/post/{{.ID}}">
+    Post link </a>
+    <br>
+    ---
+   <br>
     {{end}}
   </div>
   <br>
+  Create new post
   <form action="/api/v0/post" method="POST" novalidate>
     <div>
       <label for="Title">Title</label>
