@@ -134,7 +134,17 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("no author cookie", err)
 	}
 
-	authorID, err := s.DB.AuthorNametoID(cookie.Value)
+	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
+	if err != nil {
+		log.Fatalf("failed to decode base64 string to byte: %v", err)
+	}
+
+	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
+	if err != nil {
+		log.Fatalf("failed to decrypt: %v", err)
+	}
+
+	authorID, err := s.DB.AuthorNametoID(string(decryptedAuthorByte))
 	if err != nil {
 		log.Fatal("failed string to float conversion", err)
 		return
@@ -203,9 +213,6 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	if err != nil {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
-
-	// LOGGING TO REMOVE
-	fmt.Println("decryptedAuthorStr:", string(decryptedAuthorByte))
 
 	authorExists, err := s.DB.AuthorExists(string(decryptedAuthorByte))
 	if err != nil {
