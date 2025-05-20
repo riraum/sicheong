@@ -194,7 +194,7 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 		return false
 	}
 
-	fmt.Println("auth func, key:", s.Key)
+	// fmt.Println("auth func, key:", s.Key)
 
 	encryptedAuthorBaseStr := cookie.Value
 	// fmt.Println("auth func, encryptedAuthorBaseStr:", encryptedAuthorBaseStr)
@@ -259,7 +259,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	authorInput := r.FormValue("author")
 	fmt.Println("plain author:", authorInput)
 
-	fmt.Println("login func, key:", s.Key)
+	// fmt.Println("login func, key:", s.Key)
 
 	authorByte := []byte(authorInput)
 	fmt.Println("byte author:", string(authorByte))
