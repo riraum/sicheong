@@ -210,16 +210,10 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 	authorID, err := s.DB.AuthorNametoID(string(decryptedAuthorByte))
 	if err != nil {
 		http.Redirect(w, r, "/fail?reason=authorCookieError", http.StatusUnauthorized)
-		log.Fatalf("failed to decode base64 string to byte: %v", err)
+		log.Fatalf("failed string to float conversion: %v", err)
 
 		return
 	}
-
-	// authorID, err := s.DB.AuthorNametoID(string(decryptedAuthorByte))
-	// if err != nil {
-	// 	log.Fatal("failed string to float conversion", err)
-	// 	return
-	// }
 
 	p.AuthorID = authorID
 
