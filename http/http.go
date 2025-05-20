@@ -215,6 +215,7 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
+
 	w.WriteHeader(http.StatusGone)
 
 	err = json.NewEncoder(w).Encode(p)
