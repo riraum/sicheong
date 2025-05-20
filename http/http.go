@@ -136,9 +136,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 
 	authorID, err := s.DB.AuthorNametoID(cookie.Value)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
-
+		log.Fatal("failed string to float conversion", err)
 		return
 	}
 
