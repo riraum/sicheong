@@ -198,22 +198,17 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 
 	fmt.Println("auth func, key:", s.Key)
 
-	encryptedAuthorStr := cookie.Value
-	fmt.Println("auth func, encrypted author:", encryptedAuthorStr)
+	encryptedAuthorBaseStr := cookie.Value
+	fmt.Println("auth func, encryptedAuthorBaseStr:", encryptedAuthorBaseStr)
 
-	encryptedAuthorRune := []rune(encryptedAuthorStr)
-	fmt.Println("auth func, encrypted author rune:", encryptedAuthorRune)
+	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(encryptedAuthorBaseStr)
+	if err != nil {
+		log.Fatalf("failed to convert string to byte: %v", err)
+	}
 
-	encryptedAuthorByte2 := []byte(encryptedAuthorStr)
-	fmt.Println("auth func, encrypted author byte2:", string(encryptedAuthorByte2))
+	fmt.Println("auth func, encrypted author byte:", string(encryptedAuthorByte))
 
-	// encryptedAuthorByte, err := base64.StdEncoding.DecodeString(encryptedAuthorStr)
-	// if err != nil {
-	// 	log.Fatalf("failed to convert string to byte: %v", err)
-	// }
-	// fmt.Println("auth func, encrypted author byte:", string(encryptedAuthorByte))
-
-	decryptedAuthor, err := security.Decrypt(encryptedAuthorByte2, s.Key)
+	decryptedAuthor, err := security.Decrypt(encryptedAuthorByte, s.Key)
 	if err != nil {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
@@ -223,7 +218,7 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	decryptedAuthorStr := string(decryptedAuthor)
 	fmt.Println("decryptedAuthorStr:", decryptedAuthorStr)
 
-	authorExists, err := s.DB.AuthorExists(fmt.Sprintf("%x", decryptedAuthor))
+	authorExists, err := s.DB.AuthorExists(decryptedAuthorStr)
 	if err != nil {
 		log.Fatalf("failed sql author exist check: %v", err)
 	}
@@ -269,30 +264,21 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("login func, key:", s.Key)
 
 	authorByte := []byte(authorInput)
-	fmt.Println("byte author:", authorByte)
+	fmt.Println("byte author:", string(authorByte))
 
-	authorByte2 := make([]byte, base64.StdEncoding.EncodedLen(len(authorInput)))
-	base64.StdEncoding.Encode(authorByte2, []byte(authorInput))
-	fmt.Println("author string2byte2:", authorByte2)
-
-	encryptedAuthorByte, err := security.Encrypt(authorByte2, s.Key)
+	encryptedAuthorByte, err := security.Encrypt(authorByte, s.Key)
 	if err != nil {
 		log.Fatal(err)
 	}
-	fmt.Println("encrypted author byte:", encryptedAuthorByte)
 
-	encryptedAuthorStr := fmt.Sprintf("%x", encryptedAuthorByte)
-	fmt.Println("encrypted author:", encryptedAuthorStr)
+	fmt.Println("encrypted author byte:", string(encryptedAuthorByte))
 
-	encryptedAuthorStr2 := string(encryptedAuthorByte)
-	fmt.Println("encrypted author byte2:", encryptedAuthorStr2)
-
-	encryptedAuthorRune := []rune(encryptedAuthorStr)
-	fmt.Println("encrypted author rune:", encryptedAuthorRune)
+	encryptedAuthorBaseStr := base64.StdEncoding.EncodeToString(encryptedAuthorByte)
+	fmt.Println("encryptedAuthorBaseStr", encryptedAuthorBaseStr)
 
 	cookie := http.Cookie{
 		Name:   "authorName",
-		Value:  encryptedAuthorStr2,
+		Value:  encryptedAuthorBaseStr,
 		Path:   "/",
 		Secure: true,
 	}
@@ -307,7 +293,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 
 		fmt.Println("encrypted cookie value:", cookie.Value)
 
-		if cookie.Value == encryptedAuthorStr {
+		if cookie.Value == encryptedAuthorBaseStr {
 			fmt.Println("author name encrypted, set cookie value does match!")
 		}
 
