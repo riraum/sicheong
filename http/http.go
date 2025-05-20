@@ -238,8 +238,6 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	authorInput := r.FormValue("author")
 	passwordInput := r.FormValue("password")
 
-	fmt.Println("plain password:", passwordInput)
-
 	encryptedPassword, err := security.Encrypt([]byte(passwordInput), key)
 	if err != nil {
 		log.Fatal(err)
