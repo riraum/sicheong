@@ -379,6 +379,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("failed to encryt: %v", err)
 	}
+
 	encryptedAuthorByte, err := security.Encrypt([]byte(authorInput), s.Key)
 	if err != nil {
 		log.Fatalf("failed to encryt: %v", err)
