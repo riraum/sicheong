@@ -194,26 +194,17 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 		return false
 	}
 
-	// fmt.Println("auth func, key:", s.Key)
-
-	// encryptedAuthorBaseStr := cookie.Value
-	// fmt.Println("auth func, encryptedAuthorBaseStr:", encryptedAuthorBaseStr)
-
 	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
 	if err != nil {
 		log.Fatalf("failed to decode base64 string to byte: %v", err)
 	}
-
-	// fmt.Println("auth func, encrypted author byte:", string(encryptedAuthorByte))
 
 	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
 	if err != nil {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
 
-	// fmt.Println("decrypted author byte:", string(decryptedAuthor))
-
-	// decryptedAuthorStr := string(decryptedAuthorByte)
+	// LOGGING TO REMOVE
 	fmt.Println("decryptedAuthorStr:", string(decryptedAuthorByte))
 
 	authorExists, err := s.DB.AuthorExists(string(decryptedAuthorByte))
@@ -257,22 +248,11 @@ func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
 
 func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	authorInput := r.FormValue("author")
-	// fmt.Println("plain author:", authorInput)
-
-	// fmt.Println("login func, key:", s.Key)
-
-	// authorByte := []byte(authorInput)
-	// fmt.Println("byte author:", string(authorByte))
 
 	encryptedAuthorByte, err := security.Encrypt([]byte(authorInput), s.Key)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// fmt.Println("encrypted author byte:", string(encryptedAuthorByte))
-
-	// encryptedAuthorBaseStr := base64.StdEncoding.EncodeToString(encryptedAuthorByte)
-	// fmt.Println("encryptedAuthorBaseStr", encryptedAuthorBaseStr)
 
 	cookie := http.Cookie{
 		Name:   "authorName",
