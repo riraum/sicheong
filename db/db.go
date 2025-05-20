@@ -72,7 +72,7 @@ func (d DB) Fill() error {
 			Name: "Alpha",
 		},
 		{
-			Name: "Beta",
+			Name: "Bravo",
 		},
 		{
 			Name: "Charlie",

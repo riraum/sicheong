@@ -8,6 +8,7 @@ import (
 
 	"github.com/riraum/si-cheong/db"
 	"github.com/riraum/si-cheong/http"
+	"github.com/riraum/si-cheong/security"
 )
 
 //go:embed static/*
@@ -17,6 +18,8 @@ var t = template.Must(template.ParseFS(static, "static/*"))
 
 func main() {
 	fmt.Println("Hello si-cheong user")
+
+	key := security.NewEncryptionKey()
 
 	d, err := db.New("./sq.db")
 	if err != nil {
@@ -33,6 +36,7 @@ func main() {
 	s.EmbedRootDir = static
 	s.DB = d
 	s.T = t
+	s.Key = key
 
 	mux := s.SetupMux()
 	http.Run(mux)

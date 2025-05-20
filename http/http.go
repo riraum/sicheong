@@ -2,6 +2,7 @@ package http
 
 import (
 	"embed"
+	"encoding/base64"
 	"fmt"
 	"html/template"
 	"log"
@@ -9,6 +10,7 @@ import (
 	"strconv"
 
 	"github.com/riraum/si-cheong/db"
+	"github.com/riraum/si-cheong/security"
 )
 
 type Server struct {
@@ -16,6 +18,7 @@ type Server struct {
 	EmbedRootDir embed.FS
 	DB           db.DB
 	T            *template.Template
+	Key          *[32]byte
 }
 
 func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
@@ -131,11 +134,19 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatal("no author cookie", err)
 	}
 
-	authorID, err := s.DB.AuthorNametoID(cookie.Value)
+	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
 	if err != nil {
-		w.WriteHeader(http.StatusUnauthorized)
-		fmt.Fprint(w, "You shall not pass!", http.StatusUnauthorized)
+		log.Fatalf("failed to decode base64 string to byte: %v", err)
+	}
 
+	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
+	if err != nil {
+		log.Fatalf("failed to decrypt: %v", err)
+	}
+
+	authorID, err := s.DB.AuthorNametoID(string(decryptedAuthorByte))
+	if err != nil {
+		log.Fatal("failed string to float conversion", err)
 		return
 	}
 
@@ -193,7 +204,17 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 		return false
 	}
 
-	authorExists, err := s.DB.AuthorExists(cookie.Value)
+	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
+	if err != nil {
+		log.Fatalf("failed to decode base64 string to byte: %v", err)
+	}
+
+	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
+	if err != nil {
+		log.Fatalf("failed to decrypt: %v", err)
+	}
+
+	authorExists, err := s.DB.AuthorExists(string(decryptedAuthorByte))
 	if err != nil {
 		log.Fatalf("failed sql author exist check: %v", err)
 	}
@@ -234,10 +255,17 @@ func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
 
 func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	authorInput := r.FormValue("author")
+
+	encryptedAuthorByte, err := security.Encrypt([]byte(authorInput), s.Key)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	cookie := http.Cookie{
-		Name:  "authorName",
-		Value: authorInput,
-		Path:  "/",
+		Name:   "authorName",
+		Value:  base64.StdEncoding.EncodeToString(encryptedAuthorByte),
+		Path:   "/",
+		Secure: true,
 	}
 
 	authorExists, err := s.DB.AuthorExists(authorInput)
