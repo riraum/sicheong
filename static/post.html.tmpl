@@ -9,9 +9,7 @@
 </head>
 
 <body>
-  <br>
   <div>
-    <br>
     {{.ID}}
     <br>
     {{.Date}}
@@ -23,12 +21,18 @@
     {{.Content}}
     <br>
     {{.AuthorID}}
+    <br>
+    <form action="/post/{{.ID}}" method="DELETE" novalidate>
+    <div>
+      <input type="submit" value="Delete" />
+    </div>
+  </form>
   </div>
   <br>
   <div>
     Edit post to
   </div>
-  <form action="/api/v0/post/{{.ID}}" method="POST" novalidate>
+  <form action="/post/{{.ID}}" method="POST" novalidate>
     <div>
       <label for="Title">Title</label>
       <input type="text" name="title" required />
