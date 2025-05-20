@@ -292,13 +292,19 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
-	cookie, err := r.Cookie("authorName")
+	authorName, err := r.Cookie("authorName")
+	authorPassword, err := r.Cookie("authorPassword")
 	if err != nil {
 		http.Redirect(w, r, "/fail?reason=cookieDoesntExist", http.StatusSeeOther)
 		return false
 	}
 
-	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
+	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(authorName.Value)
+	if err != nil {
+		log.Fatalf("failed to decode base64 string to byte: %v", err)
+	}
+
+	encryptedPasswordByte, err := base64.StdEncoding.DecodeString(authorPassword.Value)
 	if err != nil {
 		log.Fatalf("failed to decode base64 string to byte: %v", err)
 	}
@@ -307,13 +313,22 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	if err != nil {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
+	decryptedPasswordByte, err := security.Decrypt(encryptedPasswordByte, s.Key)
+	if err != nil {
+		log.Fatalf("failed to decrypt: %v", err)
+	}
 
-	authorExists, err := s.DB.AuthorExists(string(decryptedAuthorByte))
+	authorNameExists, err := s.DB.AuthorExists(string(decryptedAuthorByte))
 	if err != nil {
 		log.Fatalf("failed sql author exist check: %v", err)
 	}
 
-	if !authorExists {
+	// authorPasswordExists, err := s.DB.AuthorExists(string(decryptedPasswordByte))
+	// if err != nil {
+	// 	log.Fatalf("failed sql password exist check: %v", err)
+	// }
+
+	if !authorNameExists {
 		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
 
 		return false
@@ -385,14 +400,14 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to encryt: %v", err)
 	}
 
-	cookieUserName := http.Cookie{
+	authorName := http.Cookie{
 		Name:   "authorName",
 		Value:  base64.StdEncoding.EncodeToString(encryptedAuthorByte),
 		Path:   "/",
 		Secure: true,
 	}
 
-	cookieUserPassword := http.Cookie{
+	authorPassword := http.Cookie{
 		Name:   "authorPassword",
 		Value:  base64.StdEncoding.EncodeToString(encryptedPasswordByte),
 		Path:   "/",
@@ -405,8 +420,8 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if authorExists {
-		http.SetCookie(w, &cookieUserName)
-		http.SetCookie(w, &cookieUserPassword)
+		http.SetCookie(w, &authorName)
+		http.SetCookie(w, &authorPassword)
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 	}
 
