@@ -87,21 +87,21 @@ func (d DB) Fill() error {
 
 	posts := []Post{
 		{
-			Date:     "20250101", //nolint:mnd
+			Date:     "2025-01-01",
 			Title:    "Complaint",
 			Link:     "https://http.cat/status/200",
 			Content:  "A",
 			AuthorID: 1,
 		},
 		{
-			Date:     "20250201", //nolint:mnd
+			Date:     "2025-02-01",
 			Title:    "Feedback",
 			Link:     "https://http.cat/status/100",
 			Content:  "B",
 			AuthorID: 2, //nolint:mnd
 		},
 		{
-			Date:     "20250301", //nolint:mnd
+			Date:     "2025-03-01",
 			Title:    "Announcement",
 			Link:     "https://http.cat/status/301",
 			Content:  "C",

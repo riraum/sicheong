@@ -91,12 +91,13 @@ func parseRValues(r *http.Request) (db.Post, error) {
 		p.ID = float32(ID)
 	}
 
+	fmt.Println("print date:", r.FormValue("date"))
+
 	if r.FormValue("date") != "" {
 		date := r.FormValue("date")
 		// if err != nil {
 		// 	return p, fmt.Errorf("date convert to float: %w", err)
 		// }
-
 		p.Date = date
 	}
 
@@ -216,6 +217,8 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("failed to parse values: %v", err)
 	}
+
+	fmt.Println("editPost print date:", p.Date)
 
 	err = s.DB.UpdatePost(p)
 	if err != nil {
