@@ -80,8 +80,17 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, http.StatusOK, p)
 }
 
+// func (r *Request) FormValue(key string) string {
+
+// }
+
 func parseRValues(r *http.Request) (db.Post, error) {
 	var p db.Post
+
+	err := r.ParseForm()
+	if err != nil {
+		return p, fmt.Errorf("failed to parseform %w", err)
+	}
 
 	if r.PathValue("id") != "" {
 		ID, err := strconv.ParseFloat(r.PathValue("id"), 32)
@@ -92,7 +101,7 @@ func parseRValues(r *http.Request) (db.Post, error) {
 		p.ID = float32(ID)
 	}
 
-	fmt.Println("print date:", r.FormValue("date"))
+	// fmt.Println("print date:", r.FormValue("date"))
 
 	// func (r *Request) FormValue(key string) string
 	// date := r.FormValue("date")
