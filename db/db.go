@@ -91,7 +91,7 @@ func (d DB) Fill() error {
 			Title:    "Complaint",
 			Link:     "https://http.cat/status/200",
 			Content:  "A",
-			AuthorID: 1,
+			AuthorID: 1, //nolint:mnd
 		},
 		{
 			Date:     1739890030,
