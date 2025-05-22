@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/riraum/si-cheong/db"
 )
@@ -80,17 +79,10 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, http.StatusOK, p)
 }
 
-// func (r *Request) FormValue(key string) string {
-
-// }
-
 func parseRValues(r *http.Request) (db.Post, error) {
 	var p db.Post
 
-	err := r.ParseForm()
-	if err != nil {
-		return p, fmt.Errorf("failed to parseform %w", err)
-	}
+	fmt.Println("id parse", r.PathValue("id"))
 
 	if r.PathValue("id") != "" {
 		ID, err := strconv.ParseFloat(r.PathValue("id"), 32)
@@ -99,26 +91,24 @@ func parseRValues(r *http.Request) (db.Post, error) {
 		}
 
 		p.ID = float32(ID)
+		fmt.Println("ID", p.ID)
 	}
 
-	// fmt.Println("print date:", r.FormValue("date"))
+	fmt.Println("date parse", r.FormValue("date"))
 
-	// func (r *Request) FormValue(key string) string
-	// date := r.FormValue("date")
+	if r.FormValue("date") != "" {
+		date := r.FormValue("date")
 
-	// if r.FormValue("date") != "" {
-	date := r.FormValue("date")
-	// if err != nil {
-	// 	return p, fmt.Errorf("date convert to float: %w", err)
-	// }
-	time, err := time.Parse(time.DateOnly, date)
-	if err != nil {
-		return p, fmt.Errorf("date parse: %w", err)
+		fmt.Println("date parse", date)
+		// time, err := time.Parse(time.DateOnly, date)
+		// if err != nil {
+		// 	return p, fmt.Errorf("date parse: %w", err)
+		// }
+		// log.Println("time parse:", time)
+		// p.Date = time.Unix()
 	}
-	log.Println("print time parse:", time)
 
-	p.Date = time.Unix()
-	// }
+	log.Println("author parse:", r.FormValue("author"))
 
 	if r.FormValue("author") != "" {
 		author, err := strconv.ParseFloat(r.FormValue("author"), 32)
@@ -127,11 +117,17 @@ func parseRValues(r *http.Request) (db.Post, error) {
 		}
 
 		p.AuthorID = float32(author)
+		fmt.Println("AuthorID", p.AuthorID)
 	}
 
 	p.Title = r.FormValue("title")
+	log.Println("title parse:", p.Title)
 	p.Link = r.FormValue("link")
+	log.Println("link parse:", p.Link)
 	p.Content = r.FormValue("content")
+	log.Println("content parse:", p.Content)
+
+	fmt.Println("post parse", p)
 
 	return p, nil
 }
@@ -160,6 +156,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p.AuthorID = authorID
+	fmt.Println("postAPIPost AuthorID", p.AuthorID)
 
 	err = s.DB.NewPost(p)
 	if err != nil {
