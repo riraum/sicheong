@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/riraum/si-cheong/db"
 )
@@ -100,12 +101,12 @@ func parseRValues(r *http.Request) (db.Post, error) {
 		date := r.FormValue("date")
 
 		fmt.Println("date parse", date)
-		// time, err := time.Parse(time.DateOnly, date)
-		// if err != nil {
-		// 	return p, fmt.Errorf("date parse: %w", err)
-		// }
-		// log.Println("time parse:", time)
-		// p.Date = time.Unix()
+		time, err := time.Parse(time.DateOnly, date)
+		if err != nil {
+			return p, fmt.Errorf("date parse: %w", err)
+		}
+		log.Println("time parse:", time)
+		p.Date = time.Unix()
 	}
 
 	log.Println("author parse:", r.FormValue("author"))
