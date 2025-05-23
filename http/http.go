@@ -97,16 +97,32 @@ func parseRValues(r *http.Request) (db.Post, error) {
 
 	fmt.Println("date parse", r.FormValue("date"))
 
-	if r.FormValue("date") != "" {
-		date := r.FormValue("date")
+	switch r.Method {
+	case http.MethodPost:
+		if r.FormValue("date") != "" {
+			date := r.FormValue("date")
 
-		fmt.Println("date parse", date)
-		time, err := time.Parse(time.DateOnly, date)
-		if err != nil {
-			return p, fmt.Errorf("date parse: %w", err)
+			time, err := time.Parse(time.DateOnly, date)
+			if err != nil {
+				return p, fmt.Errorf("date parse: %w", err)
+			}
+
+			log.Println("time parse:", time)
+			p.Date = time.Unix()
 		}
-		log.Println("time parse:", time)
-		p.Date = time.Unix()
+	case http.MethodGet:
+		if r.FormValue("date") != "" {
+			date := r.FormValue("date")
+
+			time, err := time.Parse(time.DateOnly, date)
+			if err != nil {
+				return p, fmt.Errorf("date parse: %w", err)
+			}
+
+			log.Println("time parse:", time)
+			p.ParsedDate = time
+		}
+	default:
 	}
 
 	log.Println("author parse:", r.FormValue("author"))

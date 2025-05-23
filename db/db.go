@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3" //revive be gone
 )
@@ -17,12 +18,13 @@ type Author struct {
 }
 
 type Post struct {
-	ID       float32
-	Date     int64
-	Title    string
-	Link     string
-	Content  string
-	AuthorID float32 // Author.ID
+	ID         float32
+	Date       int64
+	ParsedDate time.Time
+	Title      string
+	Link       string
+	Content    string
+	AuthorID   float32 // Author.ID
 }
 
 type DB struct {
