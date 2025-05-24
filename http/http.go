@@ -9,6 +9,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/riraum/si-cheong/db"
 	"github.com/riraum/si-cheong/security"
@@ -88,8 +89,14 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func parseDate(ti int64) time.Time {
+	return time.Unix(ti, 0)
+}
+
 func parseRValues(r *http.Request) (db.Post, error) {
 	var p db.Post
+
+	// fmt.Println("id parse", r.PathValue("id"))
 
 	if r.PathValue("id") != "" {
 		ID, err := strconv.ParseFloat(r.PathValue("id"), 32)
@@ -98,16 +105,40 @@ func parseRValues(r *http.Request) (db.Post, error) {
 		}
 
 		p.ID = float32(ID)
+		// fmt.Println("ID", p.ID)
 	}
 
-	if r.FormValue("date") != "" {
-		date, err := strconv.ParseFloat(r.FormValue("date"), 32)
-		if err != nil {
-			return p, fmt.Errorf("date convert to float: %w", err)
+	// fmt.Println("date parse", r.FormValue("date"))
+
+	switch r.Method {
+	case http.MethodPost:
+		if r.FormValue("date") != "" {
+			date := r.FormValue("date")
+
+			time, err := time.Parse(time.DateOnly, date)
+			if err != nil {
+				return p, fmt.Errorf("date parse: %w", err)
+			}
+
+			// log.Println("time parse post:", time)
+			p.Date = time.Unix()
 		}
+	case http.MethodGet:
+		if r.FormValue("date") != "" {
+			date := r.FormValue("date")
 
-		p.Date = float32(date)
+			time, err := time.Parse(time.DateOnly, date)
+			if err != nil {
+				return p, fmt.Errorf("date parse: %w", err)
+			}
+
+			// log.Println("time parse: get", time)
+			p.ParsedDate = time
+		}
+	default:
 	}
+
+	// log.Println("author parse:", r.FormValue("author"))
 
 	if r.FormValue("author") != "" {
 		author, err := strconv.ParseFloat(r.FormValue("author"), 32)
@@ -116,11 +147,17 @@ func parseRValues(r *http.Request) (db.Post, error) {
 		}
 
 		p.AuthorID = float32(author)
+		// fmt.Println("AuthorID", p.AuthorID)
 	}
 
 	p.Title = r.FormValue("title")
+	// log.Println("title parse:", p.Title)
 	p.Link = r.FormValue("link")
+	// log.Println("link parse:", p.Link)
 	p.Content = r.FormValue("content")
+	// log.Println("content parse:", p.Content)
+
+	// fmt.Println("post parse", p)
 
 	return p, nil
 }
@@ -216,6 +253,7 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p.AuthorID = authorID
+	// fmt.Println("postAPIPost AuthorID", p.AuthorID)
 
 	err = s.DB.NewPost(p)
 	if err != nil {
@@ -284,6 +322,8 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("read posts: %v", err)
 	}
 
+	p.ParsedDate = parseDate(p.Date)
+
 	err = s.T.ExecuteTemplate(w, "post.html.tmpl", p)
 
 	if err != nil {
@@ -331,6 +371,8 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("failed to parse values: %v", err)
 	}
+
+	fmt.Println("editPost print date:", p.Date)
 
 	err = s.DB.UpdatePost(p)
 	if err != nil {

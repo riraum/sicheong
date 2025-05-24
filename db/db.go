@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3" //revive be gone
 )
@@ -17,12 +18,13 @@ type Author struct {
 }
 
 type Post struct {
-	ID       float32
-	Date     float32
-	Title    string
-	Link     string
-	Content  string
-	AuthorID float32 // Author.ID
+	ID         float32
+	Date       int64
+	ParsedDate time.Time
+	Title      string
+	Link       string
+	Content    string
+	AuthorID   float32 // Author.ID
 }
 
 type DB struct {
@@ -87,21 +89,21 @@ func (d DB) Fill() error {
 
 	posts := []Post{
 		{
-			Date:     float32(20250101), //nolint:mnd
+			Date:     1748000743, //nolint:mnd
 			Title:    "Complaint",
 			Link:     "https://http.cat/status/200",
 			Content:  "A",
 			AuthorID: 1,
 		},
 		{
-			Date:     float32(20250201), //nolint:mnd
+			Date:     1748000733, //nolint:mnd
 			Title:    "Feedback",
 			Link:     "https://http.cat/status/100",
 			Content:  "B",
 			AuthorID: 2, //nolint:mnd
 		},
 		{
-			Date:     float32(20250301), //nolint:mnd
+			Date:     1748000666, //nolint:mnd
 			Title:    "Announcement",
 			Link:     "https://http.cat/status/301",
 			Content:  "C",

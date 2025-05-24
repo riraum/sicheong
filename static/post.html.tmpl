@@ -12,7 +12,7 @@
   <div>
     {{.ID}}
     <br>
-    {{.Date}}
+    {{.ParsedDate.Format "2006/01/02"}}
     <br>
     {{.Title}}
     <br>
@@ -39,11 +39,11 @@
     </div>
     <div>
       <label for="Date">Date</label>
-      <input type="date" required />
+      <input type="date" name="date" required />
     </div>
     <div>
       <label for="Link">Link</label>
-      <input type="text" required />
+      <input type="text" name="link" required />
     </div>
     <div>
       <label for="Content">Content</label>
