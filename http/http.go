@@ -87,7 +87,7 @@ func parseDate(ti int64) time.Time {
 func parseRValues(r *http.Request) (db.Post, error) {
 	var p db.Post
 
-	fmt.Println("id parse", r.PathValue("id"))
+	// fmt.Println("id parse", r.PathValue("id"))
 
 	if r.PathValue("id") != "" {
 		ID, err := strconv.ParseFloat(r.PathValue("id"), 32)
@@ -96,10 +96,10 @@ func parseRValues(r *http.Request) (db.Post, error) {
 		}
 
 		p.ID = float32(ID)
-		fmt.Println("ID", p.ID)
+		// fmt.Println("ID", p.ID)
 	}
 
-	fmt.Println("date parse", r.FormValue("date"))
+	// fmt.Println("date parse", r.FormValue("date"))
 
 	switch r.Method {
 	case http.MethodPost:
@@ -111,7 +111,7 @@ func parseRValues(r *http.Request) (db.Post, error) {
 				return p, fmt.Errorf("date parse: %w", err)
 			}
 
-			log.Println("time parse post:", time)
+			// log.Println("time parse post:", time)
 			p.Date = time.Unix()
 		}
 	case http.MethodGet:
@@ -123,13 +123,13 @@ func parseRValues(r *http.Request) (db.Post, error) {
 				return p, fmt.Errorf("date parse: %w", err)
 			}
 
-			log.Println("time parse: get", time)
+			// log.Println("time parse: get", time)
 			p.ParsedDate = time
 		}
 	default:
 	}
 
-	log.Println("author parse:", r.FormValue("author"))
+	// log.Println("author parse:", r.FormValue("author"))
 
 	if r.FormValue("author") != "" {
 		author, err := strconv.ParseFloat(r.FormValue("author"), 32)
@@ -138,17 +138,17 @@ func parseRValues(r *http.Request) (db.Post, error) {
 		}
 
 		p.AuthorID = float32(author)
-		fmt.Println("AuthorID", p.AuthorID)
+		// fmt.Println("AuthorID", p.AuthorID)
 	}
 
 	p.Title = r.FormValue("title")
-	log.Println("title parse:", p.Title)
+	// log.Println("title parse:", p.Title)
 	p.Link = r.FormValue("link")
-	log.Println("link parse:", p.Link)
+	// log.Println("link parse:", p.Link)
 	p.Content = r.FormValue("content")
-	log.Println("content parse:", p.Content)
+	// log.Println("content parse:", p.Content)
 
-	fmt.Println("post parse", p)
+	// fmt.Println("post parse", p)
 
 	return p, nil
 }
@@ -177,7 +177,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p.AuthorID = authorID
-	fmt.Println("postAPIPost AuthorID", p.AuthorID)
+	// fmt.Println("postAPIPost AuthorID", p.AuthorID)
 
 	err = s.DB.NewPost(p)
 	if err != nil {
