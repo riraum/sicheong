@@ -83,6 +83,7 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 func parseDate(ti int64) (tt time.Time, err error) {
 	tt = time.Unix(ti, 0)
 	log.Println("time parseDate:", tt)
+
 	return tt, nil
 }
 
