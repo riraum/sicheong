@@ -80,11 +80,8 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintln(w, http.StatusOK, p)
 }
 
-func parseDate(ti int64) (tt time.Time, err error) {
-	tt = time.Unix(ti, 0)
-	log.Println("time parseDate:", tt)
-
-	return tt, nil
+func parseDate(ti int64) time.Time {
+	return time.Unix(ti, 0)
 }
 
 func parseRValues(r *http.Request) (db.Post, error) {
@@ -220,10 +217,7 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("read posts: %v", err)
 	}
 
-	p.ParsedDate, err = parseDate(p.Date)
-	if err != nil {
-		log.Fatalf("failed to parseDate: %v", err)
-	}
+	p.ParsedDate = parseDate(p.Date)
 
 	err = s.T.ExecuteTemplate(w, "post.html.tmpl", p)
 
