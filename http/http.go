@@ -298,15 +298,15 @@ func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to parse values: %v", err)
 	}
 
+	fmt.Println("deletePost ID:", p.ID)
+
 	err = s.DB.DeletePost(p.ID)
 	if err != nil {
 		log.Fatalf("delete post in db: %v", err)
-			http.Redirect(w, r, "/fail?reason=deleteFailed", http.StatusSeeOther)
-			return false
-		}
+		http.Redirect(w, r, "/fail?reason=deleteFailed", http.StatusSeeOther)
 	}
 
-	w.WriteHeader(http.StatusGone)
+	http.Redirect(w, r, "/done", http.StatusSeeOther)
 }
 
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
@@ -370,7 +370,7 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to parse values: %v", err)
 	}
 
-	fmt.Println("editPost print date:", p.Date)
+	// fmt.Println("editPost print date:", p.Date)
 
 	err = s.DB.UpdatePost(p)
 	if err != nil {
@@ -433,7 +433,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 
 	if authorExists {
 		http.SetCookie(w, &cookie)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
 	}
 
 	if !authorExists {
