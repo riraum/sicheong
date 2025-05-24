@@ -96,7 +96,7 @@ func parseDate(ti int64) time.Time {
 func parseRValues(r *http.Request) (db.Post, error) {
 	var p db.Post
 
-	// fmt.Println("id parse", r.PathValue("id"))
+	fmt.Println("id parse", r.PathValue("id"))
 
 	if r.PathValue("id") != "" {
 		ID, err := strconv.ParseFloat(r.PathValue("id"), 32)
@@ -274,7 +274,7 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to parse values: %v", err)
 	}
 
-	err = s.DB.DeletePost(p.ID)
+	err = s.DB.DeletePost(p)
 	if err != nil {
 		log.Fatalf("delete post in db: %v", err)
 	}
@@ -300,10 +300,10 @@ func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("deletePost ID:", p.ID)
 
-	err = s.DB.DeletePost(p.ID)
+	err = s.DB.DeletePost(p)
 	if err != nil {
-		log.Fatalf("delete post in db: %v", err)
 		http.Redirect(w, r, "/fail?reason=deleteFailed", http.StatusSeeOther)
+		log.Fatalf("delete post in db: %v", err)
 	}
 
 	http.Redirect(w, r, "/done", http.StatusSeeOther)
@@ -374,6 +374,7 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 
 	err = s.DB.UpdatePost(p)
 	if err != nil {
+		http.Redirect(w, r, "/fail?reason=editFailed", http.StatusSeeOther)
 		log.Fatalf("edit post in db: %v", err)
 	}
 
