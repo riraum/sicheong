@@ -301,14 +301,12 @@ func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
 	err = s.DB.DeletePost(p.ID)
 	if err != nil {
 		log.Fatalf("delete post in db: %v", err)
+			http.Redirect(w, r, "/fail?reason=deleteFailed", http.StatusSeeOther)
+			return false
+		}
 	}
 
 	w.WriteHeader(http.StatusGone)
-
-	err = json.NewEncoder(w).Encode(p)
-	if err != nil {
-		log.Fatalf("failed to encode %v", err)
-	}
 }
 
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
