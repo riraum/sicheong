@@ -109,10 +109,7 @@ func parseRValues(r *http.Request) (db.Post, error) {
 		}
 
 		p.ID = float32(ID)
-		// fmt.Println("ID", p.ID)
 	}
-
-	// fmt.Println("date parse", r.FormValue("date"))
 
 	switch r.Method {
 	case http.MethodPost:
@@ -124,7 +121,6 @@ func parseRValues(r *http.Request) (db.Post, error) {
 				return p, fmt.Errorf("date parse: %w", err)
 			}
 
-			// log.Println("time parse post:", time)
 			p.Date = time.Unix()
 		}
 	case http.MethodGet:
@@ -136,13 +132,10 @@ func parseRValues(r *http.Request) (db.Post, error) {
 				return p, fmt.Errorf("date parse: %w", err)
 			}
 
-			// log.Println("time parse: get", time)
 			p.ParsedDate = time
 		}
 	default:
 	}
-
-	// log.Println("author parse:", r.FormValue("author"))
 
 	if r.FormValue("author") != "" {
 		author, err := strconv.ParseFloat(r.FormValue("author"), 32)
@@ -151,17 +144,11 @@ func parseRValues(r *http.Request) (db.Post, error) {
 		}
 
 		p.AuthorID = float32(author)
-		// fmt.Println("AuthorID", p.AuthorID)
 	}
 
 	p.Title = r.FormValue("title")
-	// log.Println("title parse:", p.Title)
 	p.Link = r.FormValue("link")
-	// log.Println("link parse:", p.Link)
 	p.Content = r.FormValue("content")
-	// log.Println("content parse:", p.Content)
-
-	// fmt.Println("post parse", p)
 
 	return p, nil
 }
@@ -257,7 +244,6 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p.AuthorID = authorID
-	// fmt.Println("postAPIPost AuthorID", p.AuthorID)
 
 	err = s.DB.NewPost(p)
 	if err != nil {
@@ -293,9 +279,7 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("hello deletePost")
 	if !s.authenticated(r, w) {
-		log.Fatal("failed to authenticate, delete post")
 		return
 	}
 
@@ -303,8 +287,6 @@ func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("failed to parse values: %v", err)
 	}
-
-	fmt.Println("deletePost ID:", p.ID)
 
 	err = s.DB.DeletePost(p)
 	if err != nil {
@@ -375,8 +357,6 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("failed to parse values: %v", err)
 	}
-
-	// fmt.Println("editPost print date:", p.Date)
 
 	err = s.DB.UpdatePost(p)
 	if err != nil {
