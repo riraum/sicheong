@@ -100,8 +100,6 @@ func parseDate(ti int64) time.Time {
 func parseRValues(r *http.Request) (db.Post, error) {
 	var p db.Post
 
-	fmt.Println("id parse", r.PathValue("id"))
-
 	if r.PathValue("id") != "" {
 		ID, err := strconv.ParseFloat(r.PathValue("id"), 32)
 		if err != nil {
