@@ -23,7 +23,7 @@ type Server struct {
 }
 
 func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
-	par, err := parseRValuesMap(r)
+	par, err := parseQueryParams(r)
 	if err != nil {
 		log.Fatalf("parse to map %v", err)
 	}
@@ -44,7 +44,7 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func parseRValuesMap(r *http.Request) (map[string]string, error) {
+func parseQueryParams(r *http.Request) (map[string]string, error) {
 	par := map[string]string{}
 
 	if r.FormValue("sort") != "" {
@@ -73,7 +73,7 @@ func (s Server) getCSS(w http.ResponseWriter, _ *http.Request) {
 }
 
 func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
-	par, err := parseRValuesMap(r)
+	par, err := parseQueryParams(r)
 	if err != nil {
 		log.Fatalf("parse to map %v", err)
 	}
