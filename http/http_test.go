@@ -13,7 +13,8 @@ import (
 
 func TestAllHttp(t *testing.T) {
 	var s Server
-	s.RootDir = t.TempDir()
+
+	RootDir := t.TempDir()
 
 	d, err := db.New(t.TempDir())
 	if err != nil {
@@ -31,7 +32,7 @@ func TestAllHttp(t *testing.T) {
 		log.Fatalf("Failed to create new db %v", err)
 	}
 
-	f, err := os.Create(path.Join(s.RootDir, "index.html"))
+	f, err := os.Create(path.Join(RootDir, "index.html"))
 	if err != nil {
 		t.Fatalf("Error creating file: %v", err)
 	}

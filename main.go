@@ -34,7 +34,7 @@ func main() {
 	var s http.Server
 	s.EmbedRootDir = static
 	s.DB = d
-	s.T = t
+	s.Template = t
 	s.Key = key
 
 	mux := s.SetupMux()
