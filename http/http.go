@@ -293,7 +293,9 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("hello deletePost")
 	if !s.authenticated(r, w) {
+		log.Fatal("failed to authenticate, delete post")
 		return
 	}
 
@@ -471,7 +473,7 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux.HandleFunc("POST /api/v0/post", s.postAPIPost)
 	mux.HandleFunc("POST /post", s.postPost)
 	mux.HandleFunc("DELETE /api/v0/post/{id}", s.deleteAPIPost)
-	mux.HandleFunc("DELETE /post/{id}", s.deletePost)
+	mux.HandleFunc("POST /post/delete/{id}", s.deletePost)
 	mux.HandleFunc("GET /post/{id}", s.viewPost)
 	mux.HandleFunc("POST /api/v0/post/{id}", s.editAPIPost)
 	mux.HandleFunc("POST /post/{id}", s.editPost)
