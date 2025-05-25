@@ -34,6 +34,10 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("read posts: %v", err)
 	}
 
+	for i, v := range p {
+		p[i].ParsedDate = parseDate(v.Date)
+	}
+
 	err = s.T.ExecuteTemplate(w, "index.html.tmpl", p)
 
 	if err != nil {
@@ -96,8 +100,6 @@ func parseDate(ti int64) time.Time {
 func parseRValues(r *http.Request) (db.Post, error) {
 	var p db.Post
 
-	// fmt.Println("id parse", r.PathValue("id"))
-
 	if r.PathValue("id") != "" {
 		ID, err := strconv.ParseFloat(r.PathValue("id"), 32)
 		if err != nil {
@@ -105,10 +107,7 @@ func parseRValues(r *http.Request) (db.Post, error) {
 		}
 
 		p.ID = float32(ID)
-		// fmt.Println("ID", p.ID)
 	}
-
-	// fmt.Println("date parse", r.FormValue("date"))
 
 	switch r.Method {
 	case http.MethodPost:
@@ -120,7 +119,6 @@ func parseRValues(r *http.Request) (db.Post, error) {
 				return p, fmt.Errorf("date parse: %w", err)
 			}
 
-			// log.Println("time parse post:", time)
 			p.Date = time.Unix()
 		}
 	case http.MethodGet:
@@ -132,13 +130,10 @@ func parseRValues(r *http.Request) (db.Post, error) {
 				return p, fmt.Errorf("date parse: %w", err)
 			}
 
-			// log.Println("time parse: get", time)
 			p.ParsedDate = time
 		}
 	default:
 	}
-
-	// log.Println("author parse:", r.FormValue("author"))
 
 	if r.FormValue("author") != "" {
 		author, err := strconv.ParseFloat(r.FormValue("author"), 32)
@@ -147,17 +142,11 @@ func parseRValues(r *http.Request) (db.Post, error) {
 		}
 
 		p.AuthorID = float32(author)
-		// fmt.Println("AuthorID", p.AuthorID)
 	}
 
 	p.Title = r.FormValue("title")
-	// log.Println("title parse:", p.Title)
 	p.Link = r.FormValue("link")
-	// log.Println("link parse:", p.Link)
 	p.Content = r.FormValue("content")
-	// log.Println("content parse:", p.Content)
-
-	// fmt.Println("post parse", p)
 
 	return p, nil
 }
@@ -253,7 +242,6 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p.AuthorID = authorID
-	// fmt.Println("postAPIPost AuthorID", p.AuthorID)
 
 	err = s.DB.NewPost(p)
 	if err != nil {
@@ -274,7 +262,7 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to parse values: %v", err)
 	}
 
-	err = s.DB.DeletePost(p.ID)
+	err = s.DB.DeletePost(p)
 	if err != nil {
 		log.Fatalf("delete post in db: %v", err)
 	}
@@ -298,17 +286,13 @@ func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to parse values: %v", err)
 	}
 
-	err = s.DB.DeletePost(p.ID)
+	err = s.DB.DeletePost(p)
 	if err != nil {
+		http.Redirect(w, r, "/fail?reason=deleteFailed", http.StatusSeeOther)
 		log.Fatalf("delete post in db: %v", err)
 	}
 
-	w.WriteHeader(http.StatusGone)
-
-	err = json.NewEncoder(w).Encode(p)
-	if err != nil {
-		log.Fatalf("failed to encode %v", err)
-	}
+	http.Redirect(w, r, "/done", http.StatusSeeOther)
 }
 
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
@@ -372,10 +356,9 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to parse values: %v", err)
 	}
 
-	fmt.Println("editPost print date:", p.Date)
-
 	err = s.DB.UpdatePost(p)
 	if err != nil {
+		http.Redirect(w, r, "/fail?reason=editFailed", http.StatusSeeOther)
 		log.Fatalf("edit post in db: %v", err)
 	}
 
@@ -435,7 +418,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 
 	if authorExists {
 		http.SetCookie(w, &cookie)
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
 	}
 
 	if !authorExists {
@@ -468,7 +451,7 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux.HandleFunc("POST /api/v0/post", s.postAPIPost)
 	mux.HandleFunc("POST /post", s.postPost)
 	mux.HandleFunc("DELETE /api/v0/post/{id}", s.deleteAPIPost)
-	mux.HandleFunc("DELETE /post/{id}", s.deletePost)
+	mux.HandleFunc("POST /post/delete/{id}", s.deletePost)
 	mux.HandleFunc("GET /post/{id}", s.viewPost)
 	mux.HandleFunc("POST /api/v0/post/{id}", s.editAPIPost)
 	mux.HandleFunc("POST /post/{id}", s.editPost)

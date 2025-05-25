@@ -22,12 +22,10 @@
     <br>
     {{.AuthorID}}
     <br>
-    <form action="/post/{{.ID}}" method="DELETE" novalidate>
-    <div>
-      <input type="submit" value="Delete" />
-    </div>
-  </form>
   </div>
+    <form action="/post/delete/{{.ID}}" method="POST" novalidate>
+      <input type="submit" value="Delete" />
+  </form>
   <br>
   <div>
     Edit post to

@@ -96,14 +96,14 @@ func (d DB) Fill() error {
 			AuthorID: 1,
 		},
 		{
-			Date:     1748000733, //nolint:mnd
+			Date:     1684997010, //nolint:mnd
 			Title:    "Feedback",
 			Link:     "https://http.cat/status/100",
 			Content:  "B",
 			AuthorID: 2, //nolint:mnd
 		},
 		{
-			Date:     1748000666, //nolint:mnd
+			Date:     1727780130, //nolint:mnd
 			Title:    "Announcement",
 			Link:     "https://http.cat/status/301",
 			Content:  "C",
@@ -169,7 +169,7 @@ func (d DB) AuthorNametoID(a string) (float32, error) {
 
 func (d DB) NewPost(p Post) error {
 	_, err := d.client.Exec(
-		"insert into posts(date, title, link, content, author) values(?, ?, ?, ?, ?)",
+		"INSERT into posts(date, title, link, content, author) values(?, ?, ?, ?, ?)",
 		p.Date, p.Title, p.Link, p.Content, p.AuthorID)
 	if err != nil {
 		return fmt.Errorf("failed to insert %w", err)
@@ -178,9 +178,10 @@ func (d DB) NewPost(p Post) error {
 	return nil
 }
 
-func (d DB) DeletePost(id float32) error {
-	_, err := d.client.Exec(
-		"delete from posts where id = ?", id)
+func (d DB) DeletePost(p Post) error {
+	sqlStmt := `DELETE from posts WHERE id = ?`
+
+	_, err := d.client.Exec(sqlStmt, p.ID)
 	if err != nil {
 		return fmt.Errorf("failed to delete %w", err)
 	}

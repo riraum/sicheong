@@ -21,7 +21,7 @@
     {{range .}}
     {{.ID}}
     <br>
-    {{.Date}}
+    {{.ParsedDate.Format "2006/01/02"}}
     <br>
     {{.Title}}
     <br>
@@ -38,7 +38,7 @@
   </div>
   <br>
   Create new post
-  <form action="/api/v0/post" method="POST" novalidate>
+  <form action="/post" method="POST" novalidate>
     <div>
       <label for="Title">Title</label>
       <input type="text" name="title" required />
