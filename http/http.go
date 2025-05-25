@@ -16,10 +16,9 @@ import (
 )
 
 type Server struct {
-	RootDir      string
 	EmbedRootDir embed.FS
 	DB           db.DB
-	T            *template.Template
+	Template     *template.Template
 	Key          *[32]byte
 }
 
@@ -38,7 +37,7 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 		p[i].ParsedDate = parseDate(v.Date)
 	}
 
-	err = s.T.ExecuteTemplate(w, "index.html.tmpl", p)
+	err = s.Template.ExecuteTemplate(w, "index.html.tmpl", p)
 
 	if err != nil {
 		log.Fatalf("execute %v", err)
@@ -308,7 +307,7 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 
 	p.ParsedDate = parseDate(p.Date)
 
-	err = s.T.ExecuteTemplate(w, "post.html.tmpl", p)
+	err = s.Template.ExecuteTemplate(w, "post.html.tmpl", p)
 
 	if err != nil {
 		log.Fatalf("execute %v", err)
@@ -390,7 +389,7 @@ func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
-	err := s.T.ExecuteTemplate(w, "login.html.tmpl", nil)
+	err := s.Template.ExecuteTemplate(w, "login.html.tmpl", nil)
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}
@@ -428,7 +427,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) getDone(w http.ResponseWriter, _ *http.Request) {
-	err := s.T.ExecuteTemplate(w, "done.html.tmpl", nil)
+	err := s.Template.ExecuteTemplate(w, "done.html.tmpl", nil)
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}
@@ -437,7 +436,7 @@ func (s Server) getDone(w http.ResponseWriter, _ *http.Request) {
 func (s Server) getFail(w http.ResponseWriter, r *http.Request) {
 	reason := r.URL.Query().Get("reason")
 
-	err := s.T.ExecuteTemplate(w, "fail.html.tmpl", reason)
+	err := s.Template.ExecuteTemplate(w, "fail.html.tmpl", reason)
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}

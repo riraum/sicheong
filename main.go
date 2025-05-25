@@ -32,7 +32,6 @@ func main() {
 	}
 
 	var s http.Server
-	s.RootDir = "static/"
 	s.EmbedRootDir = static
 	s.DB = d
 	s.T = t
