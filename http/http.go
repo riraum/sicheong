@@ -34,6 +34,10 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("read posts: %v", err)
 	}
 
+	for i, v := range p {
+		p[i].ParsedDate = parseDate(v.Date)
+	}
+
 	err = s.T.ExecuteTemplate(w, "index.html.tmpl", p)
 
 	if err != nil {

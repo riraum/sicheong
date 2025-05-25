@@ -96,14 +96,14 @@ func (d DB) Fill() error {
 			AuthorID: 1,
 		},
 		{
-			Date:     1748000733, //nolint:mnd
+			Date:     1684997010, //nolint:mnd
 			Title:    "Feedback",
 			Link:     "https://http.cat/status/100",
 			Content:  "B",
 			AuthorID: 2, //nolint:mnd
 		},
 		{
-			Date:     1748000666, //nolint:mnd
+			Date:     1727780130, //nolint:mnd
 			Title:    "Announcement",
 			Link:     "https://http.cat/status/301",
 			Content:  "C",
