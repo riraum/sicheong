@@ -45,8 +45,7 @@ func (s Server) SetupMux() *http.ServeMux {
 }
 
 func Run(mux *http.ServeMux) {
-	err := (http.ListenAndServe(":8080", mux))
-	if err != nil {
+	if err := (http.ListenAndServe(":8080", mux)); err != nil {
 		log.Fatal("failed to http serve")
 	}
 }
