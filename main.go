@@ -19,7 +19,10 @@ var t = template.Must(template.ParseFS(static, "static/*"))
 func main() {
 	fmt.Println("Hello si-cheong user")
 
-	key := security.NewEncryptionKey()
+	key, err := security.NewEncryptionKey()
+	if err != nil {
+		log.Fatalf("key fail: %v", err)
+	}
 
 	d, err := db.New("./sq.db")
 	if err != nil {
