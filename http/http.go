@@ -22,6 +22,37 @@ type Server struct {
 	Key          *[32]byte
 }
 
+func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
+	cookie, err := r.Cookie("authorName")
+	if err != nil {
+		http.Redirect(w, r, "/fail?reason=cookieDoesntExist", http.StatusSeeOther)
+		return false
+	}
+
+	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
+	if err != nil {
+		log.Fatalf("failed to decode base64 string to byte: %v", err)
+	}
+
+	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
+	if err != nil {
+		log.Fatalf("failed to decrypt: %v", err)
+	}
+
+	authorExists, err := s.DB.AuthorExists(string(decryptedAuthorByte))
+	if err != nil {
+		log.Fatalf("failed sql author exist check: %v", err)
+	}
+
+	if !authorExists {
+		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
+
+		return false
+	}
+
+	return true
+}
+
 func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 	par := parseQueryParams(r)
 
@@ -306,37 +337,6 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}
-}
-
-func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
-	cookie, err := r.Cookie("authorName")
-	if err != nil {
-		http.Redirect(w, r, "/fail?reason=cookieDoesntExist", http.StatusSeeOther)
-		return false
-	}
-
-	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
-	if err != nil {
-		log.Fatalf("failed to decode base64 string to byte: %v", err)
-	}
-
-	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
-	if err != nil {
-		log.Fatalf("failed to decrypt: %v", err)
-	}
-
-	authorExists, err := s.DB.AuthorExists(string(decryptedAuthorByte))
-	if err != nil {
-		log.Fatalf("failed sql author exist check: %v", err)
-	}
-
-	if !authorExists {
-		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
-
-		return false
-	}
-
-	return true
 }
 
 func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
