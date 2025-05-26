@@ -67,7 +67,7 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
 
-	authorExists, err := s.DB.Author(string(decryptedAuthorByte))
+	authorExists, err := s.DB.AuthorExists(string(decryptedAuthorByte))
 	if err != nil {
 		log.Fatalf("failed sql author exist check: %v", err)
 	}
@@ -432,7 +432,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		Secure: true,
 	}
 
-	authorExists, err := s.DB.Author(authorInput)
+	authorExists, err := s.DB.AuthorExists(authorInput)
 	if err != nil {
 		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusSeeOther)
 	}
