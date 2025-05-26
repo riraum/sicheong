@@ -30,8 +30,8 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux.HandleFunc("POST /api/v0/post", s.postAPIPost)
 	mux.HandleFunc("POST /post", s.postPost)
 	mux.HandleFunc("DELETE /api/v0/post/{id}", s.deleteAPIPost)
-	/* HTML5 only allows PUT and POST, therefore the it seems for a straight forward implementation PUT should be used for human delete interactions as of now.
-	Notice and fixed here: https://github.com/riraum/si-cheong/pull/137*/
+	/* HTML5 specification only allows GET and POST. Therefore using POST for human delete interactions.
+	More details: https://github.com/riraum/si-cheong/pull/137*/
 	mux.HandleFunc("POST /post/delete/{id}", s.deletePost)
 	mux.HandleFunc("GET /post/{id}", s.viewPost)
 	mux.HandleFunc("POST /api/v0/post/{id}", s.editAPIPost)
