@@ -48,21 +48,21 @@ func New(dbPath string) (DB, error) {
 }
 
 func createTables(d *sql.DB) error {
-	sqlStmtA := `create table authors` + `(id integer not null primary key, name text); delete from authors;`
+	stmt := `create table authors` + `(id integer not null primary key, name text); delete from authors;`
 
-	_, err := d.Exec(sqlStmtA)
+	_, err := d.Exec(stmt)
 	if err != nil {
-		return fmt.Errorf("%w: %s", err, sqlStmtA)
+		return fmt.Errorf("%w: %s", err, stmt)
 	}
 
-	sqlStmtP := `create table posts` +
+	stmt = `create table posts` +
 		`(id integer not null primary key, date	integer, title text, link text, content text, author integer);
 		delete from posts;`
 
-	_, err = d.Exec(sqlStmtP)
+	_, err = d.Exec(stmt)
 	if err != nil {
 		return fmt.Errorf("%w: %s",
-			err, sqlStmtP)
+			err, stmt)
 	}
 
 	return nil
@@ -179,9 +179,9 @@ func (d DB) NewPost(p Post) error {
 }
 
 func (d DB) DeletePost(p Post) error {
-	sqlStmt := `DELETE from posts WHERE id = ?`
+	stmt := `DELETE from posts WHERE id = ?`
 
-	_, err := d.client.Exec(sqlStmt, p.ID)
+	_, err := d.client.Exec(stmt, p.ID)
 	if err != nil {
 		return fmt.Errorf("failed to delete %w", err)
 	}
@@ -190,9 +190,9 @@ func (d DB) DeletePost(p Post) error {
 }
 
 func (d DB) UpdatePost(p Post) error {
-	sqlStmt := `UPDATE posts SET date = ?, title = ?, link = ?, content = ?, author = ? WHERE id = ?`
+	stmt := `UPDATE posts SET date = ?, title = ?, link = ?, content = ?, author = ? WHERE id = ?`
 
-	_, err := d.client.Exec(sqlStmt, p.Date, p.Title, p.Link, p.Content, p.AuthorID, p.ID)
+	_, err := d.client.Exec(stmt, p.Date, p.Title, p.Link, p.Content, p.AuthorID, p.ID)
 	if err != nil {
 		return fmt.Errorf("failed to update %w", err)
 	}
@@ -229,9 +229,9 @@ func (d DB) ReadPosts(par map[string]string) ([]Post, error) {
 		post  Post
 	)
 
-	queryString := sanQry(par)
+	query := sanQry(par)
 
-	stmt, err := d.client.Prepare(queryString)
+	stmt, err := d.client.Prepare(query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare %w", err)
 	}
