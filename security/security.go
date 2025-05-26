@@ -8,6 +8,7 @@ import (
 	"crypto/sha512"
 	"fmt"
 	"io"
+	"log"
 
 	"golang.org/x/crypto/bcrypt"
 )
@@ -17,7 +18,7 @@ func NewEncryptionKey() *[32]byte {
 
 	_, err := io.ReadFull(rand.Reader, key[:])
 	if err != nil {
-		panic(err)
+		log.Fatalln("failed to generate random encryption key", err)
 	}
 
 	return &key

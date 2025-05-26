@@ -129,7 +129,7 @@ func (d DB) NewAuthor(a Author) error {
 	return nil
 }
 
-func (d DB) AuthorExists(a string) (bool, error) {
+func (d DB) Author(a string) (bool, error) {
 	var author string
 
 	stmt, err := d.client.Prepare("SELECT name FROM authors WHERE name = ?")
@@ -150,7 +150,7 @@ func (d DB) AuthorExists(a string) (bool, error) {
 	return false, nil
 }
 
-func (d DB) AuthorNametoID(a string) (float32, error) {
+func (d DB) AuthorID(a string) (float32, error) {
 	var AuthorID float32
 
 	stmt, err := d.client.Prepare("SELECT ID FROM authors WHERE name = ?")
@@ -179,9 +179,7 @@ func (d DB) NewPost(p Post) error {
 }
 
 func (d DB) DeletePost(p Post) error {
-	stmt := `DELETE from posts WHERE id = ?`
-
-	_, err := d.client.Exec(stmt, p.ID)
+	_, err := d.client.Exec("DELETE from posts WHERE id = ?", p.ID)
 	if err != nil {
 		return fmt.Errorf("failed to delete %w", err)
 	}
@@ -255,7 +253,7 @@ func (d DB) ReadPosts(par map[string]string) ([]Post, error) {
 	return posts, nil
 }
 
-func (d DB) ReadPost(ID int) (Post, error) {
+func (d DB) ReadPost(id int) (Post, error) {
 	var p Post
 
 	stmt, err := d.client.Prepare("SELECT id, date, title, link, content, author FROM posts where id = ?")
@@ -264,7 +262,7 @@ func (d DB) ReadPost(ID int) (Post, error) {
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRow(ID).Scan(&p.ID, &p.Date, &p.Title, &p.Link, &p.Content, &p.AuthorID)
+	err = stmt.QueryRow(id).Scan(&p.ID, &p.Date, &p.Title, &p.Link, &p.Content, &p.AuthorID)
 	if err != nil {
 		return p, fmt.Errorf("failed to queryRow: %w", err)
 	}
