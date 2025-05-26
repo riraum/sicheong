@@ -22,6 +22,33 @@ type Server struct {
 	Key          *[32]byte
 }
 
+func (s Server) SetupMux() *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /{$}", s.getIndex)
+	mux.HandleFunc("GET /static/pico.min.css", s.getCSS)
+	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
+	mux.HandleFunc("POST /api/v0/post", s.postAPIPost)
+	mux.HandleFunc("POST /post", s.postPost)
+	mux.HandleFunc("DELETE /api/v0/post/{id}", s.deleteAPIPost)
+	mux.HandleFunc("POST /post/delete/{id}", s.deletePost)
+	mux.HandleFunc("GET /post/{id}", s.viewPost)
+	mux.HandleFunc("POST /api/v0/post/{id}", s.editAPIPost)
+	mux.HandleFunc("POST /post/{id}", s.editPost)
+	mux.HandleFunc("GET /login", s.getLogin)
+	mux.HandleFunc("POST /api/v0/login", s.postLogin)
+	mux.HandleFunc("GET /done", s.getDone)
+	mux.HandleFunc("GET /fail", s.getFail)
+
+	return mux
+}
+
+func Run(mux *http.ServeMux) {
+	err := (http.ListenAndServe(":8080", mux))
+	if err != nil {
+		log.Fatal("failed to http serve")
+	}
+}
+
 func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	cookie, err := r.Cookie("authorName")
 	if err != nil {
@@ -433,32 +460,5 @@ func (s Server) getFail(w http.ResponseWriter, r *http.Request) {
 	err := s.Template.ExecuteTemplate(w, "fail.html.tmpl", reason)
 	if err != nil {
 		log.Fatalf("execute %v", err)
-	}
-}
-
-func (s Server) SetupMux() *http.ServeMux {
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /{$}", s.getIndex)
-	mux.HandleFunc("GET /static/pico.min.css", s.getCSS)
-	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
-	mux.HandleFunc("POST /api/v0/post", s.postAPIPost)
-	mux.HandleFunc("POST /post", s.postPost)
-	mux.HandleFunc("DELETE /api/v0/post/{id}", s.deleteAPIPost)
-	mux.HandleFunc("POST /post/delete/{id}", s.deletePost)
-	mux.HandleFunc("GET /post/{id}", s.viewPost)
-	mux.HandleFunc("POST /api/v0/post/{id}", s.editAPIPost)
-	mux.HandleFunc("POST /post/{id}", s.editPost)
-	mux.HandleFunc("GET /login", s.getLogin)
-	mux.HandleFunc("POST /api/v0/login", s.postLogin)
-	mux.HandleFunc("GET /done", s.getDone)
-	mux.HandleFunc("GET /fail", s.getFail)
-
-	return mux
-}
-
-func Run(mux *http.ServeMux) {
-	err := (http.ListenAndServe(":8080", mux))
-	if err != nil {
-		log.Fatal("failed to http serve")
 	}
 }
