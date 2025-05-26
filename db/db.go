@@ -48,15 +48,16 @@ func New(dbPath string) (DB, error) {
 }
 
 func createTables(d *sql.DB) error {
-	stmt := `create table authors` + `(id integer not null primary key, name text); delete from authors;`
+	stmt := `create table authors
+	(id integer not null primary key, name text); delete from authors;`
 
 	_, err := d.Exec(stmt)
 	if err != nil {
 		return fmt.Errorf("%w: %s", err, stmt)
 	}
 
-	stmt = `create table posts` +
-		`(id integer not null primary key, date	integer, title text, link text, content text, author integer);
+	stmt = `create table posts
+		(id integer not null primary key, date	integer, title text, link text, content text, author integer);
 		delete from posts;`
 
 	_, err = d.Exec(stmt)
