@@ -205,7 +205,7 @@ func (d DB) UpdatePost(p Post) error {
 	return nil
 }
 
-func sanQry(p Params) string {
+func (p Params) String() string {
 	where := ""
 
 	if p.Author != "" {
@@ -224,7 +224,7 @@ func (d DB) ReadPosts(p Params) ([]Post, error) {
 		post  Post
 	)
 
-	query := sanQry(p)
+	query := p.String()
 
 	stmt, err := d.client.Prepare(query)
 	if err != nil {
