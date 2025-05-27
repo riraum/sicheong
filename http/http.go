@@ -22,12 +22,6 @@ type Server struct {
 	Key          *[32]byte
 }
 
-// type Params struct {
-// 	sort      string
-// 	direction string
-// 	author    string
-// }
-
 func (s Server) SetupMux() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.getIndex)
