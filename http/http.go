@@ -15,6 +15,8 @@ import (
 	"github.com/riraum/si-cheong/security"
 )
 
+const invalidID = -1
+
 type Server struct {
 	EmbedRootDir embed.FS
 	DB           db.DB
@@ -67,12 +69,12 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
 
-	authorExists, err := s.DB.AuthorExists(string(decryptedAuthorByte))
+	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
 		log.Fatalf("failed sql author exist check: %v", err)
 	}
 
-	if !authorExists {
+	if author == invalidID {
 		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
 
 		return false
@@ -248,7 +250,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
 
-	authorID, err := s.DB.AuthorID(string(decryptedAuthorByte))
+	authorID, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
 		http.Redirect(w, r, "/fail?reason=authorCookieError", http.StatusUnauthorized)
 		log.Fatalf("failed to decode base64 string to byte: %v", err)
@@ -297,7 +299,7 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
 
-	authorID, err := s.DB.AuthorID(string(decryptedAuthorByte))
+	authorID, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
 		http.Redirect(w, r, "/fail?reason=authorCookieError", http.StatusUnauthorized)
 		log.Fatalf("failed string to float conversion: %v", err)
@@ -444,17 +446,17 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		Secure: true,
 	}
 
-	authorExists, err := s.DB.AuthorExists(authorInput)
+	authorID, _ := s.DB.ReadAuthor(authorInput)
 	if err != nil {
-		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusSeeOther)
+		http.Redirect(w, r, "/fail?reason=authorReadError", http.StatusSeeOther)
 	}
 
-	if authorExists {
+	if authorID != invalidID {
 		http.SetCookie(w, &cookie)
 		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
 	}
 
-	if !authorExists {
+	if authorID == invalidID {
 		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusSeeOther)
 		return
 	}
