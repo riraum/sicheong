@@ -22,11 +22,11 @@ type Server struct {
 	Key          *[32]byte
 }
 
-type Params struct {
-	sort      string
-	direction string
-	author    string
-}
+// type Params struct {
+// 	sort      string
+// 	direction string
+// 	author    string
+// }
 
 func (s Server) SetupMux() *http.ServeMux {
 	mux := http.NewServeMux()
@@ -106,19 +106,27 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func parseQueryParams(r *http.Request) Params {
-	var p Params
+func parseQueryParams(r *http.Request) db.Params {
+	var p db.Params
 
 	if r.FormValue("sort") != "" {
-		p.sort = r.FormValue("sort")
+		p.Sort = r.FormValue("sort")
+	}
+
+	if r.FormValue("sort") == "" {
+		p.Sort = "date"
 	}
 
 	if r.FormValue("direction") != "" {
-		p.direction = r.FormValue("direction")
+		p.Direction = r.FormValue("direction")
+	}
+
+	if r.FormValue("direction") == "" {
+		p.Direction = "asc"
 	}
 
 	if r.FormValue("author") != "" {
-		p.author = r.FormValue("author")
+		p.Author = r.FormValue("author")
 	}
 
 	return p

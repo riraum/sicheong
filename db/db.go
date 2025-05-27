@@ -27,6 +27,12 @@ type Post struct {
 	AuthorID   float32 // Author.ID
 }
 
+type Params struct {
+	Sort      string
+	Direction string
+	Author    string
+}
+
 type DB struct {
 	client *sql.DB
 }
@@ -199,36 +205,49 @@ func (d DB) UpdatePost(p Post) error {
 	return nil
 }
 
-func sanQry(par map[string]string) string {
-	sort := "date"
-	dir := "asc"
+func sanQry(p Params) string {
 	where := ""
 
-	if par["sort"] != "" {
-		sort = par["sort"]
-	}
-
-	if par["direction"] != "" {
-		dir = par["direction"]
-	}
-
-	if par["author"] != "" {
-		where = fmt.Sprintf("WHERE author = %s", par["author"])
+	if p.Author != "" {
+		where = fmt.Sprintf("WHERE author = %s", p.Author)
 	}
 
 	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts %s ORDER BY %s %s",
-		where, sort, dir)
+		where, p.Sort, p.Direction)
 
 	return queryString
 }
 
-func (d DB) ReadPosts(par map[string]string) ([]Post, error) {
+// func sanQry(par map[string]string) string {
+// 	sort := "date"
+// 	dir := "asc"
+// 	where := ""
+
+// 	if par["sort"] != "" {
+// 		sort = par["sort"]
+// 	}
+
+// 	if par["direction"] != "" {
+// 		dir = par["direction"]
+// 	}
+
+// 	if par["author"] != "" {
+// 		where = fmt.Sprintf("WHERE author = %s", par["author"])
+// 	}
+
+// 	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts %s ORDER BY %s %s",
+// 		where, sort, dir)
+
+// 	return queryString
+// }
+
+func (d DB) ReadPosts(p Params) ([]Post, error) {
 	var (
 		posts []Post
 		post  Post
 	)
 
-	query := sanQry(par)
+	query := sanQry(p)
 
 	stmt, err := d.client.Prepare(query)
 	if err != nil {
@@ -253,6 +272,38 @@ func (d DB) ReadPosts(par map[string]string) ([]Post, error) {
 
 	return posts, nil
 }
+
+// func (d DB) ReadPosts(par map[string]string) ([]Post, error) {
+// 	var (
+// 		posts []Post
+// 		post  Post
+// 	)
+
+// 	query := sanQry(par)
+
+// 	stmt, err := d.client.Prepare(query)
+// 	if err != nil {
+// 		return nil, fmt.Errorf("failed to prepare %w", err)
+// 	}
+// 	defer stmt.Close()
+
+// 	rows, err := stmt.Query()
+// 	if err != nil {
+// 		return nil, fmt.Errorf("failed to select %w", err)
+// 	}
+// 	defer rows.Close()
+
+// 	for rows.Next() {
+// 		err = rows.Scan(&post.ID, &post.Date, &post.Title, &post.Link, &post.Content, &post.AuthorID)
+// 		if err != nil {
+// 			return nil, fmt.Errorf("failed to scan %w", err)
+// 		}
+
+// 		posts = append(posts, post)
+// 	}
+
+// 	return posts, nil
+// }
 
 func (d DB) ReadPost(id int) (Post, error) {
 	var p Post
