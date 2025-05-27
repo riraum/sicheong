@@ -266,3 +266,14 @@ func (d DB) ReadPost(id int) (Post, error) {
 
 	return p, nil
 }
+
+func ParseDates(p []Post) []Post {
+	for i, v := range p {
+		p[i].ParsedDate = ParseDate(v.Date)
+	}
+	return p
+}
+
+func ParseDate(ti int64) time.Time {
+	return time.Unix(ti, 0)
+}

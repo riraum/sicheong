@@ -89,9 +89,7 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("read posts: %v", err)
 	}
 
-	for i, v := range p {
-		p[i].ParsedDate = parseDate(v.Date)
-	}
+	p = db.ParseDates(p)
 
 	err = s.Template.ExecuteTemplate(w, "index.html.tmpl", p)
 
@@ -155,10 +153,6 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("failed to encode %v", err)
 	}
-}
-
-func parseDate(ti int64) time.Time {
-	return time.Unix(ti, 0)
 }
 
 func parseRValues(r *http.Request) (db.Post, error) {
@@ -370,7 +364,7 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("read posts: %v", err)
 	}
 
-	p.ParsedDate = parseDate(p.Date)
+	p.ParsedDate = db.ParseDate(p.Date)
 
 	err = s.Template.ExecuteTemplate(w, "post.html.tmpl", p)
 
