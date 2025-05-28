@@ -155,6 +155,7 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(p)
 	if err != nil {
+		w.WriteHeader(http.StatusNotAcceptable)
 		log.Fatalf("failed to encode %v", err)
 	}
 }
