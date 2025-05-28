@@ -251,10 +251,6 @@ func parsePostRValues(r *http.Request) (db.Post, error) {
 }
 
 func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
-	// cookie, err := r.Cookie("authorName")
-	// if err != nil {
-	// 	log.Fatal("no author cookie", err)
-	// }
 	var p db.Post
 
 	authorID, ok := s.authenticated(r, w)
@@ -268,34 +264,6 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		log.Fatalf("failed to parse values: %v", err)
 	}
-
-	// encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
-	// if err != nil {
-	// 	w.Header().Set("Content-Type", "application/json")
-	// 	w.WriteHeader(http.StatusNotAcceptable)
-
-	// 	err = json.NewEncoder(w).Encode(cookie.Value)
-	// 	if err != nil {
-	// 		log.Fatalf("failed to encode %v", err)
-	// 	}
-
-	// 	return
-	// }
-
-	// decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
-	// if err != nil {
-	// 	log.Fatalf("failed to decrypt: %v", err)
-	// }
-
-	// authorID, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
-	// if err != nil {
-	// 	http.Redirect(w, r, "/fail?reason=authorCookieError", http.StatusUnauthorized)
-	// 	log.Fatalf("failed to decode base64 string to byte: %v", err)
-
-	// 	return
-	// }
-
-	// p.AuthorID = authorID
 
 	err = s.DB.NewPost(p)
 	if err != nil {
@@ -312,15 +280,6 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
-	// cookie, err := r.Cookie("authorName")
-	// if err != nil {
-	// 	log.Fatal("no author cookie", err)
-	// }
-
-	// if !s.authenticated(r, w) {
-	// 	return
-	// }
-
 	var p db.Post
 
 	authorID, ok := s.authenticated(r, w)
@@ -335,26 +294,6 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to parse values: %v", err)
 	}
 
-	// encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
-	// if err != nil {
-	// 	log.Fatalf("failed to decode base64 string to byte: %v", err)
-	// }
-
-	// decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
-	// if err != nil {
-	// 	log.Fatalf("failed to decrypt: %v", err)
-	// }
-
-	// authorID, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
-	// if err != nil {
-	// 	http.Redirect(w, r, "/fail?reason=authorCookieError", http.StatusUnauthorized)
-	// 	log.Fatalf("failed string to float conversion: %v", err)
-
-	// 	return
-	// }
-
-	// p.AuthorID = authorID
-
 	err = s.DB.NewPost(p)
 	if err != nil {
 		log.Fatalf("create new post in db: %v", err)
@@ -364,11 +303,6 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
-	// if !s.authenticated(r, w) {
-	// 	fmt.Fprintln(w, http.StatusUnauthorized, "not authenticated")
-	// 	return
-	// }
-
 	var p db.Post
 
 	authorID, ok := s.authenticated(r, w)
@@ -398,10 +332,6 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
-	// if !s.authenticated(r, w) {
-	// 	return
-	// }
-
 	var p db.Post
 
 	authorID, ok := s.authenticated(r, w)
@@ -446,10 +376,6 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
-	// if !s.authenticated(r, w) {
-	// 	return
-	// }
-
 	var p db.Post
 
 	authorID, ok := s.authenticated(r, w)
@@ -474,10 +400,6 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
-	// if !s.authenticated(r, w) {
-	// 	return
-	// }
-
 	var p db.Post
 
 	authorID, ok := s.authenticated(r, w)
