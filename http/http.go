@@ -58,11 +58,18 @@ func Run(mux *http.ServeMux) {
 // }
 
 func handleError(w http.ResponseWriter, r *http.Request, msg string, code int) {
-	http.Redirect(w, r, fmt.Sprintf("/fail?reason=%s", msg), http.StatusUnauthorized)
-	// TODO
-	fmt.Println(code)
+	var status int
 
-	log.Fatalf("%s", msg)
+	switch code {
+	case 303:
+		status = http.StatusSeeOther
+	case 404:
+		status = http.StatusNotFound
+	}
+
+	http.Redirect(w, r, fmt.Sprintf("/fail?reason=%s", msg), status)
+
+	log.Fatalf("Error code %v /n %s", code, msg)
 }
 
 func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
