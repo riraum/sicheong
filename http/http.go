@@ -64,7 +64,7 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) (float32, 
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotAcceptable)
 
-		err = json.NewEncoder(w).Encode(cookie.Value)
+		err = json.NewEncoder(w).Encode(r)
 		if err != nil {
 			log.Fatalf("failed to decode base64 string to byte: %v", err)
 		}
