@@ -481,10 +481,9 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
 	}
 
-	if authorID == invalidID {
-		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusSeeOther)
-		return
-	}
+	http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusSeeOther)
+	return
+
 }
 
 func (s Server) getDone(w http.ResponseWriter, _ *http.Request) {
