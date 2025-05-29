@@ -136,36 +136,36 @@ func (d DB) NewAuthor(a Author) error {
 	return nil
 }
 
-func (d DB) ReadAuthor(name string) (authorID float32, err error) {
-	var authorNameFound string
+func (d DB) ReadAuthor(name string) (author Author, err error) {
+	// var authorNameFound string
 
 	stmt, err := d.client.Prepare("SELECT name FROM authors WHERE name = ?")
 	if err != nil {
-		return invalidID, fmt.Errorf("failed to select name: %w", err)
+		return author, fmt.Errorf("failed to select name: %w", err)
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRow(name).Scan(&authorNameFound)
+	err = stmt.QueryRow(name).Scan(&author.Name)
 	if err != nil {
-		return invalidID, fmt.Errorf("failed to query: %w", err)
+		return author, fmt.Errorf("failed to query: %w", err)
 	}
 
-	if authorNameFound == "" {
-		return invalidID, fmt.Errorf("failed to find author name: %w", err)
+	if author.Name == "" {
+		return author, fmt.Errorf("failed to find author name: %w", err)
 	}
 
 	stmt, err = d.client.Prepare("SELECT ID FROM authors WHERE name = ?")
 	if err != nil {
-		return invalidID, fmt.Errorf("failed to select name: %w", err)
+		return author, fmt.Errorf("failed to select name: %w", err)
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRow(name).Scan(&authorID)
+	err = stmt.QueryRow(name).Scan(&author.ID)
 	if err != nil {
-		return invalidID, fmt.Errorf("failed to query: %w", err)
+		return author, fmt.Errorf("failed to query: %w", err)
 	}
 
-	return authorID, nil
+	return author, nil
 }
 
 func (d DB) NewPost(p Post) error {

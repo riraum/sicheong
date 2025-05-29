@@ -69,12 +69,12 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
 
-	authorID, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
+	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
 		log.Fatalf("failed sql author exist check: %v", err)
 	}
 
-	if authorID == invalidID {
+	if author.ID == invalidID {
 		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
 
 		return false
@@ -275,7 +275,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
 
-	authorID, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
+	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
 		http.Redirect(w, r, "/fail?reason=authorCookieError", http.StatusUnauthorized)
 		log.Fatalf("failed to decode base64 string to byte: %v", err)
@@ -283,7 +283,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p.AuthorID = authorID
+	p.AuthorID = author.ID
 
 	err = s.DB.NewPost(p)
 	if err != nil {
@@ -324,7 +324,7 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
 
-	authorID, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
+	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
 		http.Redirect(w, r, "/fail?reason=authorCookieError", http.StatusUnauthorized)
 		log.Fatalf("failed string to float conversion: %v", err)
@@ -332,7 +332,7 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p.AuthorID = authorID
+	p.AuthorID = author.ID
 
 	err = s.DB.NewPost(p)
 	if err != nil {
@@ -471,12 +471,12 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		Secure: true,
 	}
 
-	authorID, _ := s.DB.ReadAuthor(authorInput)
+	author, _ := s.DB.ReadAuthor(authorInput)
 	if err != nil {
 		http.Redirect(w, r, "/fail?reason=authorReadError", http.StatusSeeOther)
 	}
 
-	if authorID != invalidID {
+	if author.ID != invalidID {
 		http.SetCookie(w, &cookie)
 		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
 	}
