@@ -69,12 +69,12 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
 
-	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
+	authorID, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
 		log.Fatalf("failed sql author exist check: %v", err)
 	}
 
-	if author == invalidID {
+	if authorID == invalidID {
 		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
 
 		return false
