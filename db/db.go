@@ -136,46 +136,31 @@ func (d DB) NewAuthor(a Author) error {
 	return nil
 }
 
-func (d DB) ReadAuthorName(name string) (authorName string, err error) {
-	// var authorNameFound string
+func (d DB) ReadAuthor(name string) (authorID float32, err error) {
+	var authorNameFound string
 
 	stmt, err := d.client.Prepare("SELECT name FROM authors WHERE name = ?")
-	if err != nil {
-		return "", fmt.Errorf("failed to select name: %w", err)
-	}
-	defer stmt.Close()
-
-	err = stmt.QueryRow(name).Scan(&authorName)
-	if err != nil {
-		return "", fmt.Errorf("failed to query: %w", err)
-	}
-
-	if authorName == "" {
-		return "", fmt.Errorf("failed to find author name: %w", err)
-	}
-
-	// stmt, err = d.client.Prepare("SELECT ID FROM authors WHERE name = ?")
-	// if err != nil {
-	// 	return "", fmt.Errorf("failed to select name: %w", err)
-	// }
-	// defer stmt.Close()
-
-	// err = stmt.QueryRow(name).Scan(&authorID)
-	// if err != nil {
-	// 	return "", fmt.Errorf("failed to query: %w", err)
-	// }
-
-	return authorName, nil
-}
-
-func (d DB) ReadAuthorID(authorName string) (authorID float32, err error) {
-	stmt, err := d.client.Prepare("SELECT ID FROM authors WHERE name = ?")
 	if err != nil {
 		return invalidID, fmt.Errorf("failed to select name: %w", err)
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRow(authorName).Scan(&authorID)
+	err = stmt.QueryRow(name).Scan(&authorNameFound)
+	if err != nil {
+		return invalidID, fmt.Errorf("failed to query: %w", err)
+	}
+
+	if authorNameFound == "" {
+		return invalidID, fmt.Errorf("failed to find author name: %w", err)
+	}
+
+	stmt, err = d.client.Prepare("SELECT ID FROM authors WHERE name = ?")
+	if err != nil {
+		return invalidID, fmt.Errorf("failed to select name: %w", err)
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRow(name).Scan(&authorID)
 	if err != nil {
 		return invalidID, fmt.Errorf("failed to query: %w", err)
 	}

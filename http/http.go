@@ -69,12 +69,12 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
 
-	authorName, err := s.DB.ReadAuthorName(string(decryptedAuthorByte))
+	authorID, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
 		log.Fatalf("failed sql author exist check: %v", err)
 	}
 
-	if authorName == "" {
+	if authorID == invalidID {
 		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
 
 		return false
@@ -275,18 +275,10 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
 
-	authorName, err := s.DB.ReadAuthorName(string(decryptedAuthorByte))
+	authorID, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
 		http.Redirect(w, r, "/fail?reason=authorCookieError", http.StatusUnauthorized)
 		log.Fatalf("failed to decode base64 string to byte: %v", err)
-
-		return
-	}
-
-	authorID, err := s.DB.ReadAuthorID(authorName)
-	if err != nil {
-		http.Redirect(w, r, "/fail?reason=authorIDError", http.StatusUnauthorized)
-		log.Fatalf("failed to read authorID %v", err)
 
 		return
 	}
@@ -332,18 +324,10 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
 
-	authorName, err := s.DB.ReadAuthorName(string(decryptedAuthorByte))
+	authorID, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
 		http.Redirect(w, r, "/fail?reason=authorCookieError", http.StatusUnauthorized)
 		log.Fatalf("failed string to float conversion: %v", err)
-
-		return
-	}
-
-	authorID, err := s.DB.ReadAuthorID(authorName)
-	if err != nil {
-		http.Redirect(w, r, "/fail?reason=authorIDError", http.StatusUnauthorized)
-		log.Fatalf("failed to read authorID %v", err)
 
 		return
 	}
@@ -487,17 +471,9 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		Secure: true,
 	}
 
-	authorName, _ := s.DB.ReadAuthorName(authorInput)
+	authorID, _ := s.DB.ReadAuthor(authorInput)
 	if err != nil {
 		http.Redirect(w, r, "/fail?reason=authorReadError", http.StatusSeeOther)
-	}
-
-	authorID, err := s.DB.ReadAuthorID(authorName)
-	if err != nil {
-		http.Redirect(w, r, "/fail?reason=authorIDError", http.StatusUnauthorized)
-		log.Fatalf("failed to read authorID %v", err)
-
-		return
 	}
 
 	if authorID != invalidID {
