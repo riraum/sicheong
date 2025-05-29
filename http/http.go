@@ -52,22 +52,8 @@ func Run(mux *http.ServeMux) {
 	}
 }
 
-// func (s Server) handleError(w http.ResponseWriter, r *http.Request) (msg string, code int) {
-// 	log.Fatalf("failed to %s", msg)
-// 	// http.Redirect(w, r, fmt.Sprintf("/fail?reason=%s", msg), http.StatusSeeOther)
-// }
-
 func handleError(w http.ResponseWriter, r *http.Request, msg string, code int) {
-	var status int
-
-	switch code {
-	case 303:
-		status = http.StatusSeeOther
-	case 404:
-		status = http.StatusNotFound
-	}
-
-	http.Redirect(w, r, fmt.Sprintf("/fail?reason=%s", msg), status)
+	http.Redirect(w, r, fmt.Sprintf("/fail?reason=%s", msg), code)
 
 	log.Fatalf("Error code %v /n %s", code, msg)
 }
