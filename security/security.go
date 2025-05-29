@@ -12,15 +12,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func NewEncryptionKey() *[32]byte {
+func NewEncryptionKey() (*[32]byte, error) {
 	key := [32]byte{}
 
 	_, err := io.ReadFull(rand.Reader, key[:])
 	if err != nil {
-		panic(err)
+		return nil, fmt.Errorf("failed to generate random encryption key: %w", err)
 	}
 
-	return &key
+	return &key, nil
 }
 
 func Encrypt(plaintxt []byte, key *[32]byte) (ciphertxt []byte, err error) {

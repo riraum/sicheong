@@ -27,6 +27,12 @@ type Post struct {
 	AuthorID   float32 // Author.ID
 }
 
+type Params struct {
+	Sort      string
+	Direction string
+	Author    string
+}
+
 type DB struct {
 	client *sql.DB
 }
@@ -48,21 +54,22 @@ func New(dbPath string) (DB, error) {
 }
 
 func createTables(d *sql.DB) error {
-	sqlStmtA := `create table authors` + `(id integer not null primary key, name text); delete from authors;`
+	stmt := `create table authors
+	(id integer not null primary key, name text); delete from authors;`
 
-	_, err := d.Exec(sqlStmtA)
+	_, err := d.Exec(stmt)
 	if err != nil {
-		return fmt.Errorf("%w: %s", err, sqlStmtA)
+		return fmt.Errorf("%w: %s", err, stmt)
 	}
 
-	sqlStmtP := `create table posts` +
-		`(id integer not null primary key, date	integer, title text, link text, content text, author integer);
+	stmt = `create table posts
+		(id integer not null primary key, date	integer, title text, link text, content text, author integer);
 		delete from posts;`
 
-	_, err = d.Exec(sqlStmtP)
+	_, err = d.Exec(stmt)
 	if err != nil {
 		return fmt.Errorf("%w: %s",
-			err, sqlStmtP)
+			err, stmt)
 	}
 
 	return nil
@@ -129,8 +136,8 @@ func (d DB) NewAuthor(a Author) error {
 	return nil
 }
 
-func (d DB) AuthorExists(a string) (bool, error) {
-	var author string
+func (d DB) AuthorExists(authorName string) (bool, error) {
+	var authorNameFound string
 
 	stmt, err := d.client.Prepare("SELECT name FROM authors WHERE name = ?")
 	if err != nil {
@@ -138,20 +145,20 @@ func (d DB) AuthorExists(a string) (bool, error) {
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRow(a).Scan(&author)
+	err = stmt.QueryRow(authorName).Scan(&authorNameFound)
 	if err != nil {
 		return false, fmt.Errorf("failed to query: %w", err)
 	}
 
-	if author != "" {
+	if authorNameFound != "" {
 		return true, nil
 	}
 
 	return false, nil
 }
 
-func (d DB) AuthorNametoID(a string) (float32, error) {
-	var AuthorID float32
+func (d DB) AuthorID(authorName string) (float32, error) {
+	var authorID float32
 
 	stmt, err := d.client.Prepare("SELECT ID FROM authors WHERE name = ?")
 	if err != nil {
@@ -159,12 +166,12 @@ func (d DB) AuthorNametoID(a string) (float32, error) {
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRow(a).Scan(&AuthorID)
+	err = stmt.QueryRow(authorName).Scan(&authorID)
 	if err != nil {
 		return invalidID, fmt.Errorf("failed to query: %w", err)
 	}
 
-	return AuthorID, nil
+	return authorID, nil
 }
 
 func (d DB) NewPost(p Post) error {
@@ -179,9 +186,7 @@ func (d DB) NewPost(p Post) error {
 }
 
 func (d DB) DeletePost(p Post) error {
-	sqlStmt := `DELETE from posts WHERE id = ?`
-
-	_, err := d.client.Exec(sqlStmt, p.ID)
+	_, err := d.client.Exec("DELETE from posts WHERE id = ?", p.ID)
 	if err != nil {
 		return fmt.Errorf("failed to delete %w", err)
 	}
@@ -190,9 +195,7 @@ func (d DB) DeletePost(p Post) error {
 }
 
 func (d DB) UpdatePost(p Post) error {
-	sqlStmt := `UPDATE posts SET date = ?, title = ?, link = ?, content = ?, author = ? WHERE id = ?`
-
-	_, err := d.client.Exec(sqlStmt, p.Date, p.Title, p.Link, p.Content, p.AuthorID, p.ID)
+	_, err := d.client.Exec(`UPDATE posts SET date = ?, title = ?, link = ?, content = ?, author = ? WHERE id = ?`, p.Date, p.Title, p.Link, p.Content, p.AuthorID, p.ID)
 	if err != nil {
 		return fmt.Errorf("failed to update %w", err)
 	}
@@ -200,38 +203,28 @@ func (d DB) UpdatePost(p Post) error {
 	return nil
 }
 
-func sanQry(par map[string]string) string {
-	sort := "date"
-	dir := "asc"
+func (p Params) String() string {
 	where := ""
 
-	if par["sort"] != "" {
-		sort = par["sort"]
-	}
-
-	if par["direction"] != "" {
-		dir = par["direction"]
-	}
-
-	if par["author"] != "" {
-		where = fmt.Sprintf("WHERE author = %s", par["author"])
+	if p.Author != "" {
+		where = fmt.Sprintf("WHERE author = %s", p.Author)
 	}
 
 	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts %s ORDER BY %s %s",
-		where, sort, dir)
+		where, p.Sort, p.Direction)
 
 	return queryString
 }
 
-func (d DB) ReadPosts(par map[string]string) ([]Post, error) {
+func (d DB) ReadPosts(p Params) ([]Post, error) {
 	var (
 		posts []Post
 		post  Post
 	)
 
-	queryString := sanQry(par)
+	query := p.String()
 
-	stmt, err := d.client.Prepare(queryString)
+	stmt, err := d.client.Prepare(query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare %w", err)
 	}
@@ -255,7 +248,7 @@ func (d DB) ReadPosts(par map[string]string) ([]Post, error) {
 	return posts, nil
 }
 
-func (d DB) ReadPost(ID int) (Post, error) {
+func (d DB) ReadPost(id int) (Post, error) {
 	var p Post
 
 	stmt, err := d.client.Prepare("SELECT id, date, title, link, content, author FROM posts where id = ?")
@@ -264,7 +257,7 @@ func (d DB) ReadPost(ID int) (Post, error) {
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRow(ID).Scan(&p.ID, &p.Date, &p.Title, &p.Link, &p.Content, &p.AuthorID)
+	err = stmt.QueryRow(id).Scan(&p.ID, &p.Date, &p.Title, &p.Link, &p.Content, &p.AuthorID)
 	if err != nil {
 		return p, fmt.Errorf("failed to queryRow: %w", err)
 	}

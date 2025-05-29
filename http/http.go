@@ -16,18 +16,73 @@ import (
 )
 
 type Server struct {
-	RootDir      string
 	EmbedRootDir embed.FS
 	DB           db.DB
-	T            *template.Template
+	Template     *template.Template
 	Key          *[32]byte
 }
 
-func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
-	par, err := parseRValuesMap(r)
-	if err != nil {
-		log.Fatalf("parse to map %v", err)
+func (s Server) SetupMux() *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.HandleFunc("GET /{$}", s.getIndex)
+	mux.HandleFunc("GET /static/pico.min.css", s.getCSS)
+	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
+	mux.HandleFunc("POST /api/v0/post", s.postAPIPost)
+	mux.HandleFunc("POST /post", s.postPost)
+	mux.HandleFunc("DELETE /api/v0/post/{id}", s.deleteAPIPost)
+	/* HTML5 specification only allows GET and POST. Therefore using POST for human delete interactions.
+	More details: https://github.com/riraum/si-cheong/pull/137*/
+	mux.HandleFunc("POST /post/delete/{id}", s.deletePost)
+	mux.HandleFunc("GET /post/{id}", s.viewPost)
+	mux.HandleFunc("POST /api/v0/post/{id}", s.editAPIPost)
+	mux.HandleFunc("POST /post/{id}", s.editPost)
+	mux.HandleFunc("GET /login", s.getLogin)
+	mux.HandleFunc("POST /api/v0/login", s.postLogin)
+	mux.HandleFunc("GET /done", s.getDone)
+	mux.HandleFunc("GET /fail", s.getFail)
+
+	return mux
+}
+
+func Run(mux *http.ServeMux) {
+	if err := (http.ListenAndServe(":8080", mux)); err != nil {
+		log.Fatal("failed to http serve")
 	}
+}
+
+func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
+	cookie, err := r.Cookie("authorName")
+	if err != nil {
+		http.Redirect(w, r, "/fail?reason=cookieDoesntExist", http.StatusSeeOther)
+		return false
+	}
+
+	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
+	if err != nil {
+		log.Fatalf("failed to decode base64 string to byte: %v", err)
+	}
+
+	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
+	if err != nil {
+		log.Fatalf("failed to decrypt: %v", err)
+	}
+
+	authorExists, err := s.DB.AuthorExists(string(decryptedAuthorByte))
+	if err != nil {
+		log.Fatalf("failed sql author exist check: %v", err)
+	}
+
+	if !authorExists {
+		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
+
+		return false
+	}
+
+	return true
+}
+
+func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
+	par := parseQueryParams(r)
 
 	p, err := s.DB.ReadPosts(par)
 	if err != nil {
@@ -38,29 +93,37 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 		p[i].ParsedDate = parseDate(v.Date)
 	}
 
-	err = s.T.ExecuteTemplate(w, "index.html.tmpl", p)
+	err = s.Template.ExecuteTemplate(w, "index.html.tmpl", p)
 
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}
 }
 
-func parseRValuesMap(r *http.Request) (map[string]string, error) {
-	par := map[string]string{}
+func parseQueryParams(r *http.Request) db.Params {
+	var p db.Params
 
 	if r.FormValue("sort") != "" {
-		par["sort"] = r.FormValue("sort")
+		p.Sort = r.FormValue("sort")
+	}
+
+	if r.FormValue("sort") == "" {
+		p.Sort = "date"
 	}
 
 	if r.FormValue("direction") != "" {
-		par["direction"] = r.FormValue("direction")
+		p.Direction = r.FormValue("direction")
+	}
+
+	if r.FormValue("direction") == "" {
+		p.Direction = "asc"
 	}
 
 	if r.FormValue("author") != "" {
-		par["author"] = r.FormValue("author")
+		p.Author = r.FormValue("author")
 	}
 
-	return par, nil
+	return p
 }
 
 func (s Server) getCSS(w http.ResponseWriter, _ *http.Request) {
@@ -70,14 +133,14 @@ func (s Server) getCSS(w http.ResponseWriter, _ *http.Request) {
 	}
 
 	w.Header().Add("Content-Type", "text/css")
-	fmt.Fprint(w, string(css))
+
+	if _, err = w.Write(css); err != nil {
+		log.Fatalln("failed to write css", err)
+	}
 }
 
 func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
-	par, err := parseRValuesMap(r)
-	if err != nil {
-		log.Fatalf("parse to map %v", err)
-	}
+	par := parseQueryParams(r)
 
 	p, err := s.DB.ReadPosts(par)
 	if err != nil {
@@ -184,7 +247,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
 
-	authorID, err := s.DB.AuthorNametoID(string(decryptedAuthorByte))
+	authorID, err := s.DB.AuthorID(string(decryptedAuthorByte))
 	if err != nil {
 		http.Redirect(w, r, "/fail?reason=authorCookieError", http.StatusUnauthorized)
 		log.Fatalf("failed to decode base64 string to byte: %v", err)
@@ -233,7 +296,7 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
 
-	authorID, err := s.DB.AuthorNametoID(string(decryptedAuthorByte))
+	authorID, err := s.DB.AuthorID(string(decryptedAuthorByte))
 	if err != nil {
 		http.Redirect(w, r, "/fail?reason=authorCookieError", http.StatusUnauthorized)
 		log.Fatalf("failed string to float conversion: %v", err)
@@ -308,42 +371,11 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 
 	p.ParsedDate = parseDate(p.Date)
 
-	err = s.T.ExecuteTemplate(w, "post.html.tmpl", p)
+	err = s.Template.ExecuteTemplate(w, "post.html.tmpl", p)
 
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}
-}
-
-func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
-	cookie, err := r.Cookie("authorName")
-	if err != nil {
-		http.Redirect(w, r, "/fail?reason=cookieDoesntExist", http.StatusSeeOther)
-		return false
-	}
-
-	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
-	if err != nil {
-		log.Fatalf("failed to decode base64 string to byte: %v", err)
-	}
-
-	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
-	if err != nil {
-		log.Fatalf("failed to decrypt: %v", err)
-	}
-
-	authorExists, err := s.DB.AuthorExists(string(decryptedAuthorByte))
-	if err != nil {
-		log.Fatalf("failed sql author exist check: %v", err)
-	}
-
-	if !authorExists {
-		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
-
-		return false
-	}
-
-	return true
 }
 
 func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
@@ -390,7 +422,7 @@ func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
-	err := s.T.ExecuteTemplate(w, "login.html.tmpl", nil)
+	err := s.Template.ExecuteTemplate(w, "login.html.tmpl", nil)
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}
@@ -428,7 +460,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) getDone(w http.ResponseWriter, _ *http.Request) {
-	err := s.T.ExecuteTemplate(w, "done.html.tmpl", nil)
+	err := s.Template.ExecuteTemplate(w, "done.html.tmpl", nil)
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}
@@ -437,32 +469,8 @@ func (s Server) getDone(w http.ResponseWriter, _ *http.Request) {
 func (s Server) getFail(w http.ResponseWriter, r *http.Request) {
 	reason := r.URL.Query().Get("reason")
 
-	err := s.T.ExecuteTemplate(w, "fail.html.tmpl", reason)
+	err := s.Template.ExecuteTemplate(w, "fail.html.tmpl", reason)
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}
-}
-
-func (s Server) SetupMux() *http.ServeMux {
-	mux := http.NewServeMux()
-	mux.HandleFunc("GET /{$}", s.getIndex)
-	mux.HandleFunc("GET /static/pico.min.css", s.getCSS)
-	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
-	mux.HandleFunc("POST /api/v0/post", s.postAPIPost)
-	mux.HandleFunc("POST /post", s.postPost)
-	mux.HandleFunc("DELETE /api/v0/post/{id}", s.deleteAPIPost)
-	mux.HandleFunc("POST /post/delete/{id}", s.deletePost)
-	mux.HandleFunc("GET /post/{id}", s.viewPost)
-	mux.HandleFunc("POST /api/v0/post/{id}", s.editAPIPost)
-	mux.HandleFunc("POST /post/{id}", s.editPost)
-	mux.HandleFunc("GET /login", s.getLogin)
-	mux.HandleFunc("POST /api/v0/login", s.postLogin)
-	mux.HandleFunc("GET /done", s.getDone)
-	mux.HandleFunc("GET /fail", s.getFail)
-
-	return mux
-}
-
-func Run(mux *http.ServeMux) {
-	log.Fatal(http.ListenAndServe(":8080", mux))
 }
