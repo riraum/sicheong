@@ -137,6 +137,8 @@ func (d DB) NewAuthor(a Author) error {
 }
 
 func (d DB) ReadAuthor(name string) (author Author, err error) {
+	// var authorNameFound string
+
 	stmt, err := d.client.Prepare("SELECT name FROM authors WHERE name = ?")
 	if err != nil {
 		return author, fmt.Errorf("failed to select name: %w", err)
