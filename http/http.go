@@ -100,22 +100,30 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func parseQueryParams(r *http.Request) map[string]string {
-	par := map[string]string{}
+func parseQueryParams(r *http.Request) db.Params {
+	var p db.Params
 
 	if r.FormValue("sort") != "" {
-		par["sort"] = r.FormValue("sort")
+		p.Sort = r.FormValue("sort")
+	}
+
+	if r.FormValue("sort") == "" {
+		p.Sort = "date"
 	}
 
 	if r.FormValue("direction") != "" {
-		par["direction"] = r.FormValue("direction")
+		p.Direction = r.FormValue("direction")
+	}
+
+	if r.FormValue("direction") == "" {
+		p.Direction = "asc"
 	}
 
 	if r.FormValue("author") != "" {
-		par["author"] = r.FormValue("author")
+		p.Author = r.FormValue("author")
 	}
 
-	return par
+	return p
 }
 
 func (s Server) getCSS(w http.ResponseWriter, _ *http.Request) {

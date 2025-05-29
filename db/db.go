@@ -27,6 +27,12 @@ type Post struct {
 	AuthorID   float32 // Author.ID
 }
 
+type Params struct {
+	Sort      string
+	Direction string
+	Author    string
+}
+
 type DB struct {
 	client *sql.DB
 }
@@ -189,9 +195,7 @@ func (d DB) DeletePost(p Post) error {
 }
 
 func (d DB) UpdatePost(p Post) error {
-	stmt := `UPDATE posts SET date = ?, title = ?, link = ?, content = ?, author = ? WHERE id = ?`
-
-	_, err := d.client.Exec(stmt, p.Date, p.Title, p.Link, p.Content, p.AuthorID, p.ID)
+	_, err := d.client.Exec(`UPDATE posts SET date = ?, title = ?, link = ?, content = ?, author = ? WHERE id = ?`, p.Date, p.Title, p.Link, p.Content, p.AuthorID, p.ID)
 	if err != nil {
 		return fmt.Errorf("failed to update %w", err)
 	}
@@ -199,36 +203,26 @@ func (d DB) UpdatePost(p Post) error {
 	return nil
 }
 
-func sanQry(par map[string]string) string {
-	sort := "date"
-	dir := "asc"
+func (p Params) String() string {
 	where := ""
 
-	if par["sort"] != "" {
-		sort = par["sort"]
-	}
-
-	if par["direction"] != "" {
-		dir = par["direction"]
-	}
-
-	if par["author"] != "" {
-		where = fmt.Sprintf("WHERE author = %s", par["author"])
+	if p.Author != "" {
+		where = fmt.Sprintf("WHERE author = %s", p.Author)
 	}
 
 	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts %s ORDER BY %s %s",
-		where, sort, dir)
+		where, p.Sort, p.Direction)
 
 	return queryString
 }
 
-func (d DB) ReadPosts(par map[string]string) ([]Post, error) {
+func (d DB) ReadPosts(p Params) ([]Post, error) {
 	var (
 		posts []Post
 		post  Post
 	)
 
-	query := sanQry(par)
+	query := p.String()
 
 	stmt, err := d.client.Prepare(query)
 	if err != nil {
