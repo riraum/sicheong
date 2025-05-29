@@ -52,6 +52,12 @@ func Run(mux *http.ServeMux) {
 	}
 }
 
+func handleError(w http.ResponseWriter, r *http.Request, msg string, code int) {
+	http.Redirect(w, r, fmt.Sprintf("/fail?reason=%s", msg), code)
+
+	log.Fatalf("Error code %v /n %s", code, msg)
+}
+
 func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	cookie, err := r.Cookie("authorName")
 	if err != nil {
@@ -61,6 +67,7 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 
 	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
 	if err != nil {
+
 		log.Fatalf("failed to decode base64 string to byte: %v", err)
 	}
 
