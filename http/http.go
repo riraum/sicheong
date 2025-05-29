@@ -125,7 +125,10 @@ func (s Server) getCSS(w http.ResponseWriter, _ *http.Request) {
 	}
 
 	w.Header().Add("Content-Type", "text/css")
-	fmt.Fprint(w, string(css))
+
+	if _, err = w.Write(css); err != nil {
+		log.Fatalln("failed to write css", err)
+	}
 }
 
 func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
