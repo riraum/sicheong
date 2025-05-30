@@ -27,6 +27,8 @@ type Post struct {
 	AuthorID   float32 // Author.ID
 }
 
+type Posts []*Post
+
 type Params struct {
 	Sort      string
 	Direction string
@@ -267,13 +269,12 @@ func (d DB) ReadPost(id int) (Post, error) {
 	return p, nil
 }
 
-func ParseDates(p []Post) []Post {
-	for i, v := range p {
-		p[i].ParsedDate = ParseDate(v.Date)
-	}
-	return p
+func (p *Post) ParseDate() {
+	p.ParsedDate = time.Unix(p.Date, 0)
 }
 
-func ParseDate(ti int64) time.Time {
-	return time.Unix(ti, 0)
+func (p *Posts) ParseDates() {
+	for _, post := range p {
+		post.ParseDate()
+	}
 }

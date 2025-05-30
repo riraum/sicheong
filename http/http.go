@@ -89,7 +89,9 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("read posts: %v", err)
 	}
 
-	p = db.ParseDates(p)
+	p.ParseDates()
+
+	// p = p.db.ParseDates(p)
 
 	err = s.Template.ExecuteTemplate(w, "index.html.tmpl", p)
 
@@ -364,7 +366,7 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("read posts: %v", err)
 	}
 
-	p.ParsedDate = db.ParseDate(p.Date)
+	p.ParseDate()
 
 	err = s.Template.ExecuteTemplate(w, "post.html.tmpl", p)
 
