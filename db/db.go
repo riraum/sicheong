@@ -274,7 +274,7 @@ func (p *Post) ParseDate() {
 }
 
 func (p *Posts) ParseDates() {
-	for _, post := range p {
+	for _, post := range *p {
 		post.ParseDate()
 	}
 }
