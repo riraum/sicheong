@@ -197,9 +197,7 @@ func (d DB) DeletePost(p Post) error {
 }
 
 func (d DB) UpdatePost(p Post) error {
-	stmt := `UPDATE posts SET date = ?, title = ?, link = ?, content = ?, author = ? WHERE id = ?`
-
-	_, err := d.client.Exec(stmt, p.Date, p.Title, p.Link, p.Content, p.AuthorID, p.ID)
+	_, err := d.client.Exec(`UPDATE posts SET date = ?, title = ?, link = ?, content = ?, author = ? WHERE id = ?`, p.Date, p.Title, p.Link, p.Content, p.AuthorID, p.ID)
 	if err != nil {
 		return fmt.Errorf("failed to update %w", err)
 	}
@@ -207,7 +205,7 @@ func (d DB) UpdatePost(p Post) error {
 	return nil
 }
 
-func sanQry(p Params) string {
+func (p Params) String() string {
 	where := ""
 
 	if p.Author != "" {
@@ -224,7 +222,7 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 	var post Post
 	var posts Posts
 
-	query := sanQry(p)
+	query := p.String()
 
 	stmt, err := d.client.Prepare(query)
 	if err != nil {
