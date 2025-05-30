@@ -81,7 +81,7 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 		log.Fatalf("failed sql author exist check: %v", err)
 	}
 
-	if author.ID == invalidID {
+	if author.Name == "" {
 		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
 
 		return false
@@ -483,7 +483,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/fail?reason=authorReadError", http.StatusSeeOther)
 	}
 
-	if author.ID != invalidID {
+	if author.Name != "" {
 		http.SetCookie(w, &cookie)
 		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
 	}
