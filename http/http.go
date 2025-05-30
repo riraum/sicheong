@@ -98,9 +98,7 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("read posts: %v", err)
 	}
 
-	for i, v := range p {
-		p[i].ParsedDate = parseDate(v.Date)
-	}
+	p.ParseDates()
 
 	err = s.Template.ExecuteTemplate(w, "index.html.tmpl", p)
 
@@ -143,8 +141,7 @@ func (s Server) getCSS(w http.ResponseWriter, _ *http.Request) {
 
 	w.Header().Add("Content-Type", "text/css")
 
-	_, err = w.Write(css)
-	if err != nil {
+	if _, err = w.Write(css); err != nil {
 		log.Fatalln("failed to write css", err)
 	}
 }
@@ -165,10 +162,6 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusNotAcceptable)
 		log.Fatalf("failed to encode %v", err)
 	}
-}
-
-func parseDate(ti int64) time.Time {
-	return time.Unix(ti, 0)
 }
 
 func parseGetRValues(r *http.Request) (db.Post, error) {
@@ -393,7 +386,7 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("read posts: %v", err)
 	}
 
-	p.ParsedDate = parseDate(p.Date)
+	p.ParseDate()
 
 	err = s.Template.ExecuteTemplate(w, "post.html.tmpl", p)
 
