@@ -154,6 +154,22 @@ func (d DB) ReadAuthor(name string) (Author, error) {
 	return author, nil
 }
 
+func (d DB) ReadAuthorByName(name string) (Author, error) {
+	author, err := d.ReadAuthor(name)
+	if err != nil {
+		return author, fmt.Errorf("failed to run: %w", err)
+	}
+	return author, nil
+}
+
+func (d DB) ReadAuthorByID(name string) (Author, error) {
+	author, err := d.ReadAuthor(name)
+	if err != nil {
+		return author, fmt.Errorf("failed to run: %w", err)
+	}
+	return author, nil
+}
+
 func (d DB) NewPost(p Post) error {
 	_, err := d.client.Exec(
 		"INSERT into posts(date, title, link, content, author) values(?, ?, ?, ?, ?)",
