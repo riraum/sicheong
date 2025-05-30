@@ -183,17 +183,6 @@ func parseGetRValues(r *http.Request) (db.Post, error) {
 		p.ID = float32(ID)
 	}
 
-	if r.FormValue("date") != "" {
-		date := r.FormValue("date")
-
-		time, err := time.Parse(time.DateOnly, date)
-		if err != nil {
-			return p, fmt.Errorf("date parse: %w", err)
-		}
-
-		p.ParsedDate = time
-	}
-
 	if r.FormValue("author") != "" {
 		author, err := strconv.ParseFloat(r.FormValue("author"), 32)
 		if err != nil {
