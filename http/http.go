@@ -15,6 +15,8 @@ import (
 	"github.com/riraum/si-cheong/security"
 )
 
+const invalidID = -1
+
 type Server struct {
 	EmbedRootDir embed.FS
 	DB           db.DB
@@ -50,6 +52,12 @@ func Run(mux *http.ServeMux) {
 	}
 }
 
+func handleError(w http.ResponseWriter, r *http.Request, msg string, code int) {
+	http.Redirect(w, r, fmt.Sprintf("/fail?reason=%s", msg), code)
+
+	log.Fatalf("Error code %v /n %s", code, msg)
+}
+
 func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	cookie, err := r.Cookie("authorName")
 	if err != nil {
@@ -59,6 +67,7 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 
 	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
 	if err != nil {
+
 		log.Fatalf("failed to decode base64 string to byte: %v", err)
 	}
 
@@ -67,12 +76,12 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
 
-	authorExists, err := s.DB.AuthorExists(string(decryptedAuthorByte))
+	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
 		log.Fatalf("failed sql author exist check: %v", err)
 	}
 
-	if !authorExists {
+	if author.Name == "" {
 		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
 
 		return false
@@ -150,11 +159,12 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(p)
 	if err != nil {
+		w.WriteHeader(http.StatusNotAcceptable)
 		log.Fatalf("failed to encode %v", err)
 	}
 }
 
-func parseRValues(r *http.Request) (db.Post, error) {
+func parseGetRValues(r *http.Request) (db.Post, error) {
 	var p db.Post
 
 	if r.PathValue("id") != "" {
@@ -166,30 +176,43 @@ func parseRValues(r *http.Request) (db.Post, error) {
 		p.ID = float32(ID)
 	}
 
-	switch r.Method {
-	case http.MethodPost:
-		if r.FormValue("date") != "" {
-			date := r.FormValue("date")
-
-			time, err := time.Parse(time.DateOnly, date)
-			if err != nil {
-				return p, fmt.Errorf("date parse: %w", err)
-			}
-
-			p.Date = time.Unix()
+	if r.FormValue("author") != "" {
+		author, err := strconv.ParseFloat(r.FormValue("author"), 32)
+		if err != nil {
+			return p, fmt.Errorf("author convert to float: %w", err)
 		}
-	case http.MethodGet:
-		if r.FormValue("date") != "" {
-			date := r.FormValue("date")
 
-			time, err := time.Parse(time.DateOnly, date)
-			if err != nil {
-				return p, fmt.Errorf("date parse: %w", err)
-			}
+		p.AuthorID = float32(author)
+	}
 
-			p.ParsedDate = time
+	p.Title = r.FormValue("title")
+	p.Link = r.FormValue("link")
+	p.Content = r.FormValue("content")
+
+	return p, nil
+}
+
+func parsePostRValues(r *http.Request) (db.Post, error) {
+	var p db.Post
+
+	if r.PathValue("id") != "" {
+		ID, err := strconv.ParseFloat(r.PathValue("id"), 32)
+		if err != nil {
+			return p, fmt.Errorf("ID convert to float %w", err)
 		}
-	default:
+
+		p.ID = float32(ID)
+	}
+
+	if r.FormValue("date") != "" {
+		date := r.FormValue("date")
+
+		time, err := time.Parse(time.DateOnly, date)
+		if err != nil {
+			return p, fmt.Errorf("date parse: %w", err)
+		}
+
+		p.Date = time.Unix()
 	}
 
 	if r.FormValue("author") != "" {
@@ -218,7 +241,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p, err := parseRValues(r)
+	p, err := parsePostRValues(r)
 	if err != nil {
 		log.Fatalf("failed to parse values: %v", err)
 	}
@@ -241,7 +264,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
 
-	authorID, err := s.DB.AuthorID(string(decryptedAuthorByte))
+	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
 		http.Redirect(w, r, "/fail?reason=authorCookieError", http.StatusUnauthorized)
 		log.Fatalf("failed to decode base64 string to byte: %v", err)
@@ -249,7 +272,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p.AuthorID = authorID
+	p.AuthorID = author.ID
 
 	err = s.DB.NewPost(p)
 	if err != nil {
@@ -275,7 +298,7 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p, err := parseRValues(r)
+	p, err := parsePostRValues(r)
 	if err != nil {
 		log.Fatalf("failed to parse values: %v", err)
 	}
@@ -290,7 +313,7 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("failed to decrypt: %v", err)
 	}
 
-	authorID, err := s.DB.AuthorID(string(decryptedAuthorByte))
+	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
 		http.Redirect(w, r, "/fail?reason=authorCookieError", http.StatusUnauthorized)
 		log.Fatalf("failed string to float conversion: %v", err)
@@ -298,7 +321,7 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p.AuthorID = authorID
+	p.AuthorID = author.ID
 
 	err = s.DB.NewPost(p)
 	if err != nil {
@@ -314,7 +337,7 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p, err := parseRValues(r)
+	p, err := parsePostRValues(r)
 	if err != nil {
 		log.Fatalf("failed to parse values: %v", err)
 	}
@@ -338,7 +361,7 @@ func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p, err := parseRValues(r)
+	p, err := parsePostRValues(r)
 	if err != nil {
 		log.Fatalf("failed to parse values: %v", err)
 	}
@@ -353,7 +376,7 @@ func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
-	p, err := parseRValues(r)
+	p, err := parseGetRValues(r)
 	if err != nil {
 		log.Fatalf("failed to parse values: %v", err)
 	}
@@ -377,7 +400,7 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p, err := parseRValues(r)
+	p, err := parsePostRValues(r)
 	if err != nil {
 		log.Fatalf("failed to parse values: %v", err)
 	}
@@ -396,7 +419,7 @@ func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p, err := parseRValues(r)
+	p, err := parsePostRValues(r)
 	if err != nil {
 		log.Fatalf("failed to parse values: %v", err)
 	}
@@ -437,20 +460,18 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		Secure: true,
 	}
 
-	authorExists, err := s.DB.AuthorExists(authorInput)
+	author, _ := s.DB.ReadAuthor(authorInput)
 	if err != nil {
-		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusSeeOther)
+		http.Redirect(w, r, "/fail?reason=authorReadError", http.StatusSeeOther)
 	}
 
-	if authorExists {
+	if author.Name != "" {
 		http.SetCookie(w, &cookie)
 		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
 	}
 
-	if !authorExists {
-		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusSeeOther)
-		return
-	}
+	http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusSeeOther)
+
 }
 
 func (s Server) getDone(w http.ResponseWriter, _ *http.Request) {
