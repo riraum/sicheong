@@ -220,11 +220,9 @@ func sanQry(p Params) string {
 	return queryString
 }
 
-func (d DB) ReadPosts(p Params) ([]Post, error) {
-	var (
-		posts []Post
-		post  Post
-	)
+func (d DB) ReadPosts(p Params) (Posts, error) {
+	var post Post
+	var posts Posts
 
 	query := sanQry(p)
 
@@ -246,7 +244,7 @@ func (d DB) ReadPosts(p Params) ([]Post, error) {
 			return nil, fmt.Errorf("failed to scan %w", err)
 		}
 
-		posts = append(posts, post)
+		posts = append(posts, &post)
 	}
 
 	return posts, nil

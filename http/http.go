@@ -91,8 +91,6 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 
 	p.ParseDates()
 
-	// p = p.db.ParseDates(p)
-
 	err = s.Template.ExecuteTemplate(w, "index.html.tmpl", p)
 
 	if err != nil {
