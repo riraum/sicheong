@@ -461,9 +461,6 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	author, _ := s.DB.ReadAuthor(authorInput)
-	if err != nil {
-		http.Redirect(w, r, "/fail?reason=authorReadError", http.StatusSeeOther)
-	}
 
 	if author.Name != "" {
 		http.SetCookie(w, &cookie)
