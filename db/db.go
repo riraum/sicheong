@@ -206,7 +206,7 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 	// query := p.String()
 
 	if p.Author != "" {
-		query = "SELECT id, date, title, link, content, author FROM posts WHERE author = ? ORDER BY ? ?"
+		query = "SELECT id, date, title, link, content, author FROM posts WHERE author = ?"
 
 		stmt, err := d.client.Prepare(query)
 		if err != nil {
@@ -214,7 +214,7 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 		}
 		defer stmt.Close()
 
-		rows, err := stmt.Query(p.Author, p.Sort, p.Direction)
+		rows, err := stmt.Query(p.Author)
 		if err != nil {
 			return nil, fmt.Errorf("failed to select %w", err)
 		}
@@ -222,7 +222,7 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 	}
 
 	if p.Author == "" {
-		query = "SELECT id, date, title, link, content, author FROM posts ORDER BY ? ?"
+		query = "SELECT id, date, title, link, content, author FROM posts"
 
 		stmt, err := d.client.Prepare(query)
 		if err != nil {
@@ -230,7 +230,7 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 		}
 		defer stmt.Close()
 
-		rows, err = stmt.Query(p.Sort, p.Direction)
+		rows, err = stmt.Query()
 		if err != nil {
 			return nil, fmt.Errorf("failed to select %w", err)
 		}
