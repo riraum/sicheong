@@ -184,14 +184,7 @@ func (d DB) UpdatePost(p Post) error {
 }
 
 func (p Params) String() string {
-	where := ""
-
-	if p.Author != "" {
-		where = fmt.Sprintf("WHERE author = %s", p.Author)
-	}
-
-	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts %s ORDER BY %s %s",
-		where, p.Sort, p.Direction)
+	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts ? ORDER BY %s %s", p.Sort, p.Direction)
 
 	return queryString
 }
