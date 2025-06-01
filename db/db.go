@@ -200,10 +200,10 @@ func (p Params) String() string {
 	case "desc":
 		direction = "desc"
 	default:
-		sort = "asc"
+		direction = "asc"
 	}
 
-	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts ? ORDER BY %s %s", sort, direction)
+	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts '?' ORDER BY %s %s", sort, direction)
 
 	return queryString
 }
