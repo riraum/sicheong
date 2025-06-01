@@ -183,8 +183,27 @@ func (d DB) UpdatePost(p Post) error {
 	return nil
 }
 
+// func (p Params) NoSQLi()
+
 func (p Params) String() string {
-	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts ? ORDER BY %s %s", p.Sort, p.Direction)
+	var sort string
+	var direction string
+
+	switch p.Sort {
+	case "title":
+		sort = "title"
+	default:
+		sort = "date"
+	}
+
+	switch p.Direction {
+	case "desc":
+		direction = "desc"
+	default:
+		sort = "asc"
+	}
+
+	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts ? ORDER BY %s %s", sort, direction)
 
 	return queryString
 }
