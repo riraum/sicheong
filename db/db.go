@@ -203,7 +203,7 @@ func (p Params) String() string {
 		direction = "asc"
 	}
 
-	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts '?' ORDER BY %s %s", sort, direction)
+	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts WHERE author = '?' ORDER BY %s %s", sort, direction)
 
 	return queryString
 }
@@ -220,11 +220,15 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 
 	query := p.String()
 
+	fmt.Println("query", query)
+
 	stmt, err := d.client.Prepare(query)
 	if err != nil {
 		return nil, fmt.Errorf("failed to prepare %w", err)
 	}
 	defer stmt.Close()
+
+	fmt.Println("stmt", stmt)
 
 	rows, err := stmt.Query(where)
 	if err != nil {
