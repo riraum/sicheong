@@ -200,6 +200,12 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 	var post Post
 	var posts Posts
 
+	where := ""
+
+	if p.Author != "" {
+		where = p.Author
+	}
+
 	query := p.String()
 
 	stmt, err := d.client.Prepare(query)
@@ -208,7 +214,7 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 	}
 	defer stmt.Close()
 
-	rows, err := stmt.Query()
+	rows, err := stmt.Query(where)
 	if err != nil {
 		return nil, fmt.Errorf("failed to select %w", err)
 	}
