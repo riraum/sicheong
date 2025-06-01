@@ -183,74 +183,39 @@ func (d DB) UpdatePost(p Post) error {
 	return nil
 }
 
-// func (p Params) String() string {
-// 	where := ""
+func (p Params) String() string {
+	where := ""
 
-// 	if p.Author != "" {
-// 		where = fmt.Sprintf("WHERE author = %s", p.Author)
-// 	}
+	if p.Author != "" {
+		where = fmt.Sprintf("WHERE author = %s", p.Author)
+	}
 
-// 	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts %s ORDER BY %s %s",
-// 		where, p.Sort, p.Direction)
+	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts %s ORDER BY %s %s",
+		where, p.Sort, p.Direction)
 
-// 	return queryString
-// }
+	return queryString
+}
 
 func (d DB) ReadPosts(p Params) (Posts, error) {
 	var post Post
 	var posts Posts
 
-	var query string
-	var rows *sql.Rows
+	query := p.String()
 
-	// query := p.String()
-
-	if p.Author != "" {
-		query = "SELECT id, date, title, link, content, author FROM posts WHERE author = ?"
-
-		stmt, err := d.client.Prepare(query)
-		if err != nil {
-			return nil, fmt.Errorf("failed to prepare %w", err)
-		}
-		defer stmt.Close()
-
-		rows, err := stmt.Query(p.Author)
-		if err != nil {
-			return nil, fmt.Errorf("failed to select %w", err)
-		}
-		defer rows.Close()
+	stmt, err := d.client.Prepare(query)
+	if err != nil {
+		return nil, fmt.Errorf("failed to prepare %w", err)
 	}
+	defer stmt.Close()
 
-	if p.Author == "" {
-		query = "SELECT id, date, title, link, content, author FROM posts"
-
-		stmt, err := d.client.Prepare(query)
-		if err != nil {
-			return nil, fmt.Errorf("failed to prepare %w", err)
-		}
-		defer stmt.Close()
-
-		rows, err = stmt.Query()
-		if err != nil {
-			return nil, fmt.Errorf("failed to select %w", err)
-		}
-		defer rows.Close()
+	rows, err := stmt.Query()
+	if err != nil {
+		return nil, fmt.Errorf("failed to select %w", err)
 	}
-
-	// stmt, err := d.client.Prepare(query)
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to prepare %w", err)
-	// }
-	// defer stmt.Close()
-
-	// rows, err := stmt.Query()
-	// if err != nil {
-	// 	return nil, fmt.Errorf("failed to select %w", err)
-	// }
-	// defer rows.Close()
+	defer rows.Close()
 
 	for rows.Next() {
-		err := rows.Scan(&post.ID, &post.Date, &post.Title, &post.Link, &post.Content, &post.AuthorID)
+		err = rows.Scan(&post.ID, &post.Date, &post.Title, &post.Link, &post.Content, &post.AuthorID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan %w", err)
 		}
