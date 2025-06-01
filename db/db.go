@@ -203,7 +203,7 @@ func (p Params) String() string {
 		direction = "asc"
 	}
 
-	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts WHERE author = '?' ORDER BY %s %s", sort, direction)
+	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts WHERE author = ? ORDER BY %s %s", sort, direction)
 
 	return queryString
 }
