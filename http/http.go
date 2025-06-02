@@ -52,39 +52,46 @@ func Run(mux *http.ServeMux) {
 	}
 }
 
-func handleError(w http.ResponseWriter, r *http.Request, msg string, code int) {
+func handleError(w http.ResponseWriter, r *http.Request, msg string, code int, err error) {
+	w.WriteHeader(code)
 	http.Redirect(w, r, fmt.Sprintf("/fail?reason=%s", msg), code)
 
-	log.Fatalf("Error code %v /n %s", code, msg)
+	log.Fatalf("Failed: %s \n code %v \n %s", msg, code, err)
 }
 
 func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	cookie, err := r.Cookie("authorName")
 	if err != nil {
-		http.Redirect(w, r, "/fail?reason=cookieDoesntExist", http.StatusSeeOther)
-		return false
+		handleError(w, r, "cookie doesn't exist", 404, err)
+		// http.Redirect(w, r, "/fail?reason=cookieDoesntExist", http.StatusSeeOther)
+		// return false
 	}
 
 	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
 	if err != nil {
+		handleError(w, r, "to decode base64 string", 404, err)
 
-		log.Fatalf("failed to decode base64 string to byte: %v", err)
+		// log.Fatalf("failed to decode base64 string to byte: %v", err)
 	}
 
 	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
 	if err != nil {
-		log.Fatalf("failed to decrypt: %v", err)
+		handleError(w, r, "to to decrypt", 404, err)
+		// log.Fatalf("failed to decrypt: %v", err)
 	}
 
 	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
-		log.Fatalf("failed sql author exist check: %v", err)
+		handleError(w, r, "sql author exist check", 404, err)
+
+		// log.Fatalf("failed sql author exist check: %v", err)
 	}
 
 	if author.Name == "" {
-		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
+		handleError(w, r, "authorDoesntExist", 404, nil)
 
-		return false
+		// http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
+		// return false
 	}
 
 	return true
@@ -95,7 +102,9 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 
 	p, err := s.DB.ReadPosts(par)
 	if err != nil {
-		log.Fatalf("read posts: %v", err)
+		handleError(w, r, "read posts", 404, err)
+
+		// log.Fatalf("read posts: %v", err)
 	}
 
 	p.ParseDates()
@@ -103,7 +112,9 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 	err = s.Template.ExecuteTemplate(w, "index.html.tmpl", p)
 
 	if err != nil {
-		log.Fatalf("execute %v", err)
+		handleError(w, r, "execute", 404, err)
+
+		// log.Fatalf("execute %v", err)
 	}
 }
 
@@ -133,16 +144,20 @@ func parseQueryParams(r *http.Request) db.Params {
 	return p
 }
 
-func (s Server) getCSS(w http.ResponseWriter, _ *http.Request) {
+func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
 	css, err := s.EmbedRootDir.ReadFile("static/pico.min.css")
 	if err != nil {
-		log.Fatalf("failed to read %v", err)
+		handleError(w, r, "to read", 404, err)
+
+		// log.Fatalf("failed to read %v", err)
 	}
 
 	w.Header().Add("Content-Type", "text/css")
 
 	if _, err = w.Write(css); err != nil {
-		log.Fatalln("failed to write css", err)
+		handleError(w, r, "to write css", 404, err)
+
+		// log.Fatalln("failed to write css", err)
 	}
 }
 
@@ -469,6 +484,8 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		http.SetCookie(w, &cookie)
 		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
 	}
+
+	// handleError(w, r, "authorDoesntExist", 303, err)
 
 	http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusSeeOther)
 
