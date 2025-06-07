@@ -27,7 +27,7 @@ type Post struct {
 	AuthorID   float32 // Author.ID
 }
 
-type Posts []*Post
+type Posts []Post
 
 type Params struct {
 	Sort      string
@@ -262,7 +262,7 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 			return nil, fmt.Errorf("failed to scan %w", err)
 		}
 
-		posts = append(posts, &post)
+		posts = append(posts, post)
 	}
 
 	return posts, nil
@@ -285,12 +285,12 @@ func (d DB) ReadPost(id int) (Post, error) {
 	return p, nil
 }
 
-func (p *Post) ParseDate() {
+func (p Post) ParseDate() {
 	p.ParsedDate = time.Unix(p.Date, 0)
 }
 
-func (p *Posts) ParseDates() {
-	for _, post := range *p {
+func (p Posts) ParseDates() {
+	for _, post := range p {
 		post.ParseDate()
 	}
 }
