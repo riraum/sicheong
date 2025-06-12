@@ -25,9 +25,10 @@ func TestAll(t *testing.T) {
 		t.Errorf("error filling db: %v", err)
 	}
 
-	par := map[string]string{
-		"sort":      "date",
-		"direction": "asc",
+	par := Params{
+		Sort:      "date",
+		Direction: "asc",
+		// Author:    "",
 	}
 
 	got, err := d.ReadPosts(par)
