@@ -221,8 +221,6 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 	var where string
 	var rows *sql.Rows
 
-	// where := ""
-
 	if p.Author != "" {
 		where = p.Author
 	}
@@ -254,13 +252,15 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 		defer rows.Close()
 	}
 
-	// rows, err := stmt.Query()
+	rows, err = stmt.Query()
 
 	for rows.Next() {
 		err = rows.Scan(&post.ID, &post.Date, &post.Title, &post.Link, &post.Content, &post.AuthorID)
 		if err != nil {
 			return nil, fmt.Errorf("failed to scan %w", err)
 		}
+
+		post.ParseDate()
 
 		posts = append(posts, post)
 	}
@@ -285,12 +285,12 @@ func (d DB) ReadPost(id int) (Post, error) {
 	return p, nil
 }
 
-func (p Post) ParseDate() {
+func (p *Post) ParseDate() {
 	p.ParsedDate = time.Unix(p.Date, 0)
 }
 
-func (p Posts) ParseDates() {
-	for _, post := range p {
+func (p *Posts) ParseDates() {
+	for _, post := range *p {
 		post.ParseDate()
 	}
 }

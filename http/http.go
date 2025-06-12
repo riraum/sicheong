@@ -98,7 +98,7 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 		log.Fatalf("read posts: %v", err)
 	}
 
-	p.ParseDates()
+	// p.ParseDates()
 
 	err = s.Template.ExecuteTemplate(w, "index.html.tmpl", p)
 
