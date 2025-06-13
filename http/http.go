@@ -517,9 +517,9 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	author, _ := s.DB.ReadAuthor(authorInput)
-	if err != nil {
-		handleError(w, r, "authorReadError", 404, err)
-	}
+	// if err != nil {
+	// 	handleError(w, r, "authorReadError", 404, err)
+	// }
 
 	if author.Name != "" {
 		http.SetCookie(w, &cookie)
