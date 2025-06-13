@@ -198,6 +198,7 @@ func (p Params) String() string {
 
 func (d DB) ReadPosts(p Params) (Posts, error) {
 	var post Post
+
 	var posts Posts
 
 	query := p.String()

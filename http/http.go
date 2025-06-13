@@ -67,7 +67,6 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 
 	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
 	if err != nil {
-
 		log.Fatalf("failed to decode base64 string to byte: %v", err)
 	}
 
@@ -468,7 +467,6 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusSeeOther)
-
 }
 
 func (s Server) getDone(w http.ResponseWriter, _ *http.Request) {
