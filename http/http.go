@@ -53,45 +53,40 @@ func Run(mux *http.ServeMux) {
 }
 
 func handleError(w http.ResponseWriter, r *http.Request, msg string, code int, err error) {
-	w.WriteHeader(code)
-	http.Redirect(w, r, fmt.Sprintf("/fail?reason=%s", msg), code)
+	http.Error(w, fmt.Sprintf("failed to: %s", msg), code)
 
-	log.Fatalf("Failed: %s \n code %v \n %s", msg, code, err)
+	// w.WriteHeader(code)
+
+	// http.Redirect(w, r, fmt.Sprintf("/fail?reason=%s", msg), code)
+
+	// w.Write([]byte(`404 not found`))
+
+	fmt.Printf("Failed: %s \n code %v \n %s", msg, code, err)
 }
 
 func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	cookie, err := r.Cookie("authorName")
 	if err != nil {
 		handleError(w, r, "cookie doesn't exist", 404, err)
-		// http.Redirect(w, r, "/fail?reason=cookieDoesntExist", http.StatusSeeOther)
-		// return false
 	}
 
 	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
 	if err != nil {
-		handleError(w, r, "to decode base64 string", 404, err)
-
-		// log.Fatalf("failed to decode base64 string to byte: %v", err)
+		handleError(w, r, "decode base64 string", 404, err)
 	}
 
 	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
 	if err != nil {
-		handleError(w, r, "to to decrypt", 404, err)
-		// log.Fatalf("failed to decrypt: %v", err)
+		handleError(w, r, "decrypt", 404, err)
 	}
 
 	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
 		handleError(w, r, "sql author exist check", 404, err)
-
-		// log.Fatalf("failed sql author exist check: %v", err)
 	}
 
 	if author.Name == "" {
 		handleError(w, r, "authorDoesntExist", 404, nil)
-
-		// http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
-		// return false
 	}
 
 	return true
@@ -103,8 +98,6 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 	p, err := s.DB.ReadPosts(par)
 	if err != nil {
 		handleError(w, r, "read posts", 404, err)
-
-		// log.Fatalf("read posts: %v", err)
 	}
 
 	p.ParseDates()
@@ -113,8 +106,6 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		handleError(w, r, "execute", 404, err)
-
-		// log.Fatalf("execute %v", err)
 	}
 }
 
@@ -148,16 +139,12 @@ func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
 	css, err := s.EmbedRootDir.ReadFile("static/pico.min.css")
 	if err != nil {
 		handleError(w, r, "to read", 404, err)
-
-		// log.Fatalf("failed to read %v", err)
 	}
 
 	w.Header().Add("Content-Type", "text/css")
 
 	if _, err = w.Write(css); err != nil {
 		handleError(w, r, "to write css", 404, err)
-
-		// log.Fatalln("failed to write css", err)
 	}
 }
 
@@ -166,7 +153,7 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 
 	p, err := s.DB.ReadPosts(par)
 	if err != nil {
-		log.Fatalf("read posts: %v", err)
+		handleError(w, r, "read posts", 404, err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -174,8 +161,7 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(p)
 	if err != nil {
-		w.WriteHeader(http.StatusNotAcceptable)
-		log.Fatalf("failed to encode %v", err)
+		handleError(w, r, "encode", 404, err)
 	}
 }
 
@@ -249,7 +235,7 @@ func parsePostRValues(r *http.Request) (db.Post, error) {
 func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("authorName")
 	if err != nil {
-		log.Fatal("no author cookie", err)
+		handleError(w, r, "no author cookie", 404, err)
 	}
 
 	if !s.authenticated(r, w) {
@@ -258,7 +244,8 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 
 	p, err := parsePostRValues(r)
 	if err != nil {
-		log.Fatalf("failed to parse values: %v", err)
+		handleError(w, r, "parse value", 404, err)
+		// log.Fatalf("failed to parse values: %v", err)
 	}
 
 	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
@@ -268,7 +255,9 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 
 		err = json.NewEncoder(w).Encode(cookie.Value)
 		if err != nil {
-			log.Fatalf("failed to encode %v", err)
+			handleError(w, r, "encode", 404, err)
+
+			// log.Fatalf("failed to encode %v", err)
 		}
 
 		return
@@ -276,13 +265,17 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 
 	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
 	if err != nil {
-		log.Fatalf("failed to decrypt: %v", err)
+		handleError(w, r, "decrypt", 404, err)
+
+		// log.Fatalf("failed to decrypt: %v", err)
 	}
 
 	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
-		http.Redirect(w, r, "/fail?reason=authorCookieError", http.StatusUnauthorized)
-		log.Fatalf("failed to decode base64 string to byte: %v", err)
+		handleError(w, r, "decode base64 string to byte", 404, err)
+
+		// http.Redirect(w, r, "/fail?reason=authorCookieError", http.StatusUnauthorized)
+		// log.Fatalf("failed to decode base64 string to byte: %v", err)
 
 		return
 	}
@@ -291,7 +284,9 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 
 	err = s.DB.NewPost(p)
 	if err != nil {
-		log.Fatalf("create new post in db: %v", err)
+		handleError(w, r, "create new post in db", 404, err)
+
+		// log.Fatalf("create new post in db: %v", err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -299,14 +294,18 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(p)
 	if err != nil {
-		log.Fatalf("failed to encode %v", err)
+		handleError(w, r, "encode", 404, err)
+
+		// log.Fatalf("failed to encode %v", err)
 	}
 }
 
 func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("authorName")
 	if err != nil {
-		log.Fatal("no author cookie", err)
+		handleError(w, r, "no author cookie", 404, err)
+
+		// log.Fatal("no author cookie", err)
 	}
 
 	if !s.authenticated(r, w) {
@@ -315,23 +314,31 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 
 	p, err := parsePostRValues(r)
 	if err != nil {
-		log.Fatalf("failed to parse values: %v", err)
+		handleError(w, r, "parse values", 404, err)
+
+		// log.Fatalf("failed to parse values: %v", err)
 	}
 
 	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
 	if err != nil {
-		log.Fatalf("failed to decode base64 string to byte: %v", err)
+		handleError(w, r, "decode base64 string ", 404, err)
+
+		// log.Fatalf("failed to decode base64 string to byte: %v", err)
 	}
 
 	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
 	if err != nil {
-		log.Fatalf("failed to decrypt: %v", err)
+		handleError(w, r, "decrypt", 404, err)
+
+		// log.Fatalf("failed to decrypt: %v", err)
 	}
 
 	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
-		http.Redirect(w, r, "/fail?reason=authorCookieError", http.StatusUnauthorized)
-		log.Fatalf("failed string to float conversion: %v", err)
+		handleError(w, r, "string to float conversion", 404, err)
+
+		// http.Redirect(w, r, "/fail?reason=authorCookieError", http.StatusUnauthorized)
+		// log.Fatalf("failed string to float conversion: %v", err)
 
 		return
 	}
@@ -340,7 +347,9 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 
 	err = s.DB.NewPost(p)
 	if err != nil {
-		log.Fatalf("create new post in db: %v", err)
+		handleError(w, r, "create new post in db", 404, err)
+
+		// log.Fatalf("create new post in db: %v", err)
 	}
 
 	http.Redirect(w, r, "/done", http.StatusSeeOther)
@@ -348,18 +357,24 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 
 func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 	if !s.authenticated(r, w) {
+		// handleError(w, r, "not authenticated", 404, nil)
+
 		fmt.Fprintln(w, http.StatusUnauthorized, "not authenticated")
 		return
 	}
 
 	p, err := parsePostRValues(r)
 	if err != nil {
-		log.Fatalf("failed to parse values: %v", err)
+		handleError(w, r, "parse values", 404, err)
+
+		// log.Fatalf("failed to parse values: %v", err)
 	}
 
 	err = s.DB.DeletePost(p)
 	if err != nil {
-		log.Fatalf("delete post in db: %v", err)
+		handleError(w, r, "delete post in db", 404, err)
+
+		// log.Fatalf("delete post in db: %v", err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -367,7 +382,9 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(p)
 	if err != nil {
-		log.Fatalf("failed to encode %v", err)
+		handleError(w, r, "encode", 404, err)
+
+		// log.Fatalf("failed to encode %v", err)
 	}
 }
 
@@ -378,13 +395,17 @@ func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
 
 	p, err := parsePostRValues(r)
 	if err != nil {
-		log.Fatalf("failed to parse values: %v", err)
+		handleError(w, r, "parse values", 404, err)
+
+		// log.Fatalf("failed to parse values: %v", err)
 	}
 
 	err = s.DB.DeletePost(p)
 	if err != nil {
-		http.Redirect(w, r, "/fail?reason=deleteFailed", http.StatusSeeOther)
-		log.Fatalf("delete post in db: %v", err)
+		handleError(w, r, "delete post in db", 404, err)
+
+		// http.Redirect(w, r, "/fail?reason=deleteFailed", http.StatusSeeOther)
+		// log.Fatalf("delete post in db: %v", err)
 	}
 
 	http.Redirect(w, r, "/done", http.StatusSeeOther)
@@ -393,12 +414,16 @@ func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 	p, err := parseGetRValues(r)
 	if err != nil {
-		log.Fatalf("failed to parse values: %v", err)
+		handleError(w, r, "parse values", 404, err)
+
+		// log.Fatalf("failed to parse values: %v", err)
 	}
 
 	p, err = s.DB.ReadPost(int(p.ID))
 	if err != nil {
-		log.Fatalf("read posts: %v", err)
+		handleError(w, r, "read posts", 404, err)
+
+		// log.Fatalf("read posts: %v", err)
 	}
 
 	p.ParseDate()
@@ -406,7 +431,9 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 	err = s.Template.ExecuteTemplate(w, "post.html.tmpl", p)
 
 	if err != nil {
-		log.Fatalf("execute %v", err)
+		handleError(w, r, "execute", 404, err)
+
+		// log.Fatalf("execute %v", err)
 	}
 }
 
@@ -417,13 +444,17 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 
 	p, err := parsePostRValues(r)
 	if err != nil {
-		log.Fatalf("failed to parse values: %v", err)
+		handleError(w, r, "parse values", 404, err)
+
+		// log.Fatalf("failed to parse values: %v", err)
 	}
 
 	err = s.DB.UpdatePost(p)
 	if err != nil {
-		http.Redirect(w, r, "/fail?reason=editFailed", http.StatusSeeOther)
-		log.Fatalf("edit post in db: %v", err)
+		handleError(w, r, "edit post in db", 404, err)
+
+		// http.Redirect(w, r, "/fail?reason=editFailed", http.StatusSeeOther)
+		// log.Fatalf("edit post in db: %v", err)
 	}
 
 	http.Redirect(w, r, "/done", http.StatusSeeOther)
@@ -436,12 +467,16 @@ func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
 
 	p, err := parsePostRValues(r)
 	if err != nil {
-		log.Fatalf("failed to parse values: %v", err)
+		handleError(w, r, "parse value", 404, err)
+
+		// log.Fatalf("failed to parse values: %v", err)
 	}
 
 	err = s.DB.UpdatePost(p)
 	if err != nil {
-		log.Fatalf("edit post in db: %v", err)
+		handleError(w, r, "edit post in db", 404, err)
+
+		// log.Fatalf("edit post in db: %v", err)
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -449,14 +484,18 @@ func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(p)
 	if err != nil {
-		log.Fatalf("failed to encode %v", err)
+		handleError(w, r, "encode", 404, err)
+
+		// log.Fatalf("failed to encode %v", err)
 	}
 }
 
-func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
+func (s Server) getLogin(w http.ResponseWriter, r *http.Request) {
 	err := s.Template.ExecuteTemplate(w, "login.html.tmpl", nil)
 	if err != nil {
-		log.Fatalf("execute %v", err)
+		handleError(w, r, "execute", 404, err)
+
+		// log.Fatalf("execute %v", err)
 	}
 }
 
@@ -465,7 +504,9 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 
 	encryptedAuthorByte, err := security.Encrypt([]byte(authorInput), s.Key)
 	if err != nil {
-		log.Fatal(err)
+		handleError(w, r, "encrypt error", 404, err)
+
+		// log.Fatal(err)
 	}
 
 	cookie := http.Cookie{
@@ -477,7 +518,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 
 	author, _ := s.DB.ReadAuthor(authorInput)
 	if err != nil {
-		http.Redirect(w, r, "/fail?reason=authorReadError", http.StatusSeeOther)
+		handleError(w, r, "authorReadError", 404, err)
 	}
 
 	if author.Name != "" {
@@ -485,16 +526,15 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
 	}
 
-	// handleError(w, r, "authorDoesntExist", 303, err)
-
-	http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusSeeOther)
-
+	handleError(w, r, "authorDoesntExist", 404, err)
 }
 
-func (s Server) getDone(w http.ResponseWriter, _ *http.Request) {
+func (s Server) getDone(w http.ResponseWriter, r *http.Request) {
 	err := s.Template.ExecuteTemplate(w, "done.html.tmpl", nil)
 	if err != nil {
-		log.Fatalf("execute %v", err)
+		handleError(w, r, "execute", 404, err)
+
+		// log.Fatalf("execute %v", err)
 	}
 }
 
@@ -503,6 +543,8 @@ func (s Server) getFail(w http.ResponseWriter, r *http.Request) {
 
 	err := s.Template.ExecuteTemplate(w, "fail.html.tmpl", reason)
 	if err != nil {
-		log.Fatalf("execute %v", err)
+		handleError(w, r, "execute", 404, err)
+
+		// log.Fatalf("execute %v", err)
 	}
 }
