@@ -524,6 +524,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusSeeOther)
+	fmt.Printf("authorDoesntExist")
 }
 
 func (s Server) getDone(w http.ResponseWriter, r *http.Request) {
