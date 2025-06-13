@@ -523,7 +523,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
 	}
 
-	handleError(w, r, "authorDoesntExist", 404, err)
+	http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusSeeOther)
 }
 
 func (s Server) getDone(w http.ResponseWriter, r *http.Request) {
