@@ -67,26 +67,27 @@ func handleError(w http.ResponseWriter, r *http.Request, msg string, code int, e
 func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	cookie, err := r.Cookie("authorName")
 	if err != nil {
-		handleError(w, r, "cookie doesn't exist", 404, err)
+		http.Redirect(w, r, "/fail?reason=cookieDoesntExist", http.StatusSeeOther)
 	}
 
 	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
 	if err != nil {
-		handleError(w, r, "decode base64 string", 404, err)
+		log.Fatalf("failed to decode base64 string to byte: %v", err)
 	}
 
 	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
 	if err != nil {
-		handleError(w, r, "decrypt", 404, err)
+		log.Fatalf("failed to decrypt: %v", err)
 	}
 
 	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
-		handleError(w, r, "sql author exist check", 404, err)
+		log.Fatalf("failed sql author exist check: %v", err)
 	}
 
 	if author.Name == "" {
-		handleError(w, r, "authorDoesntExist", 404, nil)
+		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
+		return false
 	}
 
 	return true
