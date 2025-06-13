@@ -53,7 +53,7 @@ func Run(mux *http.ServeMux) {
 }
 
 func handleError(w http.ResponseWriter, r *http.Request, msg string, code int, err error) {
-	http.Error(w, fmt.Sprintf("failed to: %s", msg), code)
+	http.Error(w, fmt.Sprintf("failed: %s", msg), code)
 
 	// w.WriteHeader(code)
 
@@ -67,26 +67,30 @@ func handleError(w http.ResponseWriter, r *http.Request, msg string, code int, e
 func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	cookie, err := r.Cookie("authorName")
 	if err != nil {
-		http.Redirect(w, r, "/fail?reason=cookieDoesntExist", http.StatusSeeOther)
+		return false
+		// http.Redirect(w, r, "/fail?reason=cookieDoesntExist", http.StatusSeeOther)
 	}
 
 	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
 	if err != nil {
-		log.Fatalf("failed to decode base64 string to byte: %v", err)
+		return false
+		// log.Fatalf("failed to decode base64 string to byte: %v", err)
 	}
 
 	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
 	if err != nil {
-		log.Fatalf("failed to decrypt: %v", err)
+		return false
+		// log.Fatalf("failed to decrypt: %v", err)
 	}
 
 	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
-		log.Fatalf("failed sql author exist check: %v", err)
+		return false
+		// log.Fatalf("failed sql author exist check: %v", err)
 	}
 
 	if author.Name == "" {
-		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
+		// http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
 		return false
 	}
 
@@ -139,13 +143,13 @@ func parseQueryParams(r *http.Request) db.Params {
 func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
 	css, err := s.EmbedRootDir.ReadFile("static/pico.min.css")
 	if err != nil {
-		handleError(w, r, "to read", 404, err)
+		handleError(w, r, "read file", 404, err)
 	}
 
 	w.Header().Add("Content-Type", "text/css")
 
 	if _, err = w.Write(css); err != nil {
-		handleError(w, r, "to write css", 404, err)
+		handleError(w, r, "write css", 404, err)
 	}
 }
 
@@ -240,6 +244,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !s.authenticated(r, w) {
+		handleError(w, r, "authenticate", 404, err)
 		return
 	}
 
@@ -310,6 +315,7 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !s.authenticated(r, w) {
+		handleError(w, r, "authenticate", 404, err)
 		return
 	}
 
@@ -523,6 +529,8 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		http.SetCookie(w, &cookie)
 		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
 	}
+
+	// handleError(w, r, "author doesn't exist", 404, err)
 
 	http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusSeeOther)
 	fmt.Printf("authorDoesntExist")
