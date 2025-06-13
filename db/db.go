@@ -183,7 +183,7 @@ func (d DB) UpdatePost(p Post) error {
 	return nil
 }
 
-func (p Params) String() string {
+func (p Params) Query() string {
 	var sort string
 	var direction string
 	var author string
@@ -225,7 +225,7 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 		where = p.Author
 	}
 
-	query := p.String()
+	query := p.Query()
 
 	fmt.Println("query", query)
 
