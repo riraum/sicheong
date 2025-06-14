@@ -413,6 +413,7 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 
 func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
 	if !s.authenticated(r, w) {
+		s.handleHTMLError(w, r, "not authenticated", 401, nil)
 		return
 	}
 
@@ -462,6 +463,7 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 
 func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 	if !s.authenticated(r, w) {
+		s.handleHTMLError(w, r, "not authenticated", 401, nil)
 		return
 	}
 
@@ -485,6 +487,7 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 
 func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
 	if !s.authenticated(r, w) {
+		handleJSONError(w, r, "not authenticated", 401, nil)
 		return
 	}
 
