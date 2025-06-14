@@ -84,37 +84,32 @@ func handleJSONError(w http.ResponseWriter, r *http.Request, msg string, code in
 	}
 }
 
-func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
+func (s Server) authenticated(r *http.Request, w http.ResponseWriter) (bool, error) {
 	cookie, err := r.Cookie("authorName")
 	if err != nil {
-		http.Redirect(w, r, "/fail?reason=cookieDoesntExist", http.StatusSeeOther)
-		return false
+		return false, err
 	}
 
 	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
 	if err != nil {
-		log.Fatalf("failed to decode base64 string to byte: %v", err)
-		return false
+		return false, err
 	}
 
 	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
 	if err != nil {
-		return false
-		// log.Fatalf("failed to decrypt: %v", err)
+		return false, err
 	}
 
 	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
-		log.Fatalf("failed sql author exist check: %v", err)
-		return false
+		return false, err
 	}
 
 	if author.Name == "" {
-		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
-		return false
+		return false, err
 	}
 
-	return true
+	return true, nil
 }
 
 func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
@@ -270,7 +265,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !s.authenticated(r, w) {
+	if ok, err := s.authenticated(r, w); !ok {
 		handleJSONError(w, r, "authenticate", 404, err)
 		return
 	}
@@ -340,7 +335,7 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !s.authenticated(r, w) {
+	if ok, err := s.authenticated(r, w); !ok {
 		s.handleHTMLError(w, r, "failed to authenticate", 401, err)
 		return
 	}
@@ -386,8 +381,8 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
-	if !s.authenticated(r, w) {
-		handleJSONError(w, r, "not authenticated", 401, nil)
+	if ok, err := s.authenticated(r, w); !ok {
+		handleJSONError(w, r, "not authenticated", 401, err)
 		// fmt.Fprintln(w, http.StatusUnauthorized, "not authenticated")
 		return
 	}
@@ -418,8 +413,8 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
-	if !s.authenticated(r, w) {
-		s.handleHTMLError(w, r, "not authenticated", 401, nil)
+	if ok, err := s.authenticated(r, w); !ok {
+		s.handleHTMLError(w, r, "not authenticated", 401, err)
 		return
 	}
 
@@ -468,8 +463,8 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
-	if !s.authenticated(r, w) {
-		s.handleHTMLError(w, r, "not authenticated", 401, nil)
+	if ok, err := s.authenticated(r, w); !ok {
+		s.handleHTMLError(w, r, "not authenticated", 401, err)
 		return
 	}
 
@@ -492,8 +487,8 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
-	if !s.authenticated(r, w) {
-		handleJSONError(w, r, "not authenticated", 401, nil)
+	if ok, err := s.authenticated(r, w); !ok {
+		handleJSONError(w, r, "not authenticated", 401, err)
 		return
 	}
 
