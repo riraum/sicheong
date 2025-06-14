@@ -58,16 +58,21 @@ func (s Server) handleHTMLError(w http.ResponseWriter, r *http.Request, msg stri
 
 	err = s.Template.ExecuteTemplate(w, "fail.html.tmpl", msg)
 	if err != nil {
-		log.Fatalf("execute %v", err)
+		log.Fatalf("failed to execute %v", err)
 	}
 
 	fmt.Printf("failed: %s \n code %v \n %s", msg, code, err)
 }
 
 func handleJSONError(w http.ResponseWriter, r *http.Request, msg string, code int, err error) {
-	http.Error(w, fmt.Sprintf("failed: %s", msg), code)
-
+	// http.Error(w, fmt.Sprintf("failed: %s", msg), code)
 	w.WriteHeader(code)
+	w.Header().Set("Content-Type", "application/json")
+
+	err = json.NewEncoder(w).Encode(msg)
+	if err != nil {
+		log.Fatalf("failed to encode %v", err)
+	}
 
 	fmt.Printf("failed: %s \n code %v \n %s", msg, code, err)
 }
