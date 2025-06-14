@@ -52,10 +52,10 @@ func Run(mux *http.ServeMux) {
 	}
 }
 
-func (s Server) handleHTMLError(w http.ResponseWriter, r *http.Request, msg string, code int, err error) {
-	log.Fatalf("failed: %s \n code %v \n %s", msg, code, err)
+func (s Server) handleHTMLError(w http.ResponseWriter, r *http.Request, msg string, statusCode int, err error) {
+	log.Fatalf("failed: %s \n code %v \n %s", msg, statusCode, err)
 
-	w.WriteHeader(code)
+	w.WriteHeader(statusCode)
 
 	err = s.Template.ExecuteTemplate(w, "fail.html.tmpl", msg)
 	if err != nil {
@@ -117,7 +117,7 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 
 	p, err := s.DB.ReadPosts(par)
 	if err != nil {
-		s.handleHTMLError(w, r, "read posts", 404, err)
+		s.handleHTMLError(w, r, "read posts", http.StatusNoContent, err)
 		return
 	}
 
@@ -126,7 +126,7 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 	err = s.Template.ExecuteTemplate(w, "index.html.tmpl", p)
 
 	if err != nil {
-		s.handleHTMLError(w, r, "execute", 404, err)
+		s.handleHTMLError(w, r, "execute", http.StatusNotFound, err)
 		return
 	}
 }
