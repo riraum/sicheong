@@ -66,6 +66,15 @@ func (s Server) handleHTMLError(w http.ResponseWriter, r *http.Request, msg stri
 func handleJSONError(w http.ResponseWriter, r *http.Request, msg string, code int, err error) {
 	log.Fatalf("failed: %s \n code %v \n %s", msg, code, err)
 
+	errorData := struct {
+		Message string
+		Error   string
+	}{
+		Message: msg,
+		Error:   err.Error(),
+	}
+
+	err = json.NewEncoder(w).Encode(errorData)
 	w.WriteHeader(code)
 	w.Header().Set("Content-Type", "application/json")
 
@@ -332,10 +341,9 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !s.authenticated(r, w) {
-		s.handleHTMLError(w, r, "failed to authenticate", 404, err)
+		s.handleHTMLError(w, r, "failed to authenticate", 401, err)
 		return
 	}
-
 	p, err := parsePostRValues(r)
 	if err != nil {
 		s.handleHTMLError(w, r, "parse values", 404, err)
