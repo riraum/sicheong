@@ -54,43 +54,35 @@ func Run(mux *http.ServeMux) {
 
 func (s Server) handleHTMLError(w http.ResponseWriter, r *http.Request, msg string, code int, err error) {
 	// http.Error(w, fmt.Sprintf("failed: %s", msg), code)
+	w.WriteHeader(code)
+
 	err = s.Template.ExecuteTemplate(w, "fail.html.tmpl", msg)
 	if err != nil {
 		log.Fatalf("execute %v", err)
 	}
 
-	// w.WriteHeader(code)
-
-	// http.Redirect(w, r, fmt.Sprintf("/fail?reason=%s", msg), code)
-
-	// w.Write([]byte(`404 not found`))
-
-	// fmt.Printf("Failed: %s \n code %v \n %s", msg, code, err)
+	fmt.Printf("failed: %s \n code %v \n %s", msg, code, err)
 }
 
 func handleJSONError(w http.ResponseWriter, r *http.Request, msg string, code int, err error) {
 	http.Error(w, fmt.Sprintf("failed: %s", msg), code)
 
-	// w.WriteHeader(code)
+	w.WriteHeader(code)
 
-	// http.Redirect(w, r, fmt.Sprintf("/fail?reason=%s", msg), code)
-
-	// w.Write([]byte(`404 not found`))
-
-	fmt.Printf("Failed: %s \n code %v \n %s", msg, code, err)
+	fmt.Printf("failed: %s \n code %v \n %s", msg, code, err)
 }
 
 func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 	cookie, err := r.Cookie("authorName")
 	if err != nil {
+		http.Redirect(w, r, "/fail?reason=cookieDoesntExist", http.StatusSeeOther)
 		return false
-		// http.Redirect(w, r, "/fail?reason=cookieDoesntExist", http.StatusSeeOther)
 	}
 
 	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
 	if err != nil {
+		log.Fatalf("failed to decode base64 string to byte: %v", err)
 		return false
-		// log.Fatalf("failed to decode base64 string to byte: %v", err)
 	}
 
 	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
@@ -101,12 +93,12 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
 
 	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
+		log.Fatalf("failed sql author exist check: %v", err)
 		return false
-		// log.Fatalf("failed sql author exist check: %v", err)
 	}
 
 	if author.Name == "" {
-		// http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
+		http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusUnauthorized)
 		return false
 	}
 
