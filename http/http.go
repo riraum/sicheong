@@ -376,7 +376,7 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 
 func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 	if !s.authenticated(r, w) {
-		handleJSONError(w, r, "not authenticated", 404, nil)
+		handleJSONError(w, r, "not authenticated", 401, nil)
 		// fmt.Fprintln(w, http.StatusUnauthorized, "not authenticated")
 		return
 	}
@@ -541,7 +541,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
 	}
 
-	s.handleHTMLError(w, r, "author doesn't exist", 404, err)
+	s.handleHTMLError(w, r, "author doesn't exist", 401, err)
 	// http.Redirect(w, r, "/fail?reason=authorDoesntExist", http.StatusSeeOther)
 	// fmt.Printf("authorDoesntExist")
 	return
