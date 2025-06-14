@@ -53,19 +53,19 @@ func Run(mux *http.ServeMux) {
 }
 
 func (s Server) handleHTMLError(w http.ResponseWriter, r *http.Request, msg string, code int, err error) {
-	// http.Error(w, fmt.Sprintf("failed: %s", msg), code)
+	log.Fatalf("failed: %s \n code %v \n %s", msg, code, err)
+
 	w.WriteHeader(code)
 
 	err = s.Template.ExecuteTemplate(w, "fail.html.tmpl", msg)
 	if err != nil {
 		log.Fatalf("failed to execute %v", err)
 	}
-
-	fmt.Printf("failed: %s \n code %v \n %s", msg, code, err)
 }
 
 func handleJSONError(w http.ResponseWriter, r *http.Request, msg string, code int, err error) {
-	// http.Error(w, fmt.Sprintf("failed: %s", msg), code)
+	log.Fatalf("failed: %s \n code %v \n %s", msg, code, err)
+
 	w.WriteHeader(code)
 	w.Header().Set("Content-Type", "application/json")
 
@@ -73,8 +73,6 @@ func handleJSONError(w http.ResponseWriter, r *http.Request, msg string, code in
 	if err != nil {
 		log.Fatalf("failed to encode %v", err)
 	}
-
-	fmt.Printf("failed: %s \n code %v \n %s", msg, code, err)
 }
 
 func (s Server) authenticated(r *http.Request, w http.ResponseWriter) bool {
