@@ -527,7 +527,7 @@ func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
 
 	encryptedAuthorByte, err := security.Encrypt([]byte(authorInput), s.Key)
 	if err != nil {
-		s.handleHTMLError(w, r, "encrypt error", http.StatusInternalServerError, err)
+		handleJSONError(w, r, "encrypt error", http.StatusInternalServerError, err)
 		return
 	}
 
@@ -542,7 +542,12 @@ func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
 
 	if author.Name != "" {
 		http.SetCookie(w, &cookie)
-		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		err = json.NewEncoder(w).Encode("logged in")
+		if err != nil {
+			handleJSONError(w, r, "encode", http.StatusInternalServerError, err)
+		}
 		return
 	}
 
