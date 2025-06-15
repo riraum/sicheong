@@ -74,11 +74,10 @@ func handleJSONError(w http.ResponseWriter, r *http.Request, msg string, statusC
 		Error:   err.Error(),
 	}
 
-	err = json.NewEncoder(w).Encode(errorData)
 	w.WriteHeader(statusCode)
 	w.Header().Set("Content-Type", "application/json")
 
-	err = json.NewEncoder(w).Encode(msg)
+	err = json.NewEncoder(w).Encode(errorData)
 	if err != nil {
 		log.Fatalf("failed to encode %v", err)
 	}
