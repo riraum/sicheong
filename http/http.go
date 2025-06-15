@@ -538,14 +538,14 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 
 	author, _ := s.DB.ReadAuthor(authorInput)
 
-	if author.Name != "" {
-		http.SetCookie(w, &cookie)
-		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
+	if author.Name == "" {
+
+		s.handleHTMLError(w, r, "author doesn't exist", http.StatusUnauthorized, err)
 		return
 	}
 
-	s.handleHTMLError(w, r, "author doesn't exist", http.StatusUnauthorized, err)
-	return
+	http.SetCookie(w, &cookie)
+	http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
 }
 
 func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
@@ -566,19 +566,18 @@ func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
 
 	author, _ := s.DB.ReadAuthor(authorInput)
 
-	if author.Name != "" {
-		http.SetCookie(w, &cookie)
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		err = json.NewEncoder(w).Encode("logged in")
-		if err != nil {
-			handleJSONError(w, r, "encode", http.StatusInternalServerError, err)
-		}
+	if author.Name == "" {
+		handleJSONError(w, r, "author doesn't exist", http.StatusUnauthorized, err)
 		return
 	}
 
-	handleJSONError(w, r, "author doesn't exist", http.StatusUnauthorized, err)
-	return
+	http.SetCookie(w, &cookie)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	err = json.NewEncoder(w).Encode("logged in")
+	if err != nil {
+		handleJSONError(w, r, "encode", http.StatusInternalServerError, err)
+	}
 }
 
 func (s Server) getDone(w http.ResponseWriter, r *http.Request) {
