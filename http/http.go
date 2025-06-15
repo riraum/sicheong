@@ -36,6 +36,7 @@ func (s Server) SetupMux() *http.ServeMux {
 	More details: https://github.com/riraum/si-cheong/pull/137*/
 	mux.HandleFunc("POST /post/delete/{id}", s.deletePost)
 	mux.HandleFunc("GET /post/{id}", s.viewPost)
+	mux.HandleFunc("GET /api/v0/post/{id}", s.viewAPIPost)
 	mux.HandleFunc("POST /api/v0/post/{id}", s.editAPIPost)
 	mux.HandleFunc("POST /post/{id}", s.editPost)
 	mux.HandleFunc("GET /login", s.getLogin)
@@ -433,6 +434,31 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		s.handleHTMLError(w, r, "execute", http.StatusInternalServerError, err)
+		return
+	}
+}
+
+func (s Server) viewAPIPost(w http.ResponseWriter, r *http.Request) {
+	p, err := parseGetRValues(r)
+	if err != nil {
+		handleJSONError(w, r, "parse values", http.StatusInternalServerError, err)
+		return
+	}
+
+	p, err = s.DB.ReadPost(int(p.ID))
+	if err != nil {
+		handleJSONError(w, r, "read posts", http.StatusInternalServerError, err)
+		return
+	}
+
+	p.ParseDate()
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	err = json.NewEncoder(w).Encode(p)
+	if err != nil {
+		handleJSONError(w, r, "execute", http.StatusInternalServerError, err)
 		return
 	}
 }
