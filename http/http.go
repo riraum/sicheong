@@ -39,7 +39,8 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux.HandleFunc("POST /api/v0/post/{id}", s.editAPIPost)
 	mux.HandleFunc("POST /post/{id}", s.editPost)
 	mux.HandleFunc("GET /login", s.getLogin)
-	mux.HandleFunc("POST /api/v0/login", s.postLogin)
+	mux.HandleFunc("POST /api/v0/login", s.postAPILogin)
+	mux.HandleFunc("POST /login", s.postLogin)
 	mux.HandleFunc("GET /done", s.getDone)
 	mux.HandleFunc("GET /fail", s.getFail)
 
@@ -518,6 +519,34 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.handleHTMLError(w, r, "author doesn't exist", http.StatusUnauthorized, err)
+	return
+}
+
+func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
+	authorInput := r.FormValue("author")
+
+	encryptedAuthorByte, err := security.Encrypt([]byte(authorInput), s.Key)
+	if err != nil {
+		s.handleHTMLError(w, r, "encrypt error", http.StatusInternalServerError, err)
+		return
+	}
+
+	cookie := http.Cookie{
+		Name:   "authorName",
+		Value:  base64.StdEncoding.EncodeToString(encryptedAuthorByte),
+		Path:   "/",
+		Secure: true,
+	}
+
+	author, _ := s.DB.ReadAuthor(authorInput)
+
+	if author.Name != "" {
+		http.SetCookie(w, &cookie)
+		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
+		return
+	}
+
+	handleJSONError(w, r, "author doesn't exist", http.StatusUnauthorized, err)
 	return
 }
 
