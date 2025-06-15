@@ -548,6 +548,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	if author.Name != "" {
 		http.SetCookie(w, &cookie)
 		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
+		return
 	}
 
 	s.handleHTMLError(w, r, "author doesn't exist", http.StatusUnauthorized, err)
