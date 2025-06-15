@@ -46,12 +46,21 @@ func TestAll(t *testing.T) {
 			AuthorID: 2,
 		},
 		{
-			ID:       3,
-			Date:     20250301,
+			// ID:       3,
+			Date:     1727780130,
 			Title:    "Announcement",
 			Link:     "https://http.cat/status/301",
 			Content:  "C",
 			AuthorID: 3,
+		},
+		{
+
+			// ID:       1,
+			Date:     1748000743,
+			Title:    "Complaint",
+			Link:     "https://http.cat/status/200",
+			Content:  "A",
+			AuthorID: 1,
 		},
 	}
 
