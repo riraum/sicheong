@@ -495,6 +495,11 @@ func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if p.Content == "" {
+		handleJSONError(w, r, "post is empty", http.StatusInternalServerError, err)
+		return
+	}
+
 	err = s.DB.UpdatePost(p)
 	if err != nil {
 		handleJSONError(w, r, "edit post in db", http.StatusInternalServerError, err)
