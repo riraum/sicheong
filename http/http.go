@@ -260,7 +260,7 @@ func parsePostRValues(r *http.Request) (db.Post, error) {
 func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("authorName")
 	if err != nil {
-		handleJSONError(w, r, "no author cookie", http.StatusInternalServerError, err)
+		handleJSONError(w, r, "no author cookie", http.StatusUnauthorized, err)
 		return
 	}
 
@@ -302,6 +302,10 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	p.AuthorID = author.ID
+
+	if p.Content == "" {
+		handleJSONError(w, r, "post is empty", http.StatusInternalServerError, err)
+	}
 
 	err = s.DB.NewPost(p)
 	if err != nil {
