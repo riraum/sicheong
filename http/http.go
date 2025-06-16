@@ -474,6 +474,11 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if p.Content == "" {
+		s.handleHTMLError(w, r, "post is empty", http.StatusInternalServerError, err)
+		return
+	}
+
 	err = s.DB.UpdatePost(p)
 	if err != nil {
 		s.handleHTMLError(w, r, "edit post in db", http.StatusInternalServerError, err)
