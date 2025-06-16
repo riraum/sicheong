@@ -423,7 +423,7 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 
 	p, err = s.DB.ReadPost(int(p.ID))
 	if err != nil {
-		s.handleHTMLError(w, r, "read posts", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, r, "read posts", http.StatusBadRequest, err)
 		return
 	}
 

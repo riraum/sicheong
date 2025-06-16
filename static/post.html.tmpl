@@ -11,17 +11,15 @@
 <body>
     <main class="container">
   <div>
-    {{.ID}}
+    Date: {{.ParsedDate.Format "2006/01/02"}}
     <br>
-    {{.ParsedDate.Format "2006/01/02"}}
+    Title: {{.Title}}
     <br>
-    {{.Title}}
+    Link: <a href>{{.Link}}</a>
     <br>
-    {{.Link}}
+    Content: {{.Content}}
     <br>
-    {{.Content}}
-    <br>
-    {{.AuthorID}}
+    AuthorID: {{.AuthorID}}
     <br>
   </div>
     <form action="/post/delete/{{.ID}}" method="POST" novalidate>
