@@ -9,6 +9,7 @@
 </head>
 
 <body>
+    <main class="container">
     <div>
         <a href="login">
 <button>Login</button>
@@ -17,20 +18,16 @@
 <br>
   Posts
   <div>
-    <br>
     {{range .}}
-    {{.ID}}
+    Date: {{.ParsedDate.Format "2006/01/02"}}
     <br>
-    {{.ParsedDate.Format "2006/01/02"}}
+    Title: {{.Title}}
     <br>
-    {{.Title}}
+    Link <a href="{{.Link}}">{{.Link}}</a>
     <br>
-    {{.Link}}
+    Content: {{.Content}}
     <br>
-    {{.Content}}
-    <br>
-    <a href="/post/{{.ID}}">
-    Post link </a>
+    <a href="/post/{{.ID}}">View post</a>
     <br>
     ---
    <br>
@@ -41,7 +38,7 @@
   <form action="/post" method="POST" novalidate>
     <div>
       <label for="Title">Title</label>
-      <input type="text" name="title" required />
+      <input type="text" name="title" required placeholder="enter title"/>
     </div>
     <div>
       <label for="Date">Date</label>
@@ -49,16 +46,17 @@
     </div>
     <div>
       <label for="Link">Link</label>
-      <input type="text" name="link" required />
+      <input type="text" name="link" required placeholder="enter link"/>
     </div>
     <div>
       <label for="Content">Content</label>
-      <input type="text" name="content" required />
+      <input type="text" name="content" required placeholder="enter content"/>
     </div>
     <div>
       <input type="submit" value="Submit" />
     </div>
   </form>
+    </main>
 </body>
 
 </html>
