@@ -330,6 +330,7 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 		s.handleHTMLError(w, r, "failed to authenticate", http.StatusUnauthorized, err)
 		return
 	}
+
 	p, err := parsePostRValues(r)
 	if err != nil {
 		s.handleHTMLError(w, r, "parse values", http.StatusInternalServerError, err)
@@ -356,13 +357,17 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 
 	p.AuthorID = author.ID
 
+	if p.Content == "" {
+		s.handleHTMLError(w, r, "post is empty", http.StatusInternalServerError, err)
+	}
+
 	err = s.DB.NewPost(p)
 	if err != nil {
 		s.handleHTMLError(w, r, "create new post in db", http.StatusInternalServerError, err)
 		return
 	}
 
-	http.Redirect(w, r, "/done", http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
