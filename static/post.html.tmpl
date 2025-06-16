@@ -26,31 +26,32 @@
     <form action="/post/delete/{{.ID}}" method="POST" novalidate>
       <input type="submit" value="Delete" />
   </form>
-  <br>
-  <div>
-    Edit post to
-  </div>
   <form action="/post/{{.ID}}" method="POST" novalidate>
     <div>
       <label for="Title">Title</label>
-      <input type="text" name="title" required />
+      <input type="text" name="title" required value="{{.Title}}"/>
     </div>
     <div>
       <label for="Date">Date</label>
-      <input type="date" name="date" required />
+      <input type="date" name="date" required value="{{.ParsedDate.Format "2006/01/02"}}"/>
     </div>
     <div>
       <label for="Link">Link</label>
-      <input type="text" name="link" required />
+      <input type="text" name="link" required value="{{.Link}}"/>
     </div>
     <div>
       <label for="Content">Content</label>
-      <input type="text" name="content" required />
+      <input type="text" name="content" required value="{{.Content}}"/>
     </div>
     <div>
-      <input type="submit" value="Submit" />
+      <input type="submit" value="Edit" />
     </div>
   </form>
+  <div>
+      <a href="/">
+      <button>Back to index</button>
+      </a>
+  </div>
 </body>
 
 </html>
