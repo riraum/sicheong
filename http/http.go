@@ -480,7 +480,7 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/done", http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
