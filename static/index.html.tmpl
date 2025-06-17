@@ -5,7 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="static/pico.min.css" rel="stylesheet" />
-  <title>HELLO</title>
+  <title>시청 Si-cheong index</title>
 </head>
 
 <body>
@@ -33,6 +33,7 @@
    <br>
     {{end}}
   </div>
+  {{if .authenticated}}
   <br>
   Create new post
   <form action="/post" method="POST" novalidate>
@@ -56,6 +57,7 @@
       <input type="submit" value="Submit" />
     </div>
   </form>
+  {{end}}
     </main>
 </body>
 
