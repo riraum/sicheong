@@ -446,7 +446,7 @@ func (s Server) viewAPIPost(w http.ResponseWriter, r *http.Request) {
 
 	p, err = s.DB.ReadPost(int(p.ID))
 	if err != nil {
-		handleJSONError(w, r, "read posts", http.StatusInternalServerError, err)
+		handleJSONError(w, r, "read posts", http.StatusNotFound, err)
 		return
 	}
 
