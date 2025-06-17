@@ -28,6 +28,7 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.getIndex)
 	mux.HandleFunc("GET /static/pico.min.css", s.getCSS)
+	mux.HandleFunc("GET /static/favicon.svg", s.getFavicon)
 	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
 	mux.HandleFunc("POST /api/v0/post", s.postAPIPost)
 	mux.HandleFunc("POST /post", s.postPost)
@@ -167,6 +168,19 @@ func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
 
 	if _, err = w.Write(css); err != nil {
 		s.handleHTMLError(w, r, "write css", http.StatusInternalServerError, err)
+		return
+	}
+}
+
+func (s Server) getFavicon(w http.ResponseWriter, r *http.Request) {
+	favicon, err := s.EmbedRootDir.ReadFile("static/favicon.svg")
+	if err != nil {
+		s.handleHTMLError(w, r, "read file", http.StatusInternalServerError, err)
+		return
+	}
+
+	if _, err = w.Write(favicon); err != nil {
+		s.handleHTMLError(w, r, "write favicon", http.StatusInternalServerError, err)
 		return
 	}
 }
