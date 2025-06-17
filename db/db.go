@@ -22,6 +22,7 @@ type Post struct {
 	Date       int64
 	ParsedDate time.Time
 	Today      time.Time
+	TodayStr   string
 	Title      string
 	Link       string
 	Content    string

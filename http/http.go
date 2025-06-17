@@ -430,7 +430,8 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 	p.ParseDate()
 
 	p.Today = time.Now()
-	todayFormat := p.Today.Format("2006/01/02")
+	todayFormat := p.Today.Format("2006-01-02")
+	p.TodayStr = todayFormat
 	log.Printf("%s\n%s", p.Today, todayFormat)
 
 	err = s.Template.ExecuteTemplate(w, "post.html.tmpl", p)
