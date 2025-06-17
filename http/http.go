@@ -8,6 +8,8 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"net/url"
+	"path"
 	"strconv"
 	"time"
 
@@ -173,13 +175,22 @@ func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) getFavicon(w http.ResponseWriter, r *http.Request) {
-	favicon, err := s.EmbedRootDir.ReadFile("static/favicon.svg")
+	faviconDir, err := s.EmbedRootDir.ReadDir("static/favicon")
 	if err != nil {
 		s.handleHTMLError(w, r, "read file", http.StatusInternalServerError, err)
 		return
 	}
 
-	if _, err = w.Write(favicon); err != nil {
+	u, err := url.Parse(r.URL.String())
+
+	fp := path.Join("faviconDir", "u.Path")
+	http.ServeFile(w, r, fp)
+
+	favicon := fmt.Sprintf("%s%s", faviconDir, u.Path)
+
+	log.Print(favicon)
+
+	if _, err = w.Write([]byte(favicon)); err != nil {
 		s.handleHTMLError(w, r, "write favicon", http.StatusInternalServerError, err)
 		return
 	}
