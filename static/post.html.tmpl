@@ -11,15 +11,15 @@
 <body>
     <main class="container">
   <div>
-    Date: {{.ParsedDate.Format "2006/01/02"}}
+   {{.ParsedDate.Format "2006/01/02"}}
     <br>
-    Title: {{.Title}}
+    {{.Title}}
     <br>
-    Link: <a href="{{.Link}}" target="_blank" >{{.Link}}</a>
+    <a href="{{.Link}}" target="_blank" >{{.Link}}</a>
     <br>
-    Content: {{.Content}}
+    {{.Content}}
     <br>
-    AuthorID: {{.AuthorID}}
+    {{.AuthorID}}
     <br>
   </div>
     <form action="/post/delete/{{.ID}}" method="POST" novalidate>
@@ -27,19 +27,19 @@
   </form>
   <form action="/post/{{.ID}}" method="POST" novalidate>
     <div>
-      <label for="Title">Title</label>
+      <!-- <label for="Title">Title</label> -->
       <input type="text" name="title" required value="{{.Title}}"/>
     </div>
     <div>
-      <label for="Date">Date</label>
+      <!-- <label for="Date">Date</label> -->
       <input type="date" name="date" required value="{{.Today.Format "2006/01/02"}}"/>
     </div>
     <div>
-      <label for="Link">Link</label>
+      <!-- <label for="Link">Link</label> -->
       <input type="text" name="link" required value="{{.Link}}"/>
     </div>
     <div>
-      <label for="Content">Content</label>
+      <!-- <label for="Content">Content</label> -->
       <input type="text" name="content" required value="{{.Content}}"/>
     </div>
     <div>
