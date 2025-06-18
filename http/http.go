@@ -9,7 +9,6 @@ import (
 	"log"
 	"net/http"
 	"net/url"
-	"path"
 	"strconv"
 	"time"
 
@@ -30,7 +29,7 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.getIndex)
 	mux.HandleFunc("GET /static/pico.min.css", s.getCSS)
-	mux.HandleFunc("GET /static/favicon.svg", s.getFavicon)
+	mux.HandleFunc("GET /static/favicon", s.getFavicon)
 	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
 	mux.HandleFunc("POST /api/v0/post", s.postAPIPost)
 	mux.HandleFunc("POST /post", s.postPost)
@@ -175,22 +174,26 @@ func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) getFavicon(w http.ResponseWriter, r *http.Request) {
-	faviconDir, err := s.EmbedRootDir.ReadDir("static/favicon")
+	u, err := url.Parse(r.URL.String())
+	if err != nil {
+		s.handleHTMLError(w, r, "parse URL", http.StatusInternalServerError, err)
+		return
+	}
+
+	favicon := fmt.Sprintf("%s", u.Path)
+
+	log.Print(favicon)
+
+	// fp := path.Join("faviconDir", "u.Path")
+	// http.ServeFile(w, r, fp)
+
+	faviconAsset, err := s.EmbedRootDir.ReadFile(favicon)
 	if err != nil {
 		s.handleHTMLError(w, r, "read file", http.StatusInternalServerError, err)
 		return
 	}
 
-	u, err := url.Parse(r.URL.String())
-
-	fp := path.Join("faviconDir", "u.Path")
-	http.ServeFile(w, r, fp)
-
-	favicon := fmt.Sprintf("%s%s", faviconDir, u.Path)
-
-	log.Print(favicon)
-
-	if _, err = w.Write([]byte(favicon)); err != nil {
+	if _, err = w.Write(faviconAsset); err != nil {
 		s.handleHTMLError(w, r, "write favicon", http.StatusInternalServerError, err)
 		return
 	}
