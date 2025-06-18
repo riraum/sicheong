@@ -122,10 +122,10 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	ok, err := s.authenticated(r, w)
-	if err != nil {
-		s.handleHTMLError(w, r, "failed to authenticate", http.StatusUnauthorized, err)
-	}
+	ok, _ := s.authenticated(r, w)
+	// if err != nil {
+	// 	s.handleHTMLError(w, r, "failed to authenticate", http.StatusUnauthorized, err)
+	// }
 
 	if ok {
 		posts.Authenticated = true
