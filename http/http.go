@@ -116,13 +116,22 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) (bool, err
 func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 	par := parseQueryParams(r)
 
-	p, err := s.DB.ReadPosts(par)
+	posts, err := s.DB.ReadPosts(par)
 	if err != nil {
 		s.handleHTMLError(w, r, "read posts", http.StatusInternalServerError, err)
 		return
 	}
 
-	err = s.Template.ExecuteTemplate(w, "index.html.tmpl", p)
+	ok, err := s.authenticated(r, w)
+	if err != nil {
+		s.handleHTMLError(w, r, "failed to authenticate", http.StatusUnauthorized, err)
+	}
+
+	if ok {
+		posts.Authenticated = true
+	}
+
+	err = s.Template.ExecuteTemplate(w, "index.html.tmpl", posts)
 
 	if err != nil {
 		s.handleHTMLError(w, r, "execute", http.StatusInternalServerError, err)

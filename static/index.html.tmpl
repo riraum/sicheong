@@ -18,7 +18,7 @@
 <br>
   Posts
   <div>
-    {{range .}}
+    {{range .Posts}}
     Date: {{.ParsedDate.Format "2006/01/02"}}
     <br>
     Title: {{.Title}}
@@ -33,7 +33,7 @@
    <br>
     {{end}}
   </div>
-  {{if .authenticated}}
+  {{if .Authenticated}}
   <br>
   Create new post
   <form action="/post" method="POST" novalidate>
