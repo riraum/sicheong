@@ -11,12 +11,18 @@
 <body>
     <main class="container">
     <div>
+        {{if .Authenticated}}
+        <a href="logout">
+            <button>Log out</button>
+        </a>
+        {{else}}
         <a href="login">
 <button>Login</button>
         </a>
+        {{end}}
     </div>
 <br>
-  Posts
+  <!-- Posts -->
   <div>
     {{range .Posts}}
     Date: {{.ParsedDate.Format "2006/01/02"}}
