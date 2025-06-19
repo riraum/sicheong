@@ -21,11 +21,12 @@ type Post struct {
 	ID         float32
 	Date       int64
 	ParsedDate time.Time
-	Today      time.Time
 	Title      string
 	Link       string
 	Content    string
 	AuthorID   float32 // Author.ID
+
+	Today time.Time
 }
 
 type Posts []Post
