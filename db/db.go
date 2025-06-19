@@ -31,6 +31,7 @@ type Post struct {
 
 type Posts struct {
 	Authenticated bool
+	Today         time.Time
 	Posts         []Post
 }
 
