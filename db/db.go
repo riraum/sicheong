@@ -18,18 +18,21 @@ type Author struct {
 }
 
 type Post struct {
-	ID         float32
-	Date       int64
-	ParsedDate time.Time
-	Title      string
-	Link       string
-	Content    string
-	AuthorID   float32 // Author.ID
-
-	Today time.Time
+	ID            float32
+	Date          int64
+	ParsedDate    time.Time
+	Title         string
+	Link          string
+	Content       string
+	AuthorID      float32 // Author.ID
+	Authenticated bool
+	Today         time.Time
 }
 
-type Posts []Post
+type Posts struct {
+	Authenticated bool
+	Posts         []Post
+}
 
 type Params struct {
 	Sort      string
@@ -233,7 +236,7 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 
 	stmt, err := d.client.Prepare(query)
 	if err != nil {
-		return nil, fmt.Errorf("failed to prepare %w", err)
+		return posts, fmt.Errorf("failed to prepare %w", err)
 	}
 	defer stmt.Close()
 
@@ -243,13 +246,13 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 	case "":
 		rows, err = stmt.Query()
 		if err != nil {
-			return nil, fmt.Errorf("failed to select %w", err)
+			return posts, fmt.Errorf("failed to select %w", err)
 		}
 		defer rows.Close()
 	default:
 		rows, err = stmt.Query(where)
 		if err != nil {
-			return nil, fmt.Errorf("failed to select %w", err)
+			return posts, fmt.Errorf("failed to select %w", err)
 		}
 		defer rows.Close()
 	}
@@ -259,12 +262,12 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 	for rows.Next() {
 		err = rows.Scan(&post.ID, &post.Date, &post.Title, &post.Link, &post.Content, &post.AuthorID)
 		if err != nil {
-			return nil, fmt.Errorf("failed to scan %w", err)
+			return posts, fmt.Errorf("failed to scan %w", err)
 		}
 
 		post.ParseDate()
 
-		posts = append(posts, post)
+		posts.Posts = append(posts.Posts, post)
 	}
 
 	return posts, nil
@@ -292,7 +295,7 @@ func (p *Post) ParseDate() {
 }
 
 func (p *Posts) ParseDates() {
-	for _, post := range *p {
+	for _, post := range p.Posts {
 		post.ParseDate()
 	}
 }

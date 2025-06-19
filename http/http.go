@@ -116,13 +116,22 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) (bool, err
 func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 	par := parseQueryParams(r)
 
-	p, err := s.DB.ReadPosts(par)
+	posts, err := s.DB.ReadPosts(par)
 	if err != nil {
 		s.handleHTMLError(w, r, "read posts", http.StatusInternalServerError, err)
 		return
 	}
 
-	err = s.Template.ExecuteTemplate(w, "index.html.tmpl", p)
+	ok, _ := s.authenticated(r, w)
+	// if err != nil {
+	// 	s.handleHTMLError(w, r, "failed to authenticate", http.StatusUnauthorized, err)
+	// }
+
+	if ok {
+		posts.Authenticated = true
+	}
+
+	err = s.Template.ExecuteTemplate(w, "index.html.tmpl", posts)
 
 	if err != nil {
 		s.handleHTMLError(w, r, "execute", http.StatusInternalServerError, err)
@@ -260,7 +269,7 @@ func parsePostRValues(r *http.Request) (db.Post, error) {
 func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 	cookie, err := r.Cookie("authorName")
 	if err != nil {
-		handleJSONError(w, r, "no author cookie", http.StatusInternalServerError, err)
+		handleJSONError(w, r, "no author cookie", http.StatusUnauthorized, err)
 		return
 	}
 
@@ -303,6 +312,10 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 
 	p.AuthorID = author.ID
 
+	if p.Content == "" {
+		handleJSONError(w, r, "post is empty", http.StatusInternalServerError, err)
+	}
+
 	err = s.DB.NewPost(p)
 	if err != nil {
 		handleJSONError(w, r, "create new post in db", http.StatusInternalServerError, err)
@@ -330,6 +343,7 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 		s.handleHTMLError(w, r, "failed to authenticate", http.StatusUnauthorized, err)
 		return
 	}
+
 	p, err := parsePostRValues(r)
 	if err != nil {
 		s.handleHTMLError(w, r, "parse values", http.StatusInternalServerError, err)
@@ -356,13 +370,17 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 
 	p.AuthorID = author.ID
 
+	if p.Content == "" {
+		s.handleHTMLError(w, r, "post is empty", http.StatusInternalServerError, err)
+	}
+
 	err = s.DB.NewPost(p)
 	if err != nil {
 		s.handleHTMLError(w, r, "create new post in db", http.StatusInternalServerError, err)
 		return
 	}
 
-	http.Redirect(w, r, "/done", http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
@@ -411,7 +429,7 @@ func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, "/done", http.StatusSeeOther)
+	http.Redirect(w, r, "/?deleteOkay", http.StatusSeeOther)
 }
 
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
@@ -451,7 +469,7 @@ func (s Server) viewAPIPost(w http.ResponseWriter, r *http.Request) {
 
 	p, err = s.DB.ReadPost(int(p.ID))
 	if err != nil {
-		handleJSONError(w, r, "read posts", http.StatusInternalServerError, err)
+		handleJSONError(w, r, "read posts", http.StatusNotFound, err)
 		return
 	}
 
@@ -479,13 +497,18 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if p.Content == "" {
+		s.handleHTMLError(w, r, "post is empty", http.StatusInternalServerError, err)
+		return
+	}
+
 	err = s.DB.UpdatePost(p)
 	if err != nil {
 		s.handleHTMLError(w, r, "edit post in db", http.StatusInternalServerError, err)
 		return
 	}
 
-	http.Redirect(w, r, "/done", http.StatusSeeOther)
+	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
 func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
@@ -497,6 +520,11 @@ func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
 	p, err := parsePostRValues(r)
 	if err != nil {
 		handleJSONError(w, r, "parse values", http.StatusInternalServerError, err)
+		return
+	}
+
+	if p.Content == "" {
+		handleJSONError(w, r, "post is empty", http.StatusInternalServerError, err)
 		return
 	}
 
