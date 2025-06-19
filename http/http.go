@@ -29,7 +29,7 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.getIndex)
 	mux.HandleFunc("GET /static/pico.min.css", s.getCSS)
-	mux.HandleFunc("GET /static/favicon", s.getFavicon)
+	mux.HandleFunc("GET /static/favicon/", s.getFavicon)
 	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
 	mux.HandleFunc("POST /api/v0/post", s.postAPIPost)
 	mux.HandleFunc("POST /post", s.postPost)
@@ -199,10 +199,12 @@ func (s Server) getFavicon(w http.ResponseWriter, r *http.Request) {
 
 	log.Print(favicon)
 
+	// file := u.Path[len("/static/favicon"):]
+
 	// fp := path.Join("faviconDir", "u.Path")
 	// http.ServeFile(w, r, fp)
 
-	faviconAsset, err := s.EmbedRootDir.ReadFile(favicon)
+	faviconAsset, err := s.EmbedRootDir.ReadFile(u.Path)
 	if err != nil {
 		s.handleHTMLError(w, r, "read file", http.StatusInternalServerError, err)
 		return
