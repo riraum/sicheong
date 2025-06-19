@@ -33,6 +33,7 @@ type Posts struct {
 	Authenticated bool
 	Today         time.Time
 	Posts         []Post
+	AuthorName    string
 }
 
 type Params struct {

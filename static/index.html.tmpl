@@ -13,7 +13,7 @@
     <div>
         {{if .Authenticated}}
         <a href="logout">
-            <button>Log out</button>
+            <button>{{.AuthorName}} log out</button>
         </a>
         {{else}}
         <a href="login">
