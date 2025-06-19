@@ -433,26 +433,32 @@ func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
-	p, err := parseGetRValues(r)
+	post, err := parseGetRValues(r)
 	if err != nil {
 		s.handleHTMLError(w, r, "parse values", http.StatusInternalServerError, err)
 		return
 	}
 
-	p, err = s.DB.ReadPost(int(p.ID))
+	post, err = s.DB.ReadPost(int(post.ID))
 	if err != nil {
 		s.handleHTMLError(w, r, "read posts", http.StatusNotFound, err)
 		return
 	}
 
-	p.ParseDate()
+	ok, _ := s.authenticated(r, w)
+	// if err != nil {
+	// 	s.handleHTMLError(w, r, "failed to authenticate", http.StatusUnauthorized, err)
+	// }
 
-	p.Today = time.Now()
-	// todayFormat := p.Today.Format("2006-01-02")
-	// p.TodayStr = todayFormat
-	// log.Printf("%s\n%s", p.Today, todayFormat)
+	if ok {
+		post.Authenticated = true
+	}
 
-	err = s.Template.ExecuteTemplate(w, "post.html.tmpl", p)
+	post.ParseDate()
+
+	post.Today = time.Now()
+
+	err = s.Template.ExecuteTemplate(w, "post.html.tmpl", post)
 
 	if err != nil {
 		s.handleHTMLError(w, r, "execute", http.StatusInternalServerError, err)
