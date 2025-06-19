@@ -42,6 +42,8 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux.HandleFunc("GET /login", s.getLogin)
 	mux.HandleFunc("POST /api/v0/login", s.postAPILogin)
 	mux.HandleFunc("POST /login", s.postLogin)
+	mux.HandleFunc("GET /logout", s.getLogout)
+	mux.HandleFunc("GET /api/v0/logout", s.getAPILogout)
 	mux.HandleFunc("GET /done", s.getDone)
 	mux.HandleFunc("GET /fail", s.getFail)
 
@@ -614,6 +616,31 @@ func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode("logged in")
+	if err != nil {
+		handleJSONError(w, r, "encode", http.StatusInternalServerError, err)
+	}
+}
+
+func (s Server) getLogout(w http.ResponseWriter, r *http.Request) {
+	cookie := http.Cookie{
+		Name:  "authorName",
+		Value: "",
+	}
+
+	http.SetCookie(w, &cookie)
+	http.Redirect(w, r, "/?loggedOutOkay", http.StatusSeeOther)
+}
+
+func (s Server) getAPILogout(w http.ResponseWriter, r *http.Request) {
+	cookie := http.Cookie{
+		Name:   "authorName",
+		MaxAge: 0,
+	}
+
+	http.SetCookie(w, &cookie)
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	err := json.NewEncoder(w).Encode("logged out")
 	if err != nil {
 		handleJSONError(w, r, "encode", http.StatusInternalServerError, err)
 	}
