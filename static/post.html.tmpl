@@ -22,6 +22,7 @@
     {{.AuthorID}}
     <br>
   </div>
+  {{if .Authenticated}}
     <form action="/post/delete/{{.ID}}" method="POST" novalidate>
       <input type="submit" value="Delete" />
   </form>
@@ -46,6 +47,7 @@
       <input type="submit" value="Edit" />
     </div>
   </form>
+  {{end}}
   <div>
       <a href="/">
       <button>Back to index</button>
