@@ -13,17 +13,25 @@
 </head>
 
 <body>
-  Login
-  <br>
-  <form action="/login" method="POST" novalidate>
-    <div>
-      <label for="Author">Author</label>
-      <input type="text" name="author" required />
-    </div>
-    <div>
-      <input type="submit" value="Submit" />
-    </div>
-  </form>
-</body>
+ <main class="container">
+    <form action="/login" method="POST" novalidate>
+    <fieldset class="grid">
+<div>
+    <input type="text" name="author" required placeholder="author name"/>
+</div>
 
+<div>
+    <input type="submit" value="Submit" />
+</div>
+    </fieldset>
+    </form>
+
+  <div>
+      <a href="/">
+       <button>Back to index</button>
+      </a>
+  </div>
+  </main>
+
+</body>
 </html>

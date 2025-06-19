@@ -13,48 +13,51 @@
 </head>
 
 <body>
+    <main class="container">
   <div>
-    {{.ID}}
-    <br>
-    {{.ParsedDate.Format "2006/01/02"}}
+   {{.ParsedDate.Format "2006/01/02"}}
     <br>
     {{.Title}}
     <br>
-    {{.Link}}
+    <a href="{{.Link}}" target="_blank" >{{.Link}}</a>
     <br>
     {{.Content}}
     <br>
     {{.AuthorID}}
     <br>
   </div>
+  {{if .Authenticated}}
     <form action="/post/delete/{{.ID}}" method="POST" novalidate>
       <input type="submit" value="Delete" />
   </form>
-  <br>
-  <div>
-    Edit post to
-  </div>
   <form action="/post/{{.ID}}" method="POST" novalidate>
     <div>
-      <label for="Title">Title</label>
-      <input type="text" name="title" required />
+      <!-- <label for="Title">Title</label> -->
+      <input type="text" name="title" required value="{{.Title}}"/>
     </div>
     <div>
-      <label for="Date">Date</label>
-      <input type="date" name="date" required />
+      <!-- <label for="Date">Date</label> -->
+      <input type="date" name="date" required value="{{.Today.Format "2006-01-02"}}"/>
     </div>
     <div>
-      <label for="Link">Link</label>
-      <input type="text" name="link" required />
+      <!-- <label for="Link">Link</label> -->
+      <input type="text" name="link" required value="{{.Link}}"/>
     </div>
     <div>
-      <label for="Content">Content</label>
-      <input type="text" name="content" required />
+      <!-- <label for="Content">Content</label> -->
+      <input type="text" name="content" required value="{{.Content}}"/>
     </div>
     <div>
-      <input type="submit" value="Submit" />
+      <input type="submit" value="Edit" />
     </div>
   </form>
+  {{end}}
+  <div>
+      <a href="/">
+      <button>Back to index</button>
+      </a>
+  </div>
+    </main>
 </body>
 
 </html>
