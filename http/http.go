@@ -129,6 +129,7 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 
 	if ok {
 		posts.Authenticated = true
+		posts.Today = time.Now()
 	}
 
 	err = s.Template.ExecuteTemplate(w, "index.html.tmpl", posts)
