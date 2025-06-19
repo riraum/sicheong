@@ -18,7 +18,6 @@ type Author struct {
 }
 
 type Post struct {
-	Authenticated bool
 	ID            float32
 	Date          int64
 	ParsedDate    time.Time
@@ -26,6 +25,8 @@ type Post struct {
 	Link          string
 	Content       string
 	AuthorID      float32 // Author.ID
+	Authenticated bool
+	Today         time.Time
 }
 
 type Posts struct {
