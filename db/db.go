@@ -120,7 +120,7 @@ func (d DB) Fill() error {
 		},
 		{
 			Date:     1727780130, //nolint:mnd
-			Title:    "STatus 301",
+			Title:    "Status 301",
 			Link:     "https://http.cat/status/301",
 			Content:  "Good HTTP status 301 explainer",
 			AuthorID: 3, //nolint:mnd
