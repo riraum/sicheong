@@ -291,9 +291,6 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	_, ok, _ := s.authenticated(r)
-	// if err != nil {
-	// 	s.handleHTMLError(w, "failed to authenticate", http.StatusUnauthorized, err)
-	// }
 
 	if ok {
 		p.Authenticated = true
