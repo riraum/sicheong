@@ -174,13 +174,6 @@ func parseQueryParams(r *http.Request) db.Params {
 }
 
 func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
-	u, err := url.Parse(r.URL.String())
-	if err != nil {
-		s.handleHTMLError(w, r, "parse URL", http.StatusInternalServerError, err)
-		return
-	}
-	log.Print(u.Path)
-
 	css, err := s.EmbedRootDir.ReadFile("static/pico.min.css")
 	if err != nil {
 		s.handleHTMLError(w, r, "read css file", http.StatusInternalServerError, err)
@@ -201,26 +194,14 @@ func (s Server) getStaticAsset(w http.ResponseWriter, r *http.Request) {
 		s.handleHTMLError(w, r, "parse URL", http.StatusInternalServerError, err)
 		return
 	}
-	log.Print(u.Path)
-
-	// fp := http.StripPrefix("/", u.Path))
-
-	// faviconAsset := fmt.Sprintf("%s", u.Path)
-
-	// fp := fmt.Sprintf("%s", u.Path)
 
 	fp := u.Path[len("/"):]
-
-	// fp := path.Join("faviconDir", "u.Path")
-	// http.ServeFile(w, r, fp)
 
 	asset, err := s.EmbedRootDir.ReadFile(fp)
 	if err != nil {
 		s.handleHTMLError(w, r, "read asset", http.StatusInternalServerError, err)
 		return
 	}
-
-	// w.Header().Add("Content-Type", "image/png")
 
 	if _, err = w.Write(asset); err != nil {
 		s.handleHTMLError(w, r, "write asset", http.StatusInternalServerError, err)
