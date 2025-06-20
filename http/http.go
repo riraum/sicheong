@@ -296,9 +296,16 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 		p.Authenticated = true
 	}
 
+	author, err := s.DB.ReadAuthorName(p.AuthorID)
+	if err != nil {
+		s.handleHTMLError(w, "string to float conversion", http.StatusInternalServerError, err)
+		return
+	}
+
 	p.ParseDate()
 
 	p.Today = time.Now()
+	p.AuthorName = author.Name
 
 	err = s.Template.ExecuteTemplate(w, "post.html.tmpl", p)
 

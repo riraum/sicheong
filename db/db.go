@@ -27,6 +27,7 @@ type Post struct {
 	AuthorID      float32 // Author.ID
 	Authenticated bool
 	Today         time.Time
+	AuthorName    string
 }
 
 type Posts struct {
@@ -197,6 +198,22 @@ func (d DB) ReadAuthor(name string) (Author, error) {
 	}
 
 	err = stmt.QueryRow(name).Scan(&author.ID, &author.Name)
+	if err != nil {
+		return author, fmt.Errorf("failed to query: %w", err)
+	}
+
+	return author, nil
+}
+
+func (d DB) ReadAuthorName(id float32) (Author, error) {
+	var author Author
+
+	stmt, err := d.client.Prepare("SELECT id, name FROM authors WHERE id = ?")
+	if err != nil {
+		return author, fmt.Errorf("failed query * from author: %w", err)
+	}
+
+	err = stmt.QueryRow(id).Scan(&author.ID, &author.Name)
 	if err != nil {
 		return author, fmt.Errorf("failed to query: %w", err)
 	}
