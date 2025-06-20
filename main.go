@@ -2,7 +2,6 @@ package main
 
 import (
 	"embed"
-	"fmt"
 	"html/template"
 	"log"
 
@@ -17,7 +16,7 @@ var static embed.FS
 var t = template.Must(template.ParseFS(static, "static/*"))
 
 func main() {
-	fmt.Println("Hello si-cheong user")
+	log.Print("Hello si-cheong user")
 
 	key, err := security.NewEncryptionKey()
 	if err != nil {

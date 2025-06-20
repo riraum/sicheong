@@ -27,22 +27,22 @@ type Server struct {
 
 func (s Server) SetupMux() *http.ServeMux {
 	mux := http.NewServeMux()
-	mux.HandleFunc("GET /{$}", s.getIndex)
 	mux.HandleFunc("GET /static/", s.getStaticAsset)
+	mux.HandleFunc("GET /{$}", s.getIndex)
 	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
-	mux.HandleFunc("POST /api/v0/post", s.postAPIPost)
+	mux.HandleFunc("GET /post/{id}", s.viewPost)
+	mux.HandleFunc("GET /api/v0/post/{id}", s.viewAPIPost)
 	mux.HandleFunc("POST /post", s.postPost)
+	mux.HandleFunc("POST /api/v0/post", s.postAPIPost)
 	mux.HandleFunc("DELETE /api/v0/post/{id}", s.deleteAPIPost)
 	/* HTML5 specification only allows GET and POST. Therefore using POST for human delete interactions.
 	More details: https://github.com/riraum/si-cheong/pull/137*/
 	mux.HandleFunc("POST /post/delete/{id}", s.deletePost)
-	mux.HandleFunc("GET /post/{id}", s.viewPost)
-	mux.HandleFunc("GET /api/v0/post/{id}", s.viewAPIPost)
-	mux.HandleFunc("POST /api/v0/post/{id}", s.editAPIPost)
 	mux.HandleFunc("POST /post/{id}", s.editPost)
+	mux.HandleFunc("POST /api/v0/post/{id}", s.editAPIPost)
 	mux.HandleFunc("GET /login", s.getLogin)
-	mux.HandleFunc("POST /api/v0/login", s.postAPILogin)
 	mux.HandleFunc("POST /login", s.postLogin)
+	mux.HandleFunc("POST /api/v0/login", s.postAPILogin)
 	mux.HandleFunc("GET /logout", s.getLogout)
 	mux.HandleFunc("GET /api/v0/logout", s.getAPILogout)
 	mux.HandleFunc("GET /done", s.getDone)
@@ -57,7 +57,7 @@ func Run(mux *http.ServeMux) {
 	}
 }
 
-func (s Server) handleHTMLError(w http.ResponseWriter, r *http.Request, msg string, statusCode int, err error) {
+func (s Server) handleHTMLError(w http.ResponseWriter, msg string, statusCode int, err error) {
 	log.Printf("failed: %s \n code %v \n %s", msg, statusCode, err)
 
 	w.WriteHeader(statusCode)
@@ -68,7 +68,7 @@ func (s Server) handleHTMLError(w http.ResponseWriter, r *http.Request, msg stri
 	}
 }
 
-func handleJSONError(w http.ResponseWriter, r *http.Request, msg string, statusCode int, err error) {
+func handleJSONError(w http.ResponseWriter, msg string, statusCode int, err error) {
 	log.Printf("failed: %s \n code %v \n %s", msg, statusCode, err)
 
 	errorData := struct {
@@ -88,13 +88,13 @@ func handleJSONError(w http.ResponseWriter, r *http.Request, msg string, statusC
 	}
 }
 
-func (s Server) authenticated(r *http.Request, w http.ResponseWriter) (string, bool, error) {
-	cookie, err := r.Cookie("authorName")
+func (s Server) authenticated(r *http.Request) (string, bool, error) {
+	c, err := r.Cookie("authorName")
 	if err != nil {
 		return "", false, err
 	}
 
-	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
+	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(c.Value)
 	if err != nil {
 		return "", false, err
 	}
@@ -114,36 +114,6 @@ func (s Server) authenticated(r *http.Request, w http.ResponseWriter) (string, b
 	}
 
 	return author.Name, true, nil
-}
-
-func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
-	par := parseQueryParams(r)
-
-	posts, err := s.DB.ReadPosts(par)
-	if err != nil {
-		s.handleHTMLError(w, r, "read posts", http.StatusInternalServerError, err)
-		return
-	}
-
-	authorName, ok, _ := s.authenticated(r, w)
-	// if err != nil {
-	// 	s.handleHTMLError(w, r, "failed to authenticate", http.StatusUnauthorized, err)
-	// }
-
-	if ok {
-		posts.Authenticated = true
-		posts.Today = time.Now()
-
-		posts.AuthorName = authorName
-		log.Print(authorName)
-	}
-
-	err = s.Template.ExecuteTemplate(w, "index.html.tmpl", posts)
-
-	if err != nil {
-		s.handleHTMLError(w, r, "execute", http.StatusInternalServerError, err)
-		return
-	}
 }
 
 func parseQueryParams(r *http.Request) db.Params {
@@ -170,50 +140,6 @@ func parseQueryParams(r *http.Request) db.Params {
 	}
 
 	return p
-}
-
-func (s Server) getStaticAsset(w http.ResponseWriter, r *http.Request) {
-	u, err := url.Parse(r.URL.String())
-	if err != nil {
-		s.handleHTMLError(w, r, "parse URL", http.StatusInternalServerError, err)
-		return
-	}
-
-	fp := u.Path[len("/"):]
-
-	asset, err := s.EmbedRootDir.ReadFile(fp)
-	if err != nil {
-		s.handleHTMLError(w, r, "read asset", http.StatusInternalServerError, err)
-		return
-	}
-
-	if fp == "static/pico.min.css" {
-		w.Header().Add("Content-Type", "text/css")
-	}
-
-	if _, err = w.Write(asset); err != nil {
-		s.handleHTMLError(w, r, "write asset", http.StatusInternalServerError, err)
-		return
-	}
-}
-
-func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
-	par := parseQueryParams(r)
-
-	p, err := s.DB.ReadPosts(par)
-	if err != nil {
-		handleJSONError(w, r, "read posts", http.StatusInternalServerError, err)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	err = json.NewEncoder(w).Encode(p)
-	if err != nil {
-		handleJSONError(w, r, "encode", http.StatusInternalServerError, err)
-		return
-	}
 }
 
 func parseGetRValues(r *http.Request) (db.Post, error) {
@@ -283,202 +209,109 @@ func parsePostRValues(r *http.Request) (db.Post, error) {
 	return p, nil
 }
 
-func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("authorName")
+func (s Server) getStaticAsset(w http.ResponseWriter, r *http.Request) {
+	u, err := url.Parse(r.URL.String())
 	if err != nil {
-		handleJSONError(w, r, "no author cookie", http.StatusUnauthorized, err)
+		s.handleHTMLError(w, "parse URL", http.StatusInternalServerError, err)
 		return
 	}
 
-	if _, ok, err := s.authenticated(r, w); !ok {
-		handleJSONError(w, r, "authenticate", http.StatusUnauthorized, err)
-		return
-	}
+	fp := u.Path[len("/"):]
 
-	p, err := parsePostRValues(r)
+	asset, err := s.EmbedRootDir.ReadFile(fp)
 	if err != nil {
-		handleJSONError(w, r, "parse value", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, "read asset", http.StatusInternalServerError, err)
 		return
 	}
 
-	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
-	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotAcceptable)
-
-		err = json.NewEncoder(w).Encode(cookie.Value)
-		if err != nil {
-			handleJSONError(w, r, "encode", http.StatusInternalServerError, err)
-			return
-		}
-
-		return
+	if fp == "static/pico.min.css" {
+		w.Header().Add("Content-Type", "text/css")
 	}
 
-	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
-	if err != nil {
-		handleJSONError(w, r, "decrypt", http.StatusInternalServerError, err)
-		return
-	}
-
-	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
-	if err != nil {
-		handleJSONError(w, r, "decode base64 string to byte", http.StatusInternalServerError, err)
-		return
-	}
-
-	p.AuthorID = author.ID
-
-	if p.Content == "" {
-		handleJSONError(w, r, "post is empty", http.StatusInternalServerError, err)
-	}
-
-	err = s.DB.NewPost(p)
-	if err != nil {
-		handleJSONError(w, r, "create new post in db", http.StatusInternalServerError, err)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	err = json.NewEncoder(w).Encode(p)
-	if err != nil {
-		handleJSONError(w, r, "encode", http.StatusInternalServerError, err)
-		return
+	if _, err = w.Write(asset); err != nil {
+		s.handleHTMLError(w, "write asset", http.StatusInternalServerError, err)
 	}
 }
 
-func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
-	cookie, err := r.Cookie("authorName")
+func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
+	par := parseQueryParams(r)
+
+	p, err := s.DB.ReadPosts(par)
 	if err != nil {
-		s.handleHTMLError(w, r, "no author cookie", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, "read posts", http.StatusInternalServerError, err)
 		return
 	}
 
-	if _, ok, err := s.authenticated(r, w); !ok {
-		s.handleHTMLError(w, r, "failed to authenticate", http.StatusUnauthorized, err)
-		return
-	}
-
-	p, err := parsePostRValues(r)
-	if err != nil {
-		s.handleHTMLError(w, r, "parse values", http.StatusInternalServerError, err)
-		return
-	}
-
-	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(cookie.Value)
-	if err != nil {
-		s.handleHTMLError(w, r, "decode base64 string ", http.StatusInternalServerError, err)
-		return
-	}
-
-	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
-	if err != nil {
-		s.handleHTMLError(w, r, "decrypt", http.StatusInternalServerError, err)
-		return
-	}
-
-	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
-	if err != nil {
-		s.handleHTMLError(w, r, "string to float conversion", http.StatusInternalServerError, err)
-		return
-	}
-
-	p.AuthorID = author.ID
-
-	if p.Content == "" {
-		s.handleHTMLError(w, r, "post is empty", http.StatusInternalServerError, err)
-	}
-
-	err = s.DB.NewPost(p)
-	if err != nil {
-		s.handleHTMLError(w, r, "create new post in db", http.StatusInternalServerError, err)
-		return
-	}
-
-	http.Redirect(w, r, "/", http.StatusSeeOther)
-}
-
-func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
-	if _, ok, err := s.authenticated(r, w); !ok {
-		handleJSONError(w, r, "not authenticated", http.StatusUnauthorized, err)
-		return
-	}
-
-	p, err := parsePostRValues(r)
-	if err != nil {
-		handleJSONError(w, r, "parse values", http.StatusInternalServerError, err)
-		return
-	}
-
-	err = s.DB.DeletePost(p)
-	if err != nil {
-		handleJSONError(w, r, "delete post in db", http.StatusInternalServerError, err)
-		return
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	err = json.NewEncoder(w).Encode(p)
-	if err != nil {
-		handleJSONError(w, r, "encode", http.StatusInternalServerError, err)
-		return
-	}
-}
-
-func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
-	if _, ok, err := s.authenticated(r, w); !ok {
-		s.handleHTMLError(w, r, "not authenticated", http.StatusUnauthorized, err)
-		return
-	}
-
-	p, err := parsePostRValues(r)
-	if err != nil {
-		s.handleHTMLError(w, r, "parse values", http.StatusInternalServerError, err)
-		return
-	}
-
-	err = s.DB.DeletePost(p)
-	if err != nil {
-		s.handleHTMLError(w, r, "delete post in db", http.StatusInternalServerError, err)
-		return
-	}
-
-	http.Redirect(w, r, "/?deleteOkay", http.StatusSeeOther)
-}
-
-func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
-	post, err := parseGetRValues(r)
-	if err != nil {
-		s.handleHTMLError(w, r, "parse values", http.StatusInternalServerError, err)
-		return
-	}
-
-	post, err = s.DB.ReadPost(int(post.ID))
-	if err != nil {
-		s.handleHTMLError(w, r, "read posts", http.StatusNotFound, err)
-		return
-	}
-
-	_, ok, _ := s.authenticated(r, w)
+	authorName, ok, _ := s.authenticated(r)
 	// if err != nil {
-	// 	s.handleHTMLError(w, r, "failed to authenticate", http.StatusUnauthorized, err)
+	// 	s.handleHTMLError(w, "failed to authenticate", http.StatusUnauthorized, err)
 	// }
 
 	if ok {
-		post.Authenticated = true
+		p.Authenticated = true
+		p.Today = time.Now()
+
+		p.AuthorName = authorName
+		log.Print(authorName)
 	}
 
-	post.ParseDate()
-
-	post.Today = time.Now()
-
-	err = s.Template.ExecuteTemplate(w, "post.html.tmpl", post)
+	err = s.Template.ExecuteTemplate(w, "index.html.tmpl", p)
 
 	if err != nil {
-		s.handleHTMLError(w, r, "execute", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, "execute", http.StatusInternalServerError, err)
+		return
+	}
+}
+
+func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
+	par := parseQueryParams(r)
+
+	p, err := s.DB.ReadPosts(par)
+	if err != nil {
+		s.handleHTMLError(w, "read posts", http.StatusInternalServerError, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	err = json.NewEncoder(w).Encode(p)
+	if err != nil {
+		s.handleHTMLError(w, "encode", http.StatusInternalServerError, err)
+		return
+	}
+}
+
+func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
+	p, err := parseGetRValues(r)
+	if err != nil {
+		s.handleHTMLError(w, "parse values", http.StatusInternalServerError, err)
+		return
+	}
+
+	p, err = s.DB.ReadPost(int(p.ID))
+	if err != nil {
+		s.handleHTMLError(w, "read post", http.StatusNotFound, err)
+		return
+	}
+
+	_, ok, _ := s.authenticated(r)
+	// if err != nil {
+	// 	s.handleHTMLError(w, "failed to authenticate", http.StatusUnauthorized, err)
+	// }
+
+	if ok {
+		p.Authenticated = true
+	}
+
+	p.ParseDate()
+
+	p.Today = time.Now()
+
+	err = s.Template.ExecuteTemplate(w, "post.html.tmpl", p)
+
+	if err != nil {
+		s.handleHTMLError(w, "execute", http.StatusInternalServerError, err)
 		return
 	}
 }
@@ -486,13 +319,13 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 func (s Server) viewAPIPost(w http.ResponseWriter, r *http.Request) {
 	p, err := parseGetRValues(r)
 	if err != nil {
-		handleJSONError(w, r, "parse values", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, "parse values", http.StatusInternalServerError, err)
 		return
 	}
 
 	p, err = s.DB.ReadPost(int(p.ID))
 	if err != nil {
-		handleJSONError(w, r, "read posts", http.StatusNotFound, err)
+		s.handleHTMLError(w, "read posts", http.StatusNotFound, err)
 		return
 	}
 
@@ -503,57 +336,115 @@ func (s Server) viewAPIPost(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(p)
 	if err != nil {
-		handleJSONError(w, r, "execute", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, "execute", http.StatusInternalServerError, err)
 		return
 	}
 }
 
-func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
-	if _, ok, err := s.authenticated(r, w); !ok {
-		s.handleHTMLError(w, r, "not authenticated", http.StatusUnauthorized, err)
+func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
+	c, err := r.Cookie("authorName")
+	if err != nil {
+		s.handleHTMLError(w, "no author cookie", http.StatusInternalServerError, err)
+		return
+	}
+
+	if _, ok, err := s.authenticated(r); !ok {
+		s.handleHTMLError(w, "failed to authenticate", http.StatusUnauthorized, err)
 		return
 	}
 
 	p, err := parsePostRValues(r)
 	if err != nil {
-		s.handleHTMLError(w, r, "parse values", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, "parse values", http.StatusInternalServerError, err)
 		return
 	}
+
+	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(c.Value)
+	if err != nil {
+		s.handleHTMLError(w, "decode base64 string ", http.StatusInternalServerError, err)
+		return
+	}
+
+	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
+	if err != nil {
+		s.handleHTMLError(w, "decrypt", http.StatusInternalServerError, err)
+		return
+	}
+
+	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
+	if err != nil {
+		s.handleHTMLError(w, "string to float conversion", http.StatusInternalServerError, err)
+		return
+	}
+
+	p.AuthorID = author.ID
 
 	if p.Content == "" {
-		s.handleHTMLError(w, r, "post is empty", http.StatusInternalServerError, err)
-		return
+		s.handleHTMLError(w, "post is empty", http.StatusInternalServerError, err)
 	}
 
-	err = s.DB.UpdatePost(p)
+	err = s.DB.NewPost(p)
 	if err != nil {
-		s.handleHTMLError(w, r, "edit post in db", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, "create new post in db", http.StatusInternalServerError, err)
 		return
 	}
 
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
-	if _, ok, err := s.authenticated(r, w); !ok {
-		handleJSONError(w, r, "not authenticated", http.StatusUnauthorized, err)
+func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
+	c, err := r.Cookie("authorName")
+	if err != nil {
+		s.handleHTMLError(w, "no author cookie", http.StatusUnauthorized, err)
+		return
+	}
+
+	if _, ok, err := s.authenticated(r); !ok {
+		s.handleHTMLError(w, "authenticate", http.StatusUnauthorized, err)
 		return
 	}
 
 	p, err := parsePostRValues(r)
 	if err != nil {
-		handleJSONError(w, r, "parse values", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, "parse value", http.StatusInternalServerError, err)
 		return
 	}
+
+	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(c.Value)
+	if err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusNotAcceptable)
+
+		err = json.NewEncoder(w).Encode(c.Value)
+		if err != nil {
+			s.handleHTMLError(w, "encode", http.StatusInternalServerError, err)
+			return
+		}
+
+		return
+	}
+
+	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
+	if err != nil {
+		s.handleHTMLError(w, "decrypt", http.StatusInternalServerError, err)
+		return
+	}
+
+	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
+	if err != nil {
+		s.handleHTMLError(w, "decode base64 string to byte", http.StatusInternalServerError, err)
+		return
+	}
+
+	p.AuthorID = author.ID
 
 	if p.Content == "" {
-		handleJSONError(w, r, "post is empty", http.StatusInternalServerError, err)
-		return
+		s.handleHTMLError(w, "post is empty", http.StatusInternalServerError, err)
 	}
 
-	err = s.DB.UpdatePost(p)
+	err = s.DB.NewPost(p)
 	if err != nil {
-		handleJSONError(w, r, "edit post in db", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, "create new post in db", http.StatusInternalServerError, err)
 		return
 	}
 
@@ -562,7 +453,115 @@ func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
 
 	err = json.NewEncoder(w).Encode(p)
 	if err != nil {
-		handleJSONError(w, r, "encode", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, "encode", http.StatusInternalServerError, err)
+		return
+	}
+}
+
+func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
+	if _, ok, err := s.authenticated(r); !ok {
+		s.handleHTMLError(w, "not authenticated", http.StatusUnauthorized, err)
+		return
+	}
+
+	p, err := parsePostRValues(r)
+	if err != nil {
+		s.handleHTMLError(w, "parse values", http.StatusInternalServerError, err)
+		return
+	}
+
+	err = s.DB.DeletePost(p)
+	if err != nil {
+		s.handleHTMLError(w, "delete post in db", http.StatusInternalServerError, err)
+		return
+	}
+
+	http.Redirect(w, r, "/?deleteOkay", http.StatusSeeOther)
+}
+
+func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
+	if _, ok, err := s.authenticated(r); !ok {
+		s.handleHTMLError(w, "not authenticated", http.StatusUnauthorized, err)
+		return
+	}
+
+	p, err := parsePostRValues(r)
+	if err != nil {
+		s.handleHTMLError(w, "parse values", http.StatusInternalServerError, err)
+		return
+	}
+
+	err = s.DB.DeletePost(p)
+	if err != nil {
+		s.handleHTMLError(w, "delete post in db", http.StatusInternalServerError, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	err = json.NewEncoder(w).Encode(p)
+	if err != nil {
+		s.handleHTMLError(w, "encode", http.StatusInternalServerError, err)
+		return
+	}
+}
+
+func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
+	if _, ok, err := s.authenticated(r); !ok {
+		s.handleHTMLError(w, "not authenticated", http.StatusUnauthorized, err)
+		return
+	}
+
+	p, err := parsePostRValues(r)
+	if err != nil {
+		s.handleHTMLError(w, "parse values", http.StatusInternalServerError, err)
+		return
+	}
+
+	if p.Content == "" {
+		s.handleHTMLError(w, "post is empty", http.StatusInternalServerError, err)
+		return
+	}
+
+	err = s.DB.UpdatePost(p)
+	if err != nil {
+		s.handleHTMLError(w, "edit post in db", http.StatusInternalServerError, err)
+		return
+	}
+
+	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
+	if _, ok, err := s.authenticated(r); !ok {
+		s.handleHTMLError(w, "not authenticated", http.StatusUnauthorized, err)
+		return
+	}
+
+	p, err := parsePostRValues(r)
+	if err != nil {
+		s.handleHTMLError(w, "parse values", http.StatusInternalServerError, err)
+		return
+	}
+
+	if p.Content == "" {
+		s.handleHTMLError(w, "post is empty", http.StatusInternalServerError, err)
+		return
+	}
+
+	err = s.DB.UpdatePost(p)
+	if err != nil {
+		s.handleHTMLError(w, "edit post in db", http.StatusInternalServerError, err)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+
+	err = json.NewEncoder(w).Encode(p)
+	if err != nil {
+		s.handleHTMLError(w, "encode", http.StatusInternalServerError, err)
 		return
 	}
 }
@@ -570,7 +569,7 @@ func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
 func (s Server) getLogin(w http.ResponseWriter, r *http.Request) {
 	err := s.Template.ExecuteTemplate(w, "login.html.tmpl", nil)
 	if err != nil {
-		s.handleHTMLError(w, r, "execute", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, "execute", http.StatusInternalServerError, err)
 		return
 	}
 }
@@ -580,11 +579,11 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 
 	encryptedAuthorByte, err := security.Encrypt([]byte(authorInput), s.Key)
 	if err != nil {
-		s.handleHTMLError(w, r, "encrypt error", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, "encrypt error", http.StatusInternalServerError, err)
 		return
 	}
 
-	cookie := http.Cookie{
+	c := http.Cookie{
 		Name:   "authorName",
 		Value:  base64.StdEncoding.EncodeToString(encryptedAuthorByte),
 		Path:   "/",
@@ -595,11 +594,11 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 
 	if author.Name == "" {
 
-		s.handleHTMLError(w, r, "author doesn't exist", http.StatusUnauthorized, err)
+		s.handleHTMLError(w, "author doesn't exist", http.StatusUnauthorized, err)
 		return
 	}
 
-	http.SetCookie(w, &cookie)
+	http.SetCookie(w, &c)
 	http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
 }
 
@@ -608,11 +607,11 @@ func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
 
 	encryptedAuthorByte, err := security.Encrypt([]byte(authorInput), s.Key)
 	if err != nil {
-		handleJSONError(w, r, "encrypt error", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, "encrypt error", http.StatusInternalServerError, err)
 		return
 	}
 
-	cookie := http.Cookie{
+	c := http.Cookie{
 		Name:   "authorName",
 		Value:  base64.StdEncoding.EncodeToString(encryptedAuthorByte),
 		Path:   "/",
@@ -622,48 +621,48 @@ func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
 	author, _ := s.DB.ReadAuthor(authorInput)
 
 	if author.Name == "" {
-		handleJSONError(w, r, "author doesn't exist", http.StatusUnauthorized, err)
+		s.handleHTMLError(w, "author doesn't exist", http.StatusUnauthorized, err)
 		return
 	}
 
-	http.SetCookie(w, &cookie)
+	http.SetCookie(w, &c)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	err = json.NewEncoder(w).Encode("logged in")
 	if err != nil {
-		handleJSONError(w, r, "encode", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, "encode", http.StatusInternalServerError, err)
 	}
 }
 
 func (s Server) getLogout(w http.ResponseWriter, r *http.Request) {
-	cookie := http.Cookie{
+	c := http.Cookie{
 		Name:  "authorName",
 		Value: "",
 	}
 
-	http.SetCookie(w, &cookie)
+	http.SetCookie(w, &c)
 	http.Redirect(w, r, "/?loggedOutOkay", http.StatusSeeOther)
 }
 
 func (s Server) getAPILogout(w http.ResponseWriter, r *http.Request) {
-	cookie := http.Cookie{
+	c := http.Cookie{
 		Name:   "authorName",
 		MaxAge: 0,
 	}
 
-	http.SetCookie(w, &cookie)
+	http.SetCookie(w, &c)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 	err := json.NewEncoder(w).Encode("logged out")
 	if err != nil {
-		handleJSONError(w, r, "encode", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, "encode", http.StatusInternalServerError, err)
 	}
 }
 
 func (s Server) getDone(w http.ResponseWriter, r *http.Request) {
 	err := s.Template.ExecuteTemplate(w, "done.html.tmpl", nil)
 	if err != nil {
-		s.handleHTMLError(w, r, "execute", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, "execute", http.StatusInternalServerError, err)
 		return
 	}
 }
@@ -673,7 +672,7 @@ func (s Server) getFail(w http.ResponseWriter, r *http.Request) {
 
 	err := s.Template.ExecuteTemplate(w, "fail.html.tmpl", reason)
 	if err != nil {
-		s.handleHTMLError(w, r, "execute", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, "execute", http.StatusInternalServerError, err)
 		return
 	}
 }

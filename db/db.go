@@ -234,15 +234,11 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 
 	query := p.Query()
 
-	fmt.Println("query", query)
-
 	stmt, err := d.client.Prepare(query)
 	if err != nil {
 		return posts, fmt.Errorf("failed to prepare %w", err)
 	}
 	defer stmt.Close()
-
-	fmt.Println("stmt", stmt)
 
 	switch p.Author {
 	case "":
