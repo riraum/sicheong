@@ -26,16 +26,15 @@
         {{end}}
     </div>
 <br>
-  <!-- Posts -->
   <div>
     {{range .Posts}}
-    Date: {{.ParsedDate.Format "2006/01/02"}}
+    {{.ParsedDate.Format "2006/01/02"}}
     <br>
-    Title: {{.Title}}
+    {{.Title}}
     <br>
-    Link: <a href="{{.Link}}" target="_blank">{{.Link}}</a>
+    <a href="{{.Link}}" target="_blank">{{.Link}}</a>
     <br>
-    Content: {{.Content}}
+    {{.Content}}
     <br>
     <a href="/post/{{.ID}}">View post</a>
     <br>
@@ -48,19 +47,15 @@
   Create new post
   <form action="/post" method="POST" novalidate>
     <div>
-      <!-- <label for="Title">Title</label> -->
       <input type="text" name="title" required placeholder="enter title"/>
     </div>
     <div>
-      <!-- <label for="Date">Date</label> -->
       <input type="date" name="date" required value="{{.Today.Format "2006-01-02"}}" />
     </div>
     <div>
-      <!-- <label for="Link">Link</label> -->
       <input type="text" name="link" required placeholder="enter link"/>
     </div>
     <div>
-      <!-- <label for="Content">Content</label> -->
       <input type="text" name="content" required placeholder="enter content"/>
     </div>
     <div>
