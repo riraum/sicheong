@@ -1,3 +1,11 @@
-### 시청 (Si-cheong) / City hall
+# 시청 (Si-cheong) / City hall
 
 Go project to learn ([CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete)).
+
+External packages/assets used:
+
+Go sqlite driver: https://github.com/mattn/go-sqlite3
+
+Pico CSS framework: https://picocss.com/
+
+Deployed on fly.io.
