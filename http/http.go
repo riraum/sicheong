@@ -29,7 +29,7 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.getIndex)
 	mux.HandleFunc("GET /static/pico.min.css", s.getCSS)
-	mux.HandleFunc("GET /static/", s.getFavicon)
+	mux.HandleFunc("GET /static/", s.getStaticAsset)
 	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
 	mux.HandleFunc("POST /api/v0/post", s.postAPIPost)
 	mux.HandleFunc("POST /post", s.postPost)
@@ -183,7 +183,7 @@ func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
 
 	css, err := s.EmbedRootDir.ReadFile("static/pico.min.css")
 	if err != nil {
-		s.handleHTMLError(w, r, "read file", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, r, "read css file", http.StatusInternalServerError, err)
 		return
 	}
 
@@ -195,7 +195,7 @@ func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s Server) getFavicon(w http.ResponseWriter, r *http.Request) {
+func (s Server) getStaticAsset(w http.ResponseWriter, r *http.Request) {
 	u, err := url.Parse(r.URL.String())
 	if err != nil {
 		s.handleHTMLError(w, r, "parse URL", http.StatusInternalServerError, err)
@@ -203,23 +203,27 @@ func (s Server) getFavicon(w http.ResponseWriter, r *http.Request) {
 	}
 	log.Print(u.Path)
 
+	// fp := http.StripPrefix("/", u.Path))
+
 	// faviconAsset := fmt.Sprintf("%s", u.Path)
 
 	// fp := fmt.Sprintf("%s", u.Path)
 
-	// file := u.Path[len("/static/favicon"):]
+	fp := u.Path[len("/"):]
 
 	// fp := path.Join("faviconDir", "u.Path")
 	// http.ServeFile(w, r, fp)
 
-	faviconAsset, err := s.EmbedRootDir.ReadFile(u.Path)
+	asset, err := s.EmbedRootDir.ReadFile(fp)
 	if err != nil {
-		s.handleHTMLError(w, r, "read file", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, r, "read asset", http.StatusInternalServerError, err)
 		return
 	}
 
-	if _, err = w.Write(faviconAsset); err != nil {
-		s.handleHTMLError(w, r, "write favicon", http.StatusInternalServerError, err)
+	// w.Header().Add("Content-Type", "image/png")
+
+	if _, err = w.Write(asset); err != nil {
+		s.handleHTMLError(w, r, "write asset", http.StatusInternalServerError, err)
 		return
 	}
 }
