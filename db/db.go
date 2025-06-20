@@ -191,9 +191,11 @@ func (d DB) UpdatePost(p Post) error {
 }
 
 func (p Params) Query() string {
-	var sort string
-	var direction string
-	var author string
+	var (
+		sort      string
+		direction string
+		author    string
+	)
 
 	switch p.Sort {
 	case "title":
@@ -222,11 +224,12 @@ func (p Params) Query() string {
 }
 
 func (d DB) ReadPosts(p Params) (Posts, error) {
-	var post Post
-	var posts Posts
-
-	var where string
-	var rows *sql.Rows
+	var (
+		post  Post
+		posts Posts
+		where string
+		rows  *sql.Rows
+	)
 
 	if p.Author != "" {
 		where = p.Author
@@ -234,15 +237,11 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 
 	query := p.Query()
 
-	fmt.Println("query", query)
-
 	stmt, err := d.client.Prepare(query)
 	if err != nil {
 		return posts, fmt.Errorf("failed to prepare %w", err)
 	}
 	defer stmt.Close()
-
-	fmt.Println("stmt", stmt)
 
 	switch p.Author {
 	case "":
@@ -260,7 +259,6 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 	}
 
 	rows, err = stmt.Query()
-
 	for rows.Next() {
 		err = rows.Scan(&post.ID, &post.Date, &post.Title, &post.Link, &post.Content, &post.AuthorID)
 		if err != nil {
@@ -268,7 +266,6 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 		}
 
 		post.ParseDate()
-
 		posts.Posts = append(posts.Posts, post)
 	}
 
