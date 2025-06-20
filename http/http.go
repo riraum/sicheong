@@ -29,7 +29,7 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /{$}", s.getIndex)
 	mux.HandleFunc("GET /static/pico.min.css", s.getCSS)
-	mux.HandleFunc("GET /static/favicon/", s.getFavicon)
+	mux.HandleFunc("GET /static/", s.getFavicon)
 	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
 	mux.HandleFunc("POST /api/v0/post", s.postAPIPost)
 	mux.HandleFunc("POST /post", s.postPost)
@@ -174,6 +174,13 @@ func parseQueryParams(r *http.Request) db.Params {
 }
 
 func (s Server) getCSS(w http.ResponseWriter, r *http.Request) {
+	u, err := url.Parse(r.URL.String())
+	if err != nil {
+		s.handleHTMLError(w, r, "parse URL", http.StatusInternalServerError, err)
+		return
+	}
+	log.Print(u.Path)
+
 	css, err := s.EmbedRootDir.ReadFile("static/pico.min.css")
 	if err != nil {
 		s.handleHTMLError(w, r, "read file", http.StatusInternalServerError, err)
@@ -194,10 +201,11 @@ func (s Server) getFavicon(w http.ResponseWriter, r *http.Request) {
 		s.handleHTMLError(w, r, "parse URL", http.StatusInternalServerError, err)
 		return
 	}
+	log.Print(u.Path)
 
-	favicon := fmt.Sprintf("%s", u.Path)
+	// faviconAsset := fmt.Sprintf("%s", u.Path)
 
-	log.Print(favicon)
+	// fp := fmt.Sprintf("%s", u.Path)
 
 	// file := u.Path[len("/static/favicon"):]
 
