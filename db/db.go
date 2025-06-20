@@ -106,23 +106,23 @@ func (d DB) Fill() error {
 	posts := []Post{
 		{
 			Date:     1748000743, //nolint:mnd
-			Title:    "Complaint",
+			Title:    "Status 200",
 			Link:     "https://http.cat/status/200",
-			Content:  "A",
+			Content:  "Good HTTP status 200 explainer",
 			AuthorID: 1,
 		},
 		{
 			Date:     1684997010, //nolint:mnd
-			Title:    "Feedback",
+			Title:    "Status 100",
 			Link:     "https://http.cat/status/100",
-			Content:  "B",
+			Content:  "Good HTTP status 100 explainer",
 			AuthorID: 2, //nolint:mnd
 		},
 		{
 			Date:     1727780130, //nolint:mnd
-			Title:    "Announcement",
+			Title:    "STatus 301",
 			Link:     "https://http.cat/status/301",
-			Content:  "C",
+			Content:  "Good HTTP status 301 explainer",
 			AuthorID: 3, //nolint:mnd
 		},
 	}
@@ -134,6 +134,49 @@ func (d DB) Fill() error {
 	}
 
 	return nil
+}
+
+func (p *Post) ParseDate() {
+	p.ParsedDate = time.Unix(p.Date, 0)
+}
+
+func (p *Posts) ParseDates() {
+	for _, post := range p.Posts {
+		post.ParseDate()
+	}
+}
+
+func (p Params) Query() string {
+	var (
+		sort      string
+		direction string
+		author    string
+	)
+
+	switch p.Sort {
+	case "title":
+		sort = "title"
+	default:
+		sort = "date"
+	}
+
+	switch p.Direction {
+	case "desc":
+		direction = "desc"
+	default:
+		direction = "asc"
+	}
+
+	switch p.Author {
+	case "":
+		author = ""
+	default:
+		author = "WHERE author = ?"
+	}
+
+	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts %s ORDER BY %s %s", author, sort, direction)
+
+	return queryString
 }
 
 func (d DB) NewAuthor(a Author) error {
@@ -172,15 +215,6 @@ func (d DB) NewPost(p Post) error {
 	return nil
 }
 
-func (d DB) DeletePost(p Post) error {
-	_, err := d.client.Exec("DELETE from posts WHERE id = ?", p.ID)
-	if err != nil {
-		return fmt.Errorf("failed to delete %w", err)
-	}
-
-	return nil
-}
-
 func (d DB) UpdatePost(p Post) error {
 	_, err := d.client.Exec(`UPDATE posts SET date = ?, title = ?, link = ?, content = ?, author = ? WHERE id = ?`, p.Date, p.Title, p.Link, p.Content, p.AuthorID, p.ID)
 	if err != nil {
@@ -190,37 +224,30 @@ func (d DB) UpdatePost(p Post) error {
 	return nil
 }
 
-func (p Params) Query() string {
-	var (
-		sort      string
-		direction string
-		author    string
-	)
-
-	switch p.Sort {
-	case "title":
-		sort = "title"
-	default:
-		sort = "date"
+func (d DB) DeletePost(p Post) error {
+	_, err := d.client.Exec("DELETE from posts WHERE id = ?", p.ID)
+	if err != nil {
+		return fmt.Errorf("failed to delete %w", err)
 	}
 
-	switch p.Direction {
-	case "desc":
-		direction = "desc"
-	default:
-		direction = "asc"
+	return nil
+}
+
+func (d DB) ReadPost(id int) (Post, error) {
+	var p Post
+
+	stmt, err := d.client.Prepare("SELECT id, date, title, link, content, author FROM posts where id = ?")
+	if err != nil {
+		return p, fmt.Errorf("failed to select single post: %w", err)
+	}
+	defer stmt.Close()
+
+	err = stmt.QueryRow(id).Scan(&p.ID, &p.Date, &p.Title, &p.Link, &p.Content, &p.AuthorID)
+	if err != nil {
+		return p, fmt.Errorf("failed to queryRow: %w", err)
 	}
 
-	switch p.Author {
-	case "":
-		author = ""
-	default:
-		author = "WHERE author = ?"
-	}
-
-	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts %s ORDER BY %s %s", author, sort, direction)
-
-	return queryString
+	return p, nil
 }
 
 func (d DB) ReadPosts(p Params) (Posts, error) {
@@ -270,31 +297,4 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 	}
 
 	return posts, nil
-}
-
-func (d DB) ReadPost(id int) (Post, error) {
-	var p Post
-
-	stmt, err := d.client.Prepare("SELECT id, date, title, link, content, author FROM posts where id = ?")
-	if err != nil {
-		return p, fmt.Errorf("failed to select single post: %w", err)
-	}
-	defer stmt.Close()
-
-	err = stmt.QueryRow(id).Scan(&p.ID, &p.Date, &p.Title, &p.Link, &p.Content, &p.AuthorID)
-	if err != nil {
-		return p, fmt.Errorf("failed to queryRow: %w", err)
-	}
-
-	return p, nil
-}
-
-func (p *Post) ParseDate() {
-	p.ParsedDate = time.Unix(p.Date, 0)
-}
-
-func (p *Posts) ParseDates() {
-	for _, post := range p.Posts {
-		post.ParseDate()
-	}
 }
