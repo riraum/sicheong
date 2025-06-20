@@ -8,4 +8,5 @@ Go sqlite driver: https://github.com/mattn/go-sqlite3
 
 Pico CSS framework: https://picocss.com/
 
-Deployed on fly.io.
+Deployed on fly.io:
+https://si-cheong.fly.dev/
