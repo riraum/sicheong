@@ -659,13 +659,14 @@ func (s Server) getAPILogout(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s Server) getDone(w http.ResponseWriter, r *http.Request) {
-	err := s.Template.ExecuteTemplate(w, "done.html.tmpl", nil)
-	if err != nil {
-		s.handleHTMLError(w, "execute", http.StatusInternalServerError, err)
-		return
-	}
-}
+// Currently not used anymore
+// func (s Server) getDone(w http.ResponseWriter, r *http.Request) {
+// 	err := s.Template.ExecuteTemplate(w, "done.html.tmpl", nil)
+// 	if err != nil {
+// 		s.handleHTMLError(w, "execute", http.StatusInternalServerError, err)
+// 		return
+// 	}
+// }
 
 func (s Server) getFail(w http.ResponseWriter, r *http.Request) {
 	reason := r.URL.Query().Get("reason")
