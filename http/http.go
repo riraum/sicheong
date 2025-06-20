@@ -45,7 +45,7 @@ func (s Server) SetupMux() *http.ServeMux {
 	mux.HandleFunc("POST /api/v0/login", s.postAPILogin)
 	mux.HandleFunc("GET /logout", s.getLogout)
 	mux.HandleFunc("GET /api/v0/logout", s.getAPILogout)
-	mux.HandleFunc("GET /done", s.getDone)
+	// mux.HandleFunc("GET /done", s.getDone)
 	mux.HandleFunc("GET /fail", s.getFail)
 
 	return mux
@@ -243,16 +243,11 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	authorName, ok, _ := s.authenticated(r)
-	// if err != nil {
-	// 	s.handleHTMLError(w, "failed to authenticate", http.StatusUnauthorized, err)
-	// }
 
 	if ok {
 		p.Authenticated = true
 		p.Today = time.Now()
-
 		p.AuthorName = authorName
-		log.Print(authorName)
 	}
 
 	err = s.Template.ExecuteTemplate(w, "index.html.tmpl", p)
