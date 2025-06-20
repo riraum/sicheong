@@ -27,6 +27,7 @@ type Server struct {
 
 func (s Server) SetupMux() *http.ServeMux {
 	mux := http.NewServeMux()
+
 	mux.HandleFunc("GET /static/", s.getStaticAsset)
 	mux.HandleFunc("GET /{$}", s.getIndex)
 	mux.HandleFunc("GET /api/v0/posts", s.getAPIPosts)
