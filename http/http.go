@@ -88,32 +88,32 @@ func handleJSONError(w http.ResponseWriter, msg string, statusCode int, err erro
 	}
 }
 
-func (s Server) authenticated(r *http.Request) (string, bool, error) {
+func (s Server) authenticated(r *http.Request) (db.Author, bool, error) {
 	c, err := r.Cookie("authorName")
 	if err != nil {
-		return "", false, err
+		return db.Author{}, false, err
 	}
 
 	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(c.Value)
 	if err != nil {
-		return "", false, err
+		return db.Author{}, false, err
 	}
 
 	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
 	if err != nil {
-		return "", false, err
+		return db.Author{}, false, err
 	}
 
 	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
 	if err != nil {
-		return "", false, err
+		return db.Author{}, false, err
 	}
 
 	if author.Name == "" {
-		return "", false, err
+		return db.Author{}, false, err
 	}
 
-	return author.Name, true, nil
+	return author, true, nil
 }
 
 func parseQueryParams(r *http.Request) db.Params {
@@ -242,12 +242,12 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authorName, ok, _ := s.authenticated(r)
+	author, ok, _ := s.authenticated(r)
 
 	if ok {
 		p.Authenticated = true
 		p.Today = time.Now()
-		p.AuthorName = authorName
+		p.AuthorName = author.Name
 	}
 
 	err = s.Template.ExecuteTemplate(w, "index.html.tmpl", p)
@@ -298,7 +298,7 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 
 	author, err := s.DB.ReadAuthorName(p.AuthorID)
 	if err != nil {
-		s.handleHTMLError(w, "string to float conversion", http.StatusInternalServerError, err)
+		s.handleHTMLError(w, "read author", http.StatusInternalServerError, err)
 		return
 	}
 
@@ -507,7 +507,8 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
-	if _, ok, err := s.authenticated(r); !ok {
+	author, ok, err := s.authenticated(r)
+	if !ok {
 		s.handleHTMLError(w, "not authenticated", http.StatusUnauthorized, err)
 		return
 	}
@@ -522,6 +523,8 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 		s.handleHTMLError(w, "post is empty", http.StatusInternalServerError, err)
 		return
 	}
+
+	p.AuthorID = author.ID
 
 	err = s.DB.UpdatePost(p)
 	if err != nil {
