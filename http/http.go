@@ -89,7 +89,7 @@ func handleJSONError(w http.ResponseWriter, msg string, statusCode int, err erro
 func (s Server) authenticated(r *http.Request) (db.Author, bool, error) {
 	c, err := r.Cookie("authorName")
 	if err != nil {
-		return db.Author{}, false, err
+		return db.Author{}, false, nil
 	}
 
 	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(c.Value)
