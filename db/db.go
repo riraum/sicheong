@@ -25,16 +25,11 @@ type Post struct {
 	Link       string
 	Content    string
 	AuthorID   float32 // Author.ID
-	// Authenticated bool
-	// Today         time.Time
 	AuthorName string
 }
 
 type Posts struct {
-	// Authenticated bool
-	// Today      time.Time
 	Posts []Post
-	// AuthorName string
 }
 
 type Params struct {
