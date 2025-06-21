@@ -571,7 +571,8 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		Secure: true,
 	}
 
-	if author, _ := s.DB.ReadAuthor(authorInput); author.Name == "" {
+	author, _ := s.DB.ReadAuthor(authorInput)
+	if author.Name == "" {
 		s.handleHTMLError(w, "author doesn't exist", http.StatusUnauthorized, err)
 		return
 	}
