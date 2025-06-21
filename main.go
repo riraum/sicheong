@@ -7,6 +7,7 @@ import (
 
 	"github.com/riraum/si-cheong/db"
 	"github.com/riraum/si-cheong/http"
+	"github.com/riraum/si-cheong/posts"
 	"github.com/riraum/si-cheong/security"
 )
 
@@ -36,7 +37,8 @@ func main() {
 		Key:          key,
 	}
 
-	if err = d.Fill(); err != nil {
+	d, err = posts.Fill(d)
+	if err != nil {
 		log.Fatalf("error filling posts into db: %v", err)
 	}
 
