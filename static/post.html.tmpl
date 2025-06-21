@@ -15,33 +15,33 @@
 <body>
     <main class="container">
   <div>
-   {{.ParsedDate.Format "2006/01/02"}}
+   {{.Post.ParsedDate.Format "2006/01/02"}}
     <br>
-    {{.Title}}
+    {{.Post.Title}}
     <br>
-    <a href="{{.Link}}" target="_blank" >{{.Link}}</a>
+    <a href="{{.Post.Link}}" target="_blank" >{{.Post.Link}}</a>
     <br>
-    {{.Content}}
+    {{.Post.Content}}
     <br>
     {{.AuthorName}}
     <br>
   </div>
-  {{if .}}
+  {{if .Auth}}
     <form action="/post/delete/{{.ID}}" method="POST" novalidate>
       <input type="submit" value="Delete" />
   </form>
   <form action="/post/{{.ID}}" method="POST" novalidate>
     <div>
-      <input type="text" name="title" required value="{{.Title}}"/>
+      <input type="text" name="title" required value="{{.Post.Title}}"/>
     </div>
     <div>
       <input type="date" name="date" required value="{{.Today.Format "2006-01-02"}}"/>
     </div>
     <div>
-      <input type="text" name="link" required value="{{.Link}}"/>
+      <input type="text" name="link" required value="{{.Post.Link}}"/>
     </div>
     <div>
-      <input type="text" name="content" required value="{{.Content}}"/>
+      <input type="text" name="content" required value="{{.Post.Content}}"/>
     </div>
     <div>
       <input type="submit" value="Edit" />
