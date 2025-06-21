@@ -214,7 +214,7 @@ func (s Server) getStaticAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fp := u.Path[len("/"):]
+	fp := u.Path[1:]
 
 	asset, err := s.EmbedRootDir.ReadFile(fp)
 	if err != nil {
