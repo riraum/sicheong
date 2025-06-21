@@ -216,9 +216,10 @@ func (d DB) ReadAuthorName(id float32) (Author, error) {
 }
 
 func (d DB) NewPost(p Post) error {
-	if _, err := d.client.Exec(
+	_, err := d.client.Exec(
 		"INSERT into posts(date, title, link, content, author) values(?, ?, ?, ?, ?)",
-		p.Date, p.Title, p.Link, p.Content, p.AuthorID); err != nil {
+		p.Date, p.Title, p.Link, p.Content, p.AuthorID)
+	if err != nil {
 		return fmt.Errorf("failed to insert %w", err)
 	}
 
@@ -226,7 +227,8 @@ func (d DB) NewPost(p Post) error {
 }
 
 func (d DB) UpdatePost(p Post) error {
-	if _, err := d.client.Exec(`UPDATE posts SET date = ?, title = ?, link = ?, content = ?, author = ? WHERE id = ?`, p.Date, p.Title, p.Link, p.Content, p.AuthorID, p.ID); err != nil {
+	_, err := d.client.Exec(`UPDATE posts SET date = ?, title = ?, link = ?, content = ?, author = ? WHERE id = ?`, p.Date, p.Title, p.Link, p.Content, p.AuthorID, p.ID)
+	if err != nil {
 		return fmt.Errorf("failed to update %w", err)
 	}
 
@@ -250,7 +252,8 @@ func (d DB) ReadPost(id int) (Post, error) {
 	}
 	defer stmt.Close()
 
-	if err = stmt.QueryRow(id).Scan(&p.ID, &p.Date, &p.Title, &p.Link, &p.Content, &p.AuthorID); err != nil {
+	err = stmt.QueryRow(id).Scan(&p.ID, &p.Date, &p.Title, &p.Link, &p.Content, &p.AuthorID)
+	if err != nil {
 		return p, fmt.Errorf("failed to queryRow: %w", err)
 	}
 
