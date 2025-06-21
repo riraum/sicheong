@@ -318,7 +318,7 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 	ap.Post.ParseDate()
 
 	_, ok, err := s.authenticated(r)
-	if err != nil {
+	if err != nil && ok {
 		s.handleHTMLError(w, "authenticated", http.StatusInternalServerError, err)
 		return
 	}
