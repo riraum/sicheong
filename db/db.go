@@ -133,6 +133,16 @@ func (d DB) ReadAuthorByID(id float32) (Author, error) {
 	return author, nil
 }
 
+func (d DB) NewPost(p post.Post) error {
+	if _, err := d.client.Exec(
+		"INSERT into posts(date, title, link, content, author) values(?, ?, ?, ?, ?)",
+		p.Date, p.Title, p.Link, p.Content, p.AuthorID); err != nil {
+		return fmt.Errorf("failed to insert %w", err)
+	}
+
+	return nil
+}
+
 func (d DB) Fill() error {
 	authors := []Author{
 		{
@@ -176,9 +186,7 @@ func (d DB) Fill() error {
 		},
 	}
 	for _, p := range posts {
-		err := d.NewPost(p)
-		// err := d.NewPost(p)
-		if err != nil {
+		if err := d.NewPost(p); err != nil {
 			log.Fatalf("create new post in db: %v", err)
 		}
 	}
