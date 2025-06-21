@@ -3,12 +3,15 @@ package posts
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/riraum/si-cheong/db"
 	"github.com/riraum/si-cheong/post"
 )
+
+type DB struct {
+	client *sql.DB
+}
 
 type Posts struct {
 	Authenticated bool
@@ -70,57 +73,4 @@ func (d DB) ReadPosts(p db.Params) (Posts, error) {
 	}
 
 	return posts, nil
-}
-
-func (d DB) Fill() error {
-	authors := []db.Author{
-		{
-			Name: "Alpha",
-		},
-		{
-			Name: "Bravo",
-		},
-		{
-			Name: "Charlie",
-		},
-	}
-	for _, a := range authors {
-		err := d.NewAuthor(a)
-		if err != nil {
-			log.Fatalf("create new author in db: %v", err)
-		}
-	}
-
-	posts := []post.Post{
-		{
-			Date:     1748000743, //nolint:mnd
-			Title:    "Status 200",
-			Link:     "https://http.cat/status/200",
-			Content:  "Good HTTP status 200 explainer",
-			AuthorID: 1,
-		},
-		{
-			Date:     1684997010, //nolint:mnd
-			Title:    "Status 100",
-			Link:     "https://http.cat/status/100",
-			Content:  "Good HTTP status 100 explainer",
-			AuthorID: 2, //nolint:mnd
-		},
-		{
-			Date:     1727780130, //nolint:mnd
-			Title:    "Status 301",
-			Link:     "https://http.cat/status/301",
-			Content:  "Good HTTP status 301 explainer",
-			AuthorID: 3, //nolint:mnd
-		},
-	}
-	for _, p := range posts {
-		err := d.post.NewPost(p)
-		// err := d.NewPost(p)
-		if err != nil {
-			log.Fatalf("create new post in db: %v", err)
-		}
-	}
-
-	return nil
 }
