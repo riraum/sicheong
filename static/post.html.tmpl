@@ -23,14 +23,14 @@
     <br>
     {{.Post.Content}}
     <br>
-    {{.AuthorName}}
+    {{.Post.AuthorName}}
     <br>
   </div>
   {{if .Auth}}
-    <form action="/post/delete/{{.ID}}" method="POST" novalidate>
+    <form action="/post/delete/{{.Post.ID}}" method="POST" novalidate>
       <input type="submit" value="Delete" />
   </form>
-  <form action="/post/{{.ID}}" method="POST" novalidate>
+  <form action="/post/{{.Post.ID}}" method="POST" novalidate>
     <div>
       <input type="text" name="title" required value="{{.Post.Title}}"/>
     </div>

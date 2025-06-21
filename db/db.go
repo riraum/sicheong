@@ -27,7 +27,7 @@ type Post struct {
 	AuthorID   float32 // Author.ID
 	// Authenticated bool
 	// Today         time.Time
-	// AuthorName string
+	AuthorName string
 }
 
 type Posts struct {

@@ -287,10 +287,9 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 	type authedPost struct {
-		Auth       bool
-		Post       db.Post
-		Today      time.Time
-		AuthorName string
+		Auth  bool
+		Post  db.Post
+		Today time.Time
 	}
 
 	p, err := parseGetRValues(r)
@@ -311,6 +310,8 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	p.AuthorName = author.Name
+
 	ap := authedPost{
 		Post: p,
 	}
@@ -318,11 +319,8 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 	ap.Post.ParseDate()
 
 	if _, ok, _ := s.authenticated(r); ok {
-		ap = authedPost{
-			Auth:       true,
-			Today:      time.Now(),
-			AuthorName: author.Name,
-		}
+		ap.Auth = true
+		ap.Today = time.Now()
 	}
 
 	if err = s.Template.ExecuteTemplate(w, "post.html.tmpl", ap); err != nil {
