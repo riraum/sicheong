@@ -253,11 +253,10 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 
 	author, ok, _ := s.authenticated(r)
 	if ok {
-		ap = authedPosts{
-			Auth:       true,
-			Today:      time.Now(),
-			AuthorName: author.Name,
-		}
+		ap.Auth = true
+		ap.Today = time.Now()
+		ap.AuthorName = author.Name
+
 	}
 
 	if err = s.Template.ExecuteTemplate(w, "index.html.tmpl", ap); err != nil {
