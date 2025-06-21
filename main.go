@@ -27,15 +27,15 @@ func main() {
 		log.Fatalf("Failed to create new db %v", err)
 	}
 
+	if err = d.Fill(); err != nil {
+		log.Fatalf("error filling posts into db: %v", err)
+	}
+
 	s := http.Server{
 		EmbedRootDir: static,
 		DB:           d,
 		Template:     t,
 		Key:          key,
-	}
-
-	if err = d.Fill(); err != nil {
-		log.Fatalf("error filling posts into db: %v", err)
 	}
 
 	mux := s.SetupMux()
