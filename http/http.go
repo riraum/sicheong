@@ -62,8 +62,7 @@ func (s Server) handleHTMLError(w http.ResponseWriter, msg string, statusCode in
 
 	w.WriteHeader(statusCode)
 
-	err = s.Template.ExecuteTemplate(w, "fail.html.tmpl", msg)
-	if err != nil {
+	if err = s.Template.ExecuteTemplate(w, "fail.html.tmpl", msg); err != nil {
 		log.Fatalf("failed to execute %v", err)
 	}
 }
@@ -82,8 +81,7 @@ func handleJSONError(w http.ResponseWriter, msg string, statusCode int, err erro
 	w.WriteHeader(statusCode)
 	w.Header().Set("Content-Type", "application/json")
 
-	err = json.NewEncoder(w).Encode(errorData)
-	if err != nil {
+	if err = json.NewEncoder(w).Encode(errorData); err != nil {
 		log.Fatalf("failed to encode %v", err)
 	}
 }
@@ -287,9 +285,7 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, ok, _ := s.authenticated(r)
-
-	if ok {
+	if _, ok, _ := s.authenticated(r); ok {
 		p.Authenticated = true
 	}
 
@@ -553,8 +549,7 @@ func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) getLogin(w http.ResponseWriter, r *http.Request) {
-	err := s.Template.ExecuteTemplate(w, "login.html.tmpl", nil)
-	if err != nil {
+	if err := s.Template.ExecuteTemplate(w, "login.html.tmpl", nil); err != nil {
 		s.handleHTMLError(w, "execute", http.StatusInternalServerError, err)
 		return
 	}
@@ -576,9 +571,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		Secure: true,
 	}
 
-	author, _ := s.DB.ReadAuthor(authorInput)
-
-	if author.Name == "" {
+	if author, _ := s.DB.ReadAuthor(authorInput); author.Name == "" {
 		s.handleHTMLError(w, "author doesn't exist", http.StatusUnauthorized, err)
 		return
 	}
@@ -603,9 +596,7 @@ func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
 		Secure: true,
 	}
 
-	author, _ := s.DB.ReadAuthor(authorInput)
-
-	if author.Name == "" {
+	if author, _ := s.DB.ReadAuthor(authorInput); author.Name == "" {
 		handleJSONError(w, "author doesn't exist", http.StatusUnauthorized, err)
 		return
 	}
@@ -638,8 +629,8 @@ func (s Server) getAPILogout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &c)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	err := json.NewEncoder(w).Encode("logged out")
-	if err != nil {
+
+	if err := json.NewEncoder(w).Encode("logged out"); err != nil {
 		handleJSONError(w, "encode", http.StatusInternalServerError, err)
 	}
 }

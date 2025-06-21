@@ -66,8 +66,7 @@ func createTables(d *sql.DB) error {
 	stmt := `create table authors
 	(id integer not null primary key, name text); delete from authors;`
 
-	_, err := d.Exec(stmt)
-	if err != nil {
+	if _, err := d.Exec(stmt); err != nil {
 		return fmt.Errorf("%w: %s", err, stmt)
 	}
 
@@ -75,8 +74,7 @@ func createTables(d *sql.DB) error {
 		(id integer not null primary key, date	integer, title text, link text, content text, author integer);
 		delete from posts;`
 
-	_, err = d.Exec(stmt)
-	if err != nil {
+	if _, err := d.Exec(stmt); err != nil {
 		return fmt.Errorf("%w: %s",
 			err, stmt)
 	}
@@ -180,8 +178,7 @@ func (p Params) Query() string {
 }
 
 func (d DB) NewAuthor(a Author) error {
-	_, err := d.client.Exec("insert into authors(name) values (?)", a.Name)
-	if err != nil {
+	if _, err := d.client.Exec("insert into authors(name) values (?)", a.Name); err != nil {
 		return fmt.Errorf("failed to insert %w", err)
 	}
 
@@ -219,10 +216,9 @@ func (d DB) ReadAuthorName(id float32) (Author, error) {
 }
 
 func (d DB) NewPost(p Post) error {
-	_, err := d.client.Exec(
+	if _, err := d.client.Exec(
 		"INSERT into posts(date, title, link, content, author) values(?, ?, ?, ?, ?)",
-		p.Date, p.Title, p.Link, p.Content, p.AuthorID)
-	if err != nil {
+		p.Date, p.Title, p.Link, p.Content, p.AuthorID); err != nil {
 		return fmt.Errorf("failed to insert %w", err)
 	}
 
@@ -230,8 +226,7 @@ func (d DB) NewPost(p Post) error {
 }
 
 func (d DB) UpdatePost(p Post) error {
-	_, err := d.client.Exec(`UPDATE posts SET date = ?, title = ?, link = ?, content = ?, author = ? WHERE id = ?`, p.Date, p.Title, p.Link, p.Content, p.AuthorID, p.ID)
-	if err != nil {
+	if _, err := d.client.Exec(`UPDATE posts SET date = ?, title = ?, link = ?, content = ?, author = ? WHERE id = ?`, p.Date, p.Title, p.Link, p.Content, p.AuthorID, p.ID); err != nil {
 		return fmt.Errorf("failed to update %w", err)
 	}
 
@@ -239,8 +234,7 @@ func (d DB) UpdatePost(p Post) error {
 }
 
 func (d DB) DeletePost(p Post) error {
-	_, err := d.client.Exec("DELETE from posts WHERE id = ?", p.ID)
-	if err != nil {
+	if _, err := d.client.Exec("DELETE from posts WHERE id = ?", p.ID); err != nil {
 		return fmt.Errorf("failed to delete %w", err)
 	}
 
