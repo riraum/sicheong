@@ -250,9 +250,7 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 		p.AuthorName = author.Name
 	}
 
-	err = s.Template.ExecuteTemplate(w, "index.html.tmpl", p)
-
-	if err != nil {
+	if err = s.Template.ExecuteTemplate(w, "index.html.tmpl", p); err != nil {
 		s.handleHTMLError(w, "execute", http.StatusInternalServerError, err)
 		return
 	}
@@ -270,8 +268,7 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	err = json.NewEncoder(w).Encode(p)
-	if err != nil {
+	if err = json.NewEncoder(w).Encode(p); err != nil {
 		handleJSONError(w, "encode", http.StatusInternalServerError, err)
 		return
 	}
@@ -307,9 +304,7 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 	p.Today = time.Now()
 	p.AuthorName = author.Name
 
-	err = s.Template.ExecuteTemplate(w, "post.html.tmpl", p)
-
-	if err != nil {
+	if err = s.Template.ExecuteTemplate(w, "post.html.tmpl", p); err != nil {
 		s.handleHTMLError(w, "execute", http.StatusInternalServerError, err)
 		return
 	}
@@ -333,8 +328,7 @@ func (s Server) viewAPIPost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	err = json.NewEncoder(w).Encode(p)
-	if err != nil {
+	if err = json.NewEncoder(w).Encode(p); err != nil {
 		handleJSONError(w, "execute", http.StatusInternalServerError, err)
 		return
 	}
@@ -382,8 +376,7 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 		s.handleHTMLError(w, "post is empty", http.StatusInternalServerError, err)
 	}
 
-	err = s.DB.NewPost(p)
-	if err != nil {
+	if err = s.DB.NewPost(p); err != nil {
 		s.handleHTMLError(w, "create new post in db", http.StatusInternalServerError, err)
 		return
 	}
@@ -414,8 +407,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusNotAcceptable)
 
-		err = json.NewEncoder(w).Encode(c.Value)
-		if err != nil {
+		if err = json.NewEncoder(w).Encode(c.Value); err != nil {
 			handleJSONError(w, "encode", http.StatusInternalServerError, err)
 			return
 		}
@@ -441,8 +433,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		handleJSONError(w, "post is empty", http.StatusInternalServerError, err)
 	}
 
-	err = s.DB.NewPost(p)
-	if err != nil {
+	if err = s.DB.NewPost(p); err != nil {
 		handleJSONError(w, "create new post in db", http.StatusInternalServerError, err)
 		return
 	}
@@ -450,8 +441,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	err = json.NewEncoder(w).Encode(p)
-	if err != nil {
+	if err = json.NewEncoder(w).Encode(p); err != nil {
 		handleJSONError(w, "encode", http.StatusInternalServerError, err)
 		return
 	}
@@ -469,8 +459,7 @@ func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = s.DB.DeletePost(p)
-	if err != nil {
+	if err = s.DB.DeletePost(p); err != nil {
 		s.handleHTMLError(w, "delete post in db", http.StatusInternalServerError, err)
 		return
 	}
@@ -490,8 +479,7 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = s.DB.DeletePost(p)
-	if err != nil {
+	if err = s.DB.DeletePost(p); err != nil {
 		handleJSONError(w, "delete post in db", http.StatusInternalServerError, err)
 		return
 	}
@@ -499,8 +487,7 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	err = json.NewEncoder(w).Encode(p)
-	if err != nil {
+	if err = json.NewEncoder(w).Encode(p); err != nil {
 		handleJSONError(w, "encode", http.StatusInternalServerError, err)
 		return
 	}
@@ -526,8 +513,7 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 
 	p.AuthorID = author.ID
 
-	err = s.DB.UpdatePost(p)
-	if err != nil {
+	if err = s.DB.UpdatePost(p); err != nil {
 		s.handleHTMLError(w, "edit post in db", http.StatusInternalServerError, err)
 		return
 	}
@@ -552,8 +538,7 @@ func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = s.DB.UpdatePost(p)
-	if err != nil {
+	if err = s.DB.UpdatePost(p); err != nil {
 		handleJSONError(w, "edit post in db", http.StatusInternalServerError, err)
 		return
 	}
@@ -561,8 +546,7 @@ func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	err = json.NewEncoder(w).Encode(p)
-	if err != nil {
+	if err = json.NewEncoder(w).Encode(p); err != nil {
 		handleJSONError(w, "encode", http.StatusInternalServerError, err)
 		return
 	}
@@ -595,7 +579,6 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	author, _ := s.DB.ReadAuthor(authorInput)
 
 	if author.Name == "" {
-
 		s.handleHTMLError(w, "author doesn't exist", http.StatusUnauthorized, err)
 		return
 	}
@@ -630,8 +613,8 @@ func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &c)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	err = json.NewEncoder(w).Encode("logged in")
-	if err != nil {
+
+	if err = json.NewEncoder(w).Encode("logged in"); err != nil {
 		handleJSONError(w, "encode", http.StatusInternalServerError, err)
 	}
 }
@@ -663,8 +646,7 @@ func (s Server) getAPILogout(w http.ResponseWriter, r *http.Request) {
 
 // Currently not used anymore
 // func (s Server) getDone(w http.ResponseWriter, r *http.Request) {
-// 	err := s.Template.ExecuteTemplate(w, "done.html.tmpl", nil)
-// 	if err != nil {
+// 	if err := s.Template.ExecuteTemplate(w, "done.html.tmpl", nil); err != nil {
 // 		s.handleHTMLError(w, "execute", http.StatusInternalServerError, err)
 // 		return
 // 	}
@@ -673,8 +655,7 @@ func (s Server) getAPILogout(w http.ResponseWriter, r *http.Request) {
 func (s Server) getFail(w http.ResponseWriter, r *http.Request) {
 	reason := r.URL.Query().Get("reason")
 
-	err := s.Template.ExecuteTemplate(w, "fail.html.tmpl", reason)
-	if err != nil {
+	if err := s.Template.ExecuteTemplate(w, "fail.html.tmpl", reason); err != nil {
 		s.handleHTMLError(w, "execute", http.StatusInternalServerError, err)
 		return
 	}

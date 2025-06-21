@@ -55,8 +55,7 @@ func New(dbPath string) (DB, error) {
 		return DB{}, fmt.Errorf("failed to open sql %w", err)
 	}
 
-	err = createTables(d)
-	if err != nil {
+	if err = createTables(d); err != nil {
 		return DB{}, fmt.Errorf("failed to create tables %w", err)
 	}
 
@@ -197,8 +196,7 @@ func (d DB) ReadAuthor(name string) (Author, error) {
 		return author, fmt.Errorf("failed query * from author: %w", err)
 	}
 
-	err = stmt.QueryRow(name).Scan(&author.ID, &author.Name)
-	if err != nil {
+	if err = stmt.QueryRow(name).Scan(&author.ID, &author.Name); err != nil {
 		return author, fmt.Errorf("failed to query: %w", err)
 	}
 
@@ -213,8 +211,7 @@ func (d DB) ReadAuthorName(id float32) (Author, error) {
 		return author, fmt.Errorf("failed query * from author: %w", err)
 	}
 
-	err = stmt.QueryRow(id).Scan(&author.ID, &author.Name)
-	if err != nil {
+	if err = stmt.QueryRow(id).Scan(&author.ID, &author.Name); err != nil {
 		return author, fmt.Errorf("failed to query: %w", err)
 	}
 
@@ -259,8 +256,7 @@ func (d DB) ReadPost(id int) (Post, error) {
 	}
 	defer stmt.Close()
 
-	err = stmt.QueryRow(id).Scan(&p.ID, &p.Date, &p.Title, &p.Link, &p.Content, &p.AuthorID)
-	if err != nil {
+	if err = stmt.QueryRow(id).Scan(&p.ID, &p.Date, &p.Title, &p.Link, &p.Content, &p.AuthorID); err != nil {
 		return p, fmt.Errorf("failed to queryRow: %w", err)
 	}
 
