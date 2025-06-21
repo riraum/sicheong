@@ -11,10 +11,8 @@ import (
 )
 
 //go:embed static/*
-var (
-	static embed.FS
-	t      = template.Must(template.ParseFS(static, "static/*"))
-)
+var static embed.FS
+var t = template.Must(template.ParseFS(static, "static/*"))
 
 func main() {
 	log.Print("Hello si-cheong user")
