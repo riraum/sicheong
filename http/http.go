@@ -317,7 +317,12 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 
 	ap.Post.ParseDate()
 
-	if _, ok, _ := s.authenticated(r); ok {
+	_, ok, err := s.authenticated(r)
+	if err != nil {
+		s.handleHTMLError(w, "authenticated", http.StatusInternalServerError, err)
+		return
+	}
+	if ok {
 		ap.Auth = true
 		ap.Today = time.Now()
 	}
