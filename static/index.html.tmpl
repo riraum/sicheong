@@ -15,7 +15,7 @@
 <body>
     <main class="container">
     <div>
-        {{if .Authenticated}}
+        {{if .Auth}}
         <a href="logout">
             <button>{{.AuthorName}} log out</button>
         </a>
@@ -27,7 +27,7 @@
     </div>
 <br>
   <div>
-    {{range .Posts}}
+    {{range .Posts.Posts}}
     {{.ParsedDate.Format "2006/01/02"}}
     <br>
     {{.Title}}
@@ -42,7 +42,7 @@
    <br>
     {{end}}
   </div>
-  {{if .Authenticated}}
+  {{if .Auth}}
   <br>
   Create new post
   <form action="/post" method="POST" novalidate>
