@@ -578,16 +578,17 @@ func (s Server) getLogin(w http.ResponseWriter, r *http.Request) {
 
 func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	authorInput := r.FormValue("author")
+	passwordInput := r.FormValue("password")
 
-	encryptedAuthorByte, err := security.Encrypt([]byte(authorInput), s.Key)
+	encryptedPasswordByte, err := security.Encrypt([]byte(passwordInput), s.Key)
 	if err != nil {
 		s.handleHTMLError(w, "encrypt error", http.StatusInternalServerError, err)
 		return
 	}
 
 	c := http.Cookie{
-		Name:   "authorName",
-		Value:  base64.StdEncoding.EncodeToString(encryptedAuthorByte),
+		Name:   authorInput,
+		Value:  base64.StdEncoding.EncodeToString(encryptedPasswordByte),
 		Path:   "/",
 		Secure: true,
 	}
