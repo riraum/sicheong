@@ -1,11 +1,14 @@
 package post
 
 import (
+	"database/sql"
 	"fmt"
 	"time"
-
-	"github.com/riraum/si-cheong/db"
 )
+
+type DB struct {
+	client *sql.DB
+}
 
 type Post struct {
 	ID            float32
@@ -24,7 +27,7 @@ func (p *Post) ParseDate() {
 	p.ParsedDate = time.Unix(p.Date, 0)
 }
 
-func (d db.DB) NewPost(p Post) error {
+func (d DB) NewPost(p Post) error {
 	if _, err := d.client.Exec(
 		"INSERT into posts(date, title, link, content, author) values(?, ?, ?, ?, ?)",
 		p.Date, p.Title, p.Link, p.Content, p.AuthorID); err != nil {
