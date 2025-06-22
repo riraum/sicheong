@@ -1,14 +1,9 @@
-package post
+package db
 
 import (
-	"database/sql"
 	"fmt"
 	"time"
 )
-
-type DB struct {
-	client *sql.DB
-}
 
 type Post struct {
 	ID            float32

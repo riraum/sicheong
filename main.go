@@ -7,15 +7,12 @@ import (
 
 	"github.com/riraum/si-cheong/db"
 	"github.com/riraum/si-cheong/http"
-	"github.com/riraum/si-cheong/posts"
 	"github.com/riraum/si-cheong/security"
 )
 
 //go:embed static/*
-var (
-	static embed.FS
-	t      = template.Must(template.ParseFS(static, "static/*"))
-)
+var static embed.FS
+var t = template.Must(template.ParseFS(static, "static/*"))
 
 func main() {
 	log.Print("Hello si-cheong user")
@@ -37,8 +34,7 @@ func main() {
 		Key:          key,
 	}
 
-	d, err = posts.Fill(d)
-	if err != nil {
+	if err = d.Fill(); err != nil {
 		log.Fatalf("error filling posts into db: %v", err)
 	}
 
