@@ -18,23 +18,18 @@ type Author struct {
 }
 
 type Post struct {
-	ID            float32
-	Date          int64
-	ParsedDate    time.Time
-	Title         string
-	Link          string
-	Content       string
-	AuthorID      float32 // Author.ID
-	Authenticated bool
-	Today         time.Time
-	AuthorName    string
+	ID         float32
+	Date       int64
+	ParsedDate time.Time
+	Title      string
+	Link       string
+	Content    string
+	AuthorID   float32 // Author.ID
+	AuthorName string
 }
 
 type Posts struct {
-	Authenticated bool
-	Today         time.Time
-	Posts         []Post
-	AuthorName    string
+	Posts []Post
 }
 
 type Params struct {

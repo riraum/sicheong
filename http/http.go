@@ -232,6 +232,13 @@ func (s Server) getStaticAsset(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
+	type authedPosts struct {
+		Auth       bool
+		Posts      db.Posts
+		Today      time.Time
+		AuthorName string
+	}
+
 	par := parseQueryParams(r)
 
 	p, err := s.DB.ReadPosts(par)
@@ -240,18 +247,23 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	author, ok, _ := s.authenticated(r)
-
-	if ok {
-		p.Authenticated = true
-		p.Today = time.Now()
-		p.AuthorName = author.Name
+	ap := authedPosts{
+		Posts: p,
 	}
 
-	if err = s.Template.ExecuteTemplate(w, "index.html.tmpl", p); err != nil {
+	author, ok, _ := s.authenticated(r)
+	if ok {
+		ap.Auth = true
+		ap.Today = time.Now()
+		ap.AuthorName = author.Name
+
+	}
+
+	if err = s.Template.ExecuteTemplate(w, "index.html.tmpl", ap); err != nil {
 		s.handleHTMLError(w, "execute", http.StatusInternalServerError, err)
 		return
 	}
+
 }
 
 func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
@@ -273,6 +285,12 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
+	type authedPost struct {
+		Auth  bool
+		Post  db.Post
+		Today time.Time
+	}
+
 	p, err := parseGetRValues(r)
 	if err != nil {
 		s.handleHTMLError(w, "parse values", http.StatusInternalServerError, err)
@@ -285,22 +303,26 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, ok, _ := s.authenticated(r); ok {
-		p.Authenticated = true
-	}
-
 	author, err := s.DB.ReadAuthorName(p.AuthorID)
 	if err != nil {
 		s.handleHTMLError(w, "read author", http.StatusInternalServerError, err)
 		return
 	}
 
-	p.ParseDate()
-
-	p.Today = time.Now()
 	p.AuthorName = author.Name
 
-	if err = s.Template.ExecuteTemplate(w, "post.html.tmpl", p); err != nil {
+	ap := authedPost{
+		Post: p,
+	}
+
+	ap.Post.ParseDate()
+
+	if _, ok, _ := s.authenticated(r); ok {
+		ap.Auth = true
+		ap.Today = time.Now()
+	}
+
+	if err = s.Template.ExecuteTemplate(w, "post.html.tmpl", ap); err != nil {
 		s.handleHTMLError(w, "execute", http.StatusInternalServerError, err)
 		return
 	}
