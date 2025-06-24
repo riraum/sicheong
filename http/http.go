@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/riraum/si-cheong/db"
@@ -89,27 +90,55 @@ func handleJSONError(w http.ResponseWriter, msg string, statusCode int, err erro
 }
 
 func (s Server) authenticated(r *http.Request) (db.Author, bool, error) {
+	// if strings.HasPrefix(s string, prefix string)
 	c, err := r.Cookie("authorName")
 	if err != nil {
 		return db.Author{}, false, err
 	}
 
-	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(c.Value)
+	// encrypted, err := base64.StdEncoding.DecodeString(c.Value)
+	// if err != nil {
+	// 	return db.Author{}, false, err
+	// }
+
+	// plaintxt, err := security.Decrypt(encrypted, s.Key)
+	// if err != nil {
+	// 	return db.Author{}, false, err
+	// }
+
+	plaintxt, err := security.Decrypt([]byte(c.Value), s.Key)
 	if err != nil {
 		return db.Author{}, false, err
 	}
 
-	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
+	authorName, authorPassword, ok := strings.Cut(string(plaintxt), ":")
+	if !ok {
+		return db.Author{}, false, err
+	}
+
+	if authorName == "" {
+		return db.Author{}, false, err
+	}
+
+	if authorPassword == "" {
+		return db.Author{}, false, err
+	}
+
+	// author, err := s.DB.ReadAuthor(string(plaintxt))
+	// if err != nil {
+	// 	return db.Author{}, false, err
+	// }
+
+	author, err := s.DB.ReadAuthor(authorName)
 	if err != nil {
 		return db.Author{}, false, err
 	}
 
-	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
-	if err != nil {
+	if authorName != author.Name {
 		return db.Author{}, false, err
 	}
 
-	if author.Name == "" {
+	if authorPassword != author.Password {
 		return db.Author{}, false, err
 	}
 
@@ -580,15 +609,21 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	authorInput := r.FormValue("author")
 	passwordInput := r.FormValue("password")
 
-	encryptedPasswordByte, err := security.Encrypt([]byte(passwordInput), s.Key)
+	plaintxt := fmt.Sprintf("%s:%s", authorInput, passwordInput)
+
+	encryptedValue, err := security.Encrypt([]byte(plaintxt), s.Key)
 	if err != nil {
 		s.handleHTMLError(w, "encrypt error", http.StatusInternalServerError, err)
 		return
 	}
 
+	// cookieName := []string{"authorName", authorInput}
+
 	c := http.Cookie{
-		Name:   authorInput,
-		Value:  base64.StdEncoding.EncodeToString(encryptedPasswordByte),
+		Name: "authorName",
+		// Name:   "authorName" + authorInput,
+		Value: string(encryptedValue),
+		// Value:  base64.StdEncoding.EncodeToString(encryptedPasswordByte),
 		Path:   "/",
 		Secure: true,
 	}
@@ -596,7 +631,6 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	author, _ := s.DB.ReadAuthor(authorInput)
 
 	if author.Name == "" {
-
 		s.handleHTMLError(w, "author doesn't exist", http.StatusUnauthorized, err)
 		return
 	}
