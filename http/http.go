@@ -90,7 +90,6 @@ func handleJSONError(w http.ResponseWriter, msg string, statusCode int, err erro
 }
 
 func (s Server) authenticated(r *http.Request) (db.Author, bool, error) {
-	// if strings.HasPrefix(s string, prefix string)
 	c, err := r.Cookie("authorName")
 	if err != nil {
 		return db.Author{}, false, err
@@ -144,6 +143,12 @@ func (s Server) authenticated(r *http.Request) (db.Author, bool, error) {
 		return db.Author{}, false, err
 	}
 
+	if authorName == author.Name && authorPassword == author.Password {
+		log.Print("login check match!")
+		return author, true, nil
+	}
+
+	log.Print("login check match!")
 	return author, true, nil
 }
 
@@ -276,6 +281,7 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 	author, ok, _ := s.authenticated(r)
 
 	if ok {
+		log.Print("authenticated!")
 		p.Authenticated = true
 		p.Today = time.Now()
 		p.AuthorName = author.Name
@@ -613,13 +619,13 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 
 	plaintxt := fmt.Sprintf("%s:%s", authorInput, passwordInput)
 
+	log.Printf("plaintext postLogin: %s", plaintxt)
+
 	encryptedValue, err := security.Encrypt([]byte(plaintxt), s.Key)
 	if err != nil {
 		s.handleHTMLError(w, "encrypt error", http.StatusInternalServerError, err)
 		return
 	}
-
-	// cookieName := []string{"authorName", authorInput}
 
 	c := http.Cookie{
 		Name: "authorName",
@@ -632,7 +638,6 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	author, _ := s.DB.ReadAuthor(authorInput)
-
 	if author.Name == "" {
 		s.handleHTMLError(w, "author doesn't exist", http.StatusUnauthorized, err)
 		return
