@@ -66,7 +66,7 @@ func New(dbPath string) (DB, error) {
 
 func createTables(d *sql.DB) error {
 	stmt := `create table authors
-	(id integer not null primary key, name text); delete from authors;`
+	(id integer not null primary key, name text, password text); delete from authors;`
 
 	_, err := d.Exec(stmt)
 	if err != nil {
@@ -185,7 +185,7 @@ func (p Params) Query() string {
 }
 
 func (d DB) NewAuthor(a Author) error {
-	_, err := d.client.Exec("insert into authors(name) values (?)", a.Name)
+	_, err := d.client.Exec("insert into authors(name, password) values (?,?)", a.Name, a.Password)
 	if err != nil {
 		return fmt.Errorf("failed to insert %w", err)
 	}
@@ -196,12 +196,12 @@ func (d DB) NewAuthor(a Author) error {
 func (d DB) ReadAuthor(name string) (Author, error) {
 	var author Author
 
-	stmt, err := d.client.Prepare("SELECT id, name FROM authors WHERE name = ?")
+	stmt, err := d.client.Prepare("SELECT id, name, password FROM authors WHERE name = ?")
 	if err != nil {
 		return author, fmt.Errorf("failed query * from author: %w", err)
 	}
 
-	err = stmt.QueryRow(name).Scan(&author.ID, &author.Name)
+	err = stmt.QueryRow(name).Scan(&author.ID, &author.Name, &author.Password)
 	if err != nil {
 		return author, fmt.Errorf("failed to query: %w", err)
 	}

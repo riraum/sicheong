@@ -117,13 +117,13 @@ func (s Server) authenticated(r *http.Request) (db.Author, bool, error) {
 
 	log.Printf("authorName: %s \n authorPassword: %s", authorName, authorPassword)
 
-	if authorName == "" {
-		return db.Author{}, false, err
-	}
+	// if authorName == "" {
+	// 	return db.Author{}, false, err
+	// }
 
-	if authorPassword == "" {
-		return db.Author{}, false, err
-	}
+	// if authorPassword == "" {
+	// 	return db.Author{}, false, err
+	// }
 
 	// author, err := s.DB.ReadAuthor(string(plaintxt))
 	// if err != nil {
@@ -135,18 +135,18 @@ func (s Server) authenticated(r *http.Request) (db.Author, bool, error) {
 		return db.Author{}, false, err
 	}
 
-	if authorName != author.Name {
-		return db.Author{}, false, err
-	}
+	// if authorName != author.Name {
+	// 	return db.Author{}, false, err
+	// }
 
-	if authorPassword != author.Password {
-		return db.Author{}, false, err
-	}
+	// if authorPassword != author.Password {
+	// 	return db.Author{}, false, err
+	// }
 
-	if authorName == author.Name && authorPassword == author.Password {
-		log.Print("login check match!")
-		return author, true, nil
-	}
+	// if authorName == author.Name && authorPassword == author.Password {
+	// 	log.Print("login check match!")
+	// 	return author, true, nil
+	// }
 
 	log.Print("login check match!")
 	return author, true, nil
@@ -617,6 +617,8 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	authorInput := r.FormValue("author")
 	passwordInput := r.FormValue("password")
 
+	log.Printf("authorInput: %s \n passwordInput: %s", authorInput, passwordInput)
+
 	plaintxt := fmt.Sprintf("%s:%s", authorInput, passwordInput)
 
 	log.Printf("plaintext postLogin: %s", plaintxt)
@@ -637,10 +639,37 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		Secure: true,
 	}
 
-	author, _ := s.DB.ReadAuthor(authorInput)
+	author, err := s.DB.ReadAuthor(authorInput)
+	if err != nil {
+		s.handleHTMLError(w, "read author", http.StatusUnauthorized, err)
+	}
+
+	log.Printf("Readauthor authorName: %s \n authorPassword: %s", author.Name, author.Password)
+
 	if author.Name == "" {
-		s.handleHTMLError(w, "author doesn't exist", http.StatusUnauthorized, err)
+		s.handleHTMLError(w, "author is empty", http.StatusUnauthorized, err)
 		return
+	}
+
+	if passwordInput == "" {
+		s.handleHTMLError(w, "password is empty", http.StatusUnauthorized, err)
+		return
+	}
+
+	if authorInput != author.Name {
+		s.handleHTMLError(w, "author doesn't match", http.StatusUnauthorized, err)
+		return
+	}
+
+	if passwordInput != author.Password {
+		s.handleHTMLError(w, "password doesn't match", http.StatusUnauthorized, err)
+		return
+	}
+
+	if authorInput == author.Name && passwordInput == author.Password {
+		log.Print("login check match!")
+		http.SetCookie(w, &c)
+		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
 	}
 
 	http.SetCookie(w, &c)
