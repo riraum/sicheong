@@ -96,25 +96,27 @@ func (s Server) authenticated(r *http.Request) (db.Author, bool, error) {
 		return db.Author{}, false, err
 	}
 
-	// encrypted, err := base64.StdEncoding.DecodeString(c.Value)
-	// if err != nil {
-	// 	return db.Author{}, false, err
-	// }
-
-	// plaintxt, err := security.Decrypt(encrypted, s.Key)
-	// if err != nil {
-	// 	return db.Author{}, false, err
-	// }
-
-	plaintxt, err := security.Decrypt([]byte(c.Value), s.Key)
+	encrypted, err := base64.StdEncoding.DecodeString(c.Value)
 	if err != nil {
 		return db.Author{}, false, err
 	}
+
+	plaintxt, err := security.Decrypt(encrypted, s.Key)
+	if err != nil {
+		return db.Author{}, false, err
+	}
+
+	// plaintxt, err := security.Decrypt([]byte(c.Value), s.Key)
+	// if err != nil {
+	// 	return db.Author{}, false, err
+	// }
 
 	authorName, authorPassword, ok := strings.Cut(string(plaintxt), ":")
 	if !ok {
 		return db.Author{}, false, err
 	}
+
+	log.Printf("authorName: %s \n authorPassword: %s", authorName, authorPassword)
 
 	if authorName == "" {
 		return db.Author{}, false, err
@@ -622,7 +624,8 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	c := http.Cookie{
 		Name: "authorName",
 		// Name:   "authorName" + authorInput,
-		Value: string(encryptedValue),
+		// Value: string(encryptedValue),
+		Value: base64.StdEncoding.EncodeToString(encryptedValue),
 		// Value:  base64.StdEncoding.EncodeToString(encryptedPasswordByte),
 		Path:   "/",
 		Secure: true,
