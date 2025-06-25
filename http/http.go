@@ -388,13 +388,8 @@ func (s Server) viewAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
-	c, err := r.Cookie("authorName")
-	if err != nil {
-		s.handleHTMLError(w, "no author cookie", http.StatusInternalServerError, err)
-		return
-	}
-
-	if _, ok, err := s.authenticated(r); !ok {
+	author, ok, err := s.authenticated(r)
+	if !ok {
 		s.handleHTMLError(w, "failed to authenticate", http.StatusUnauthorized, err)
 		return
 	}
@@ -402,24 +397,6 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 	p, err := parsePostRValues(r)
 	if err != nil {
 		s.handleHTMLError(w, "parse values", http.StatusInternalServerError, err)
-		return
-	}
-
-	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(c.Value)
-	if err != nil {
-		s.handleHTMLError(w, "decode base64 string ", http.StatusInternalServerError, err)
-		return
-	}
-
-	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
-	if err != nil {
-		s.handleHTMLError(w, "decrypt", http.StatusInternalServerError, err)
-		return
-	}
-
-	author, err := s.DB.ReadAuthorByName(string(decryptedAuthorByte))
-	if err != nil {
-		s.handleHTMLError(w, "string to float conversion", http.StatusInternalServerError, err)
 		return
 	}
 
