@@ -617,11 +617,11 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	authorInput := r.FormValue("author")
 	passwordInput := r.FormValue("password")
 
-	log.Printf("authorInput: %s \n passwordInput: %s", authorInput, passwordInput)
+	log.Printf("authorInput: %s \n passwordInput: %s", authorInput, passwordInput[2:])
 
-	plaintxt := fmt.Sprintf("%s:%s", authorInput, passwordInput)
+	plaintxt := fmt.Sprintf("%s:%s", authorInput, passwordInput[2:])
 
-	log.Printf("plaintext postLogin: %s", plaintxt)
+	// log.Printf("plaintext postLogin: %s", plaintxt)
 
 	encryptedValue, err := security.Encrypt([]byte(plaintxt), s.Key)
 	if err != nil {
@@ -644,7 +644,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		s.handleHTMLError(w, "read author", http.StatusUnauthorized, err)
 	}
 
-	log.Printf("Readauthor authorName: %s \n authorPassword: %s", author.Name, author.Password)
+	log.Printf("Readauthor authorName: %s \n authorPassword: %s", author.Name, author.Password[2:])
 
 	if author.Name == "" {
 		s.handleHTMLError(w, "author is empty", http.StatusUnauthorized, err)
