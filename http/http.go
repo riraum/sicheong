@@ -133,7 +133,7 @@ func (s Server) authenticated(r *http.Request) (db.Author, bool, error) {
 		return db.Author{}, false, err
 	}
 
-	// to be extra safe, added a conditional auth check, maybe will remove once more certain of check logic
+	// to be extra safe, conditional auth check, should remove once more certain of check logic
 	if authorName == author.Name && authorPassword == author.Password {
 		return author, true, nil
 	}
@@ -301,6 +301,15 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, post := range p.Posts {
+		author, err := s.DB.ReadAuthorByID(post.ID)
+		if err != nil {
+			handleJSONError(w, "read author name", http.StatusInternalServerError, err)
+			return
+		}
+		post.AuthorName = author.Name
+	}
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
@@ -343,7 +352,7 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 
 	ap.Post.ParseDate()
 
-	// TODO: add error condition that not fires when not logged in
+	// TODO: add error condition that doesn't fire when not logged in
 	_, ok, _ := s.authenticated(r)
 	if ok {
 		ap.Auth = true

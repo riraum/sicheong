@@ -7,8 +7,7 @@ import (
 )
 
 type Posts struct {
-	Posts      []Post
-	AuthorName string
+	Posts []Post
 }
 
 func (p *Posts) ParseDates() {
