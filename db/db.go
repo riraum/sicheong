@@ -11,8 +11,9 @@ import (
 const invalidID = -1
 
 type Author struct {
-	ID   float32
-	Name string
+	ID       float32
+	Name     string
+	Password string
 }
 
 type Params struct {
@@ -42,7 +43,7 @@ func New(dbPath string) (DB, error) {
 
 func createTables(d *sql.DB) error {
 	stmt := `create table authors
-	(id integer not null primary key, name text); delete from authors;`
+	(id integer not null primary key, name text, password text); delete from authors;`
 
 	if _, err := d.Exec(stmt); err != nil {
 		return fmt.Errorf("%w: %s", err, stmt)
@@ -94,7 +95,7 @@ func (p Params) Query() string {
 }
 
 func (d DB) NewAuthor(a Author) error {
-	if _, err := d.client.Exec("insert into authors(name) values (?)", a.Name); err != nil {
+	if _, err := d.client.Exec("insert into authors(name, password) values (?,?)", a.Name, a.Password); err != nil {
 		return fmt.Errorf("failed to insert %w", err)
 	}
 
@@ -104,12 +105,12 @@ func (d DB) NewAuthor(a Author) error {
 func (d DB) ReadAuthorByName(name string) (Author, error) {
 	var author Author
 
-	stmt, err := d.client.Prepare("SELECT id, name FROM authors WHERE name = ?")
+	stmt, err := d.client.Prepare("SELECT id, name, password FROM authors WHERE name = ?")
 	if err != nil {
 		return author, fmt.Errorf("failed query * from author: %w", err)
 	}
 
-	if err = stmt.QueryRow(name).Scan(&author.ID, &author.Name); err != nil {
+	if err = stmt.QueryRow(name).Scan(&author.ID, &author.Name, &author.Password); err != nil {
 		return author, fmt.Errorf("failed to query: %w", err)
 	}
 

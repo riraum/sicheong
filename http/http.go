@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/riraum/si-cheong/db"
@@ -95,26 +96,48 @@ func (s Server) authenticated(r *http.Request) (db.Author, bool, error) {
 		return db.Author{}, false, nil
 	}
 
-	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(c.Value)
+	encrypted, err := base64.StdEncoding.DecodeString(c.Value)
 	if err != nil {
 		return db.Author{}, false, err
 	}
 
-	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
+	plaintxt, err := security.Decrypt(encrypted, s.Key)
 	if err != nil {
 		return db.Author{}, false, err
 	}
 
-	author, err := s.DB.ReadAuthorByName(string(decryptedAuthorByte))
+	authorName, authorPassword, ok := strings.Cut(string(plaintxt), ":")
+	if !ok {
+		return db.Author{}, false, err
+	}
+
+	if authorName == "" {
+		return db.Author{}, false, err
+	}
+
+	if authorPassword == "" {
+		return db.Author{}, false, err
+	}
+
+	author, err := s.DB.ReadAuthorByName(string(authorName))
 	if err != nil {
 		return db.Author{}, false, err
 	}
 
-	if author.Name == "" {
+	if authorName != author.Name {
 		return db.Author{}, false, err
 	}
 
-	return author, true, nil
+	if authorPassword != author.Password {
+		return db.Author{}, false, err
+	}
+
+	// to be extra safe, added a conditional auth check, maybe will remove once more certain of check logic
+	if authorName == author.Name && authorPassword == author.Password {
+		return author, true, nil
+	}
+
+	return author, false, nil
 }
 
 func parseQueryParams(r *http.Request) db.Params {
@@ -591,8 +614,11 @@ func (s Server) getLogin(w http.ResponseWriter, r *http.Request) {
 
 func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	authorInput := r.FormValue("author")
+	passwordInput := r.FormValue("password")
 
-	encryptedAuthorByte, err := security.Encrypt([]byte(authorInput), s.Key)
+	plaintxt := fmt.Sprintf("%s:%s", authorInput, passwordInput)
+
+	encryptedValue, err := security.Encrypt([]byte(plaintxt), s.Key)
 	if err != nil {
 		s.handleHTMLError(w, "encrypt error", http.StatusInternalServerError, err)
 		return
@@ -600,18 +626,44 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 
 	c := http.Cookie{
 		Name:   "authorName",
-		Value:  base64.StdEncoding.EncodeToString(encryptedAuthorByte),
+		Value:  base64.StdEncoding.EncodeToString(encryptedValue),
 		Path:   "/",
 		Secure: true,
 	}
 
-	if author, _ := s.DB.ReadAuthorByName(authorInput); author.Name == "" {
-		s.handleHTMLError(w, "author doesn't exist", http.StatusUnauthorized, err)
+	author, err := s.DB.ReadAuthorByName(authorInput)
+	if err != nil {
+		s.handleHTMLError(w, "read author", http.StatusUnauthorized, err)
+	}
+
+	if author.Name == "" {
+		s.handleHTMLError(w, "author is empty", http.StatusUnauthorized, err)
 		return
 	}
 
-	http.SetCookie(w, &c)
-	http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
+	if passwordInput == "" {
+		s.handleHTMLError(w, "password is empty", http.StatusUnauthorized, err)
+		return
+	}
+
+	if authorInput != author.Name {
+		s.handleHTMLError(w, "author doesn't match", http.StatusUnauthorized, err)
+		return
+	}
+
+	if passwordInput != author.Password {
+		s.handleHTMLError(w, "password doesn't match", http.StatusUnauthorized, err)
+		return
+	}
+
+	// to be extra safe, added a conditional auth check, maybe will remove once more certain of check logic
+	if authorInput == author.Name && passwordInput == author.Password {
+		http.SetCookie(w, &c)
+		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
+		return
+	}
+
+	s.handleHTMLError(w, "end of postLogin", http.StatusUnauthorized, err)
 }
 
 func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
