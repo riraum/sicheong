@@ -13,7 +13,7 @@ type Post struct {
 	Link       string
 	Content    string
 	AuthorID   float32 // Author.ID
-	AuthorName string
+	AuthorName string  // Author.Name
 }
 
 func (p *Post) ParseDate() {
