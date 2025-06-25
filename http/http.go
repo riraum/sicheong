@@ -616,39 +616,36 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		Secure: true,
 	}
 
+	if authorInput == "" && passwordInput == "" {
+		s.handleHTMLError(w, "fields are empty", http.StatusUnauthorized, err)
+		return
+	}
+
+	if passwordInput == "" || authorInput == "" {
+		s.handleHTMLError(w, "one field is empty", http.StatusUnauthorized, err)
+		return
+	}
+
 	author, err := s.DB.ReadAuthorByName(authorInput)
-	if err != nil {
-		s.handleHTMLError(w, "read author", http.StatusUnauthorized, err)
-	}
+	// TODO: adjust to not give away that user doesn't exist
+	// if err != nil {
+	// 	s.handleHTMLError(w, "read author", http.StatusUnauthorized, err)
+	// }
 
-	if author.Name == "" {
-		s.handleHTMLError(w, "author is empty", http.StatusUnauthorized, err)
+	if authorInput != author.Name || passwordInput != author.Password {
+		s.handleHTMLError(w, "user password combination not correct", http.StatusUnauthorized, err)
 		return
 	}
 
-	if passwordInput == "" {
-		s.handleHTMLError(w, "password is empty", http.StatusUnauthorized, err)
-		return
-	}
-
-	if authorInput != author.Name {
-		s.handleHTMLError(w, "author doesn't match", http.StatusUnauthorized, err)
-		return
-	}
-
-	if passwordInput != author.Password {
-		s.handleHTMLError(w, "password doesn't match", http.StatusUnauthorized, err)
-		return
-	}
-
-	// to be extra safe, added a conditional auth check, maybe will remove once more certain of check logic
+	// to be extra safe, conditional auth check, should remove once more certain of check logic
 	if authorInput == author.Name && passwordInput == author.Password {
 		http.SetCookie(w, &c)
 		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
 		return
 	}
 
-	s.handleHTMLError(w, "end of postLogin", http.StatusUnauthorized, err)
+	log.Print("end of postLogin")
+	s.handleHTMLError(w, "user login combination not correct", http.StatusUnauthorized, err)
 }
 
 func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
@@ -691,7 +688,7 @@ func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// to be extra safe, added a conditional auth check, maybe will remove once more certain of check logic
+	// to be extra safe, conditional auth check, should remove once more certain of check logic
 	if authorInput == author.Name && passwordInput == author.Password {
 		http.SetCookie(w, &c)
 		w.Header().Set("Content-Type", "application/json")
