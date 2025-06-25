@@ -105,7 +105,7 @@ func (s Server) authenticated(r *http.Request) (db.Author, bool, error) {
 		return db.Author{}, false, err
 	}
 
-	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
+	author, err := s.DB.ReadAuthorByName(string(decryptedAuthorByte))
 	if err != nil {
 		return db.Author{}, false, err
 	}
@@ -306,7 +306,11 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	author, err := s.DB.ReadAuthorName(p.AuthorID)
+	if _, ok, _ := s.authenticated(r); ok {
+		p.Authenticated = true
+	}
+
+	author, err := s.DB.ReadAuthorByID(p.AuthorID)
 	if err != nil {
 		s.handleHTMLError(w, "read author", http.StatusInternalServerError, err)
 		return
@@ -390,7 +394,7 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
+	author, err := s.DB.ReadAuthorByName(string(decryptedAuthorByte))
 	if err != nil {
 		s.handleHTMLError(w, "string to float conversion", http.StatusInternalServerError, err)
 		return
@@ -447,7 +451,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	author, err := s.DB.ReadAuthor(string(decryptedAuthorByte))
+	author, err := s.DB.ReadAuthorByName(string(decryptedAuthorByte))
 	if err != nil {
 		handleJSONError(w, "decode base64 string to byte", http.StatusInternalServerError, err)
 		return
@@ -601,8 +605,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		Secure: true,
 	}
 
-	author, _ := s.DB.ReadAuthor(authorInput)
-	if author.Name == "" {
+	if author, _ := s.DB.ReadAuthorByName(authorInput); author.Name == "" {
 		s.handleHTMLError(w, "author doesn't exist", http.StatusUnauthorized, err)
 		return
 	}
@@ -627,7 +630,7 @@ func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
 		Secure: true,
 	}
 
-	if author, _ := s.DB.ReadAuthor(authorInput); author.Name == "" {
+	if author, _ := s.DB.ReadAuthorByName(authorInput); author.Name == "" {
 		handleJSONError(w, "author doesn't exist", http.StatusUnauthorized, err)
 		return
 	}

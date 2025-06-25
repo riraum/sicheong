@@ -3,9 +3,7 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"os"
-	"time"
 
 	_ "github.com/mattn/go-sqlite3" //revive be gone
 )
@@ -15,21 +13,6 @@ const invalidID = -1
 type Author struct {
 	ID   float32
 	Name string
-}
-
-type Post struct {
-	ID         float32
-	Date       int64
-	ParsedDate time.Time
-	Title      string
-	Link       string
-	Content    string
-	AuthorID   float32 // Author.ID
-	AuthorName string  // Author.Name
-}
-
-type Posts struct {
-	Posts []Post
 }
 
 type Params struct {
@@ -77,68 +60,6 @@ func createTables(d *sql.DB) error {
 	return nil
 }
 
-func (d DB) Fill() error {
-	authors := []Author{
-		{
-			Name: "Alpha",
-		},
-		{
-			Name: "Bravo",
-		},
-		{
-			Name: "Charlie",
-		},
-	}
-	for _, a := range authors {
-		err := d.NewAuthor(a)
-		if err != nil {
-			log.Fatalf("create new author in db: %v", err)
-		}
-	}
-
-	posts := []Post{
-		{
-			Date:     1748000743, //nolint:mnd
-			Title:    "Status 200",
-			Link:     "https://http.cat/status/200",
-			Content:  "Good HTTP status 200 explainer",
-			AuthorID: 1,
-		},
-		{
-			Date:     1684997010, //nolint:mnd
-			Title:    "Status 100",
-			Link:     "https://http.cat/status/100",
-			Content:  "Good HTTP status 100 explainer",
-			AuthorID: 2, //nolint:mnd
-		},
-		{
-			Date:     1727780130, //nolint:mnd
-			Title:    "Status 301",
-			Link:     "https://http.cat/status/301",
-			Content:  "Good HTTP status 301 explainer",
-			AuthorID: 3, //nolint:mnd
-		},
-	}
-	for _, p := range posts {
-		err := d.NewPost(p)
-		if err != nil {
-			log.Fatalf("create new post in db: %v", err)
-		}
-	}
-
-	return nil
-}
-
-func (p *Post) ParseDate() {
-	p.ParsedDate = time.Unix(p.Date, 0)
-}
-
-func (p *Posts) ParseDates() {
-	for _, post := range p.Posts {
-		post.ParseDate()
-	}
-}
-
 func (p Params) Query() string {
 	var (
 		sort      string
@@ -180,7 +101,7 @@ func (d DB) NewAuthor(a Author) error {
 	return nil
 }
 
-func (d DB) ReadAuthor(name string) (Author, error) {
+func (d DB) ReadAuthorByName(name string) (Author, error) {
 	var author Author
 
 	stmt, err := d.client.Prepare("SELECT id, name FROM authors WHERE name = ?")
@@ -195,7 +116,7 @@ func (d DB) ReadAuthor(name string) (Author, error) {
 	return author, nil
 }
 
-func (d DB) ReadAuthorName(id float32) (Author, error) {
+func (d DB) ReadAuthorByID(id float32) (Author, error) {
 	var author Author
 
 	stmt, err := d.client.Prepare("SELECT id, name FROM authors WHERE id = ?")
@@ -208,98 +129,4 @@ func (d DB) ReadAuthorName(id float32) (Author, error) {
 	}
 
 	return author, nil
-}
-
-func (d DB) NewPost(p Post) error {
-	_, err := d.client.Exec(
-		"INSERT into posts(date, title, link, content, author) values(?, ?, ?, ?, ?)",
-		p.Date, p.Title, p.Link, p.Content, p.AuthorID)
-	if err != nil {
-		return fmt.Errorf("failed to insert %w", err)
-	}
-
-	return nil
-}
-
-func (d DB) UpdatePost(p Post) error {
-	_, err := d.client.Exec(`UPDATE posts SET date = ?, title = ?, link = ?, content = ?, author = ? WHERE id = ?`, p.Date, p.Title, p.Link, p.Content, p.AuthorID, p.ID)
-	if err != nil {
-		return fmt.Errorf("failed to update %w", err)
-	}
-
-	return nil
-}
-
-func (d DB) DeletePost(p Post) error {
-	if _, err := d.client.Exec("DELETE from posts WHERE id = ?", p.ID); err != nil {
-		return fmt.Errorf("failed to delete %w", err)
-	}
-
-	return nil
-}
-
-func (d DB) ReadPost(id int) (Post, error) {
-	var p Post
-
-	stmt, err := d.client.Prepare("SELECT id, date, title, link, content, author FROM posts where id = ?")
-	if err != nil {
-		return p, fmt.Errorf("failed to select single post: %w", err)
-	}
-	defer stmt.Close()
-
-	err = stmt.QueryRow(id).Scan(&p.ID, &p.Date, &p.Title, &p.Link, &p.Content, &p.AuthorID)
-	if err != nil {
-		return p, fmt.Errorf("failed to queryRow: %w", err)
-	}
-
-	return p, nil
-}
-
-func (d DB) ReadPosts(p Params) (Posts, error) {
-	var (
-		post  Post
-		posts Posts
-		where string
-		rows  *sql.Rows
-	)
-
-	if p.Author != "" {
-		where = p.Author
-	}
-
-	query := p.Query()
-
-	stmt, err := d.client.Prepare(query)
-	if err != nil {
-		return posts, fmt.Errorf("failed to prepare %w", err)
-	}
-	defer stmt.Close()
-
-	switch p.Author {
-	case "":
-		rows, err = stmt.Query()
-		if err != nil {
-			return posts, fmt.Errorf("failed to select %w", err)
-		}
-		defer rows.Close()
-	default:
-		rows, err = stmt.Query(where)
-		if err != nil {
-			return posts, fmt.Errorf("failed to select %w", err)
-		}
-		defer rows.Close()
-	}
-
-	rows, err = stmt.Query()
-	for rows.Next() {
-		err = rows.Scan(&post.ID, &post.Date, &post.Title, &post.Link, &post.Content, &post.AuthorID)
-		if err != nil {
-			return posts, fmt.Errorf("failed to scan %w", err)
-		}
-
-		post.ParseDate()
-		posts.Posts = append(posts.Posts, post)
-	}
-
-	return posts, nil
 }
