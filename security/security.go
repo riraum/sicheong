@@ -15,8 +15,7 @@ import (
 func NewEncryptionKey() (*[32]byte, error) {
 	key := [32]byte{}
 
-	_, err := io.ReadFull(rand.Reader, key[:])
-	if err != nil {
+	if _, err := io.ReadFull(rand.Reader, key[:]); err != nil {
 		return nil, fmt.Errorf("failed to generate random encryption key: %w", err)
 	}
 
@@ -36,8 +35,7 @@ func Encrypt(plaintxt []byte, key *[32]byte) (ciphertxt []byte, err error) {
 
 	nonce := make([]byte, gcm.NonceSize())
 
-	_, err = io.ReadFull(rand.Reader, nonce)
-	if err != nil {
+	if _, err = io.ReadFull(rand.Reader, nonce); err != nil {
 		return nil, fmt.Errorf("failed to read nonce: %w", err)
 	}
 
@@ -60,7 +58,6 @@ func Decrypt(ciphertxt []byte, key *[32]byte) (plaintxt []byte, err error) {
 	}
 
 	decrypted, err := gcm.Open(nil,
-
 		ciphertxt[:gcm.NonceSize()],
 		ciphertxt[gcm.NonceSize():],
 		nil,
@@ -90,8 +87,7 @@ func HashPassword(password []byte) ([]byte, error) {
 }
 
 func CheckPasswordHash(hash, password []byte) error {
-	err := bcrypt.CompareHashAndPassword(hash, password)
-	if err != nil {
+	if err := bcrypt.CompareHashAndPassword(hash, password); err != nil {
 		return fmt.Errorf("failed to check hashed password: %w", err)
 	}
 
