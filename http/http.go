@@ -92,6 +92,7 @@ func (s Server) authenticated(r *http.Request) (db.Author, bool, error) {
 	if err != nil {
 		return db.Author{}, false, nil
 	}
+
 	if c.Value == "" {
 		return db.Author{}, false, nil
 	}
@@ -277,19 +278,18 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 		Posts: p,
 	}
 
+	// TODO: find way to handle error, while still showing index when not logged in
 	author, ok, _ := s.authenticated(r)
 	if ok {
 		ap.Auth = true
 		ap.Today = time.Now()
 		ap.AuthorName = author.Name
-
 	}
 
 	if err = s.Template.ExecuteTemplate(w, "index.html.tmpl", ap); err != nil {
 		s.handleHTMLError(w, "execute", http.StatusInternalServerError, err)
 		return
 	}
-
 }
 
 func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
@@ -327,10 +327,6 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		s.handleHTMLError(w, "read post", http.StatusNotFound, err)
 		return
-	}
-
-	if _, ok, _ := s.authenticated(r); ok {
-		p.Authenticated = true
 	}
 
 	author, err := s.DB.ReadAuthorByID(p.AuthorID)

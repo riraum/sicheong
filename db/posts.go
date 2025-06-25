@@ -4,14 +4,11 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"time"
 )
 
 type Posts struct {
-	Authenticated bool
-	Today         time.Time
-	Posts         []Post
-	AuthorName    string
+	Posts      []Post
+	AuthorName string
 }
 
 func (p *Posts) ParseDates() {
