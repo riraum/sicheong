@@ -105,51 +105,38 @@ func (s Server) authenticated(r *http.Request) (db.Author, bool, error) {
 		return db.Author{}, false, err
 	}
 
-	// plaintxt, err := security.Decrypt([]byte(c.Value), s.Key)
-	// if err != nil {
-	// 	return db.Author{}, false, err
-	// }
-
 	authorName, authorPassword, ok := strings.Cut(string(plaintxt), ":")
 	if !ok {
 		return db.Author{}, false, err
 	}
 
-	log.Printf("authorName: %s \n authorPassword: %s", authorName, authorPassword)
+	if authorName == "" {
+		return db.Author{}, false, err
+	}
 
-	// if authorName == "" {
-	// 	return db.Author{}, false, err
-	// }
-
-	// if authorPassword == "" {
-	// 	return db.Author{}, false, err
-	// }
-
-	// author, err := s.DB.ReadAuthor(string(plaintxt))
-	// if err != nil {
-	// 	return db.Author{}, false, err
-	// }
+	if authorPassword == "" {
+		return db.Author{}, false, err
+	}
 
 	author, err := s.DB.ReadAuthor(authorName)
 	if err != nil {
 		return db.Author{}, false, err
 	}
 
-	// if authorName != author.Name {
-	// 	return db.Author{}, false, err
-	// }
+	if authorName != author.Name {
+		return db.Author{}, false, err
+	}
 
-	// if authorPassword != author.Password {
-	// 	return db.Author{}, false, err
-	// }
+	if authorPassword != author.Password {
+		return db.Author{}, false, err
+	}
 
-	// if authorName == author.Name && authorPassword == author.Password {
-	// 	log.Print("login check match!")
-	// 	return author, true, nil
-	// }
+	// to be extra safe, added a conditional auth check, maybe will remove once more certain of check logic
+	if authorName == author.Name && authorPassword == author.Password {
+		return author, true, nil
+	}
 
-	log.Print("login check match!")
-	return author, true, nil
+	return author, false, nil
 }
 
 func parseQueryParams(r *http.Request) db.Params {
@@ -281,7 +268,6 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 	author, ok, _ := s.authenticated(r)
 
 	if ok {
-		log.Print("authenticated!")
 		p.Authenticated = true
 		p.Today = time.Now()
 		p.AuthorName = author.Name
@@ -617,11 +603,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	authorInput := r.FormValue("author")
 	passwordInput := r.FormValue("password")
 
-	log.Printf("authorInput: %s \n passwordInput: %s", authorInput, passwordInput[2:])
-
-	plaintxt := fmt.Sprintf("%s:%s", authorInput, passwordInput[2:])
-
-	// log.Printf("plaintext postLogin: %s", plaintxt)
+	plaintxt := fmt.Sprintf("%s:%s", authorInput, passwordInput)
 
 	encryptedValue, err := security.Encrypt([]byte(plaintxt), s.Key)
 	if err != nil {
@@ -630,11 +612,8 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := http.Cookie{
-		Name: "authorName",
-		// Name:   "authorName" + authorInput,
-		// Value: string(encryptedValue),
-		Value: base64.StdEncoding.EncodeToString(encryptedValue),
-		// Value:  base64.StdEncoding.EncodeToString(encryptedPasswordByte),
+		Name:   "authorName",
+		Value:  base64.StdEncoding.EncodeToString(encryptedValue),
 		Path:   "/",
 		Secure: true,
 	}
@@ -643,8 +622,6 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		s.handleHTMLError(w, "read author", http.StatusUnauthorized, err)
 	}
-
-	log.Printf("Readauthor authorName: %s \n authorPassword: %s", author.Name, author.Password[2:])
 
 	if author.Name == "" {
 		s.handleHTMLError(w, "author is empty", http.StatusUnauthorized, err)
@@ -666,14 +643,14 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// to be extra safe, added a conditional auth check, maybe will remove once more certain of check logic
 	if authorInput == author.Name && passwordInput == author.Password {
-		log.Print("login check match!")
 		http.SetCookie(w, &c)
 		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
+		return
 	}
 
-	http.SetCookie(w, &c)
-	http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
+	s.handleHTMLError(w, "end of postLogin", http.StatusUnauthorized, err)
 }
 
 func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
