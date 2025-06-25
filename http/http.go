@@ -89,7 +89,10 @@ func handleJSONError(w http.ResponseWriter, msg string, statusCode int, err erro
 func (s Server) authenticated(r *http.Request) (db.Author, bool, error) {
 	c, err := r.Cookie("authorName")
 	if err != nil {
-		return db.Author{}, false, err
+		return db.Author{}, false, nil
+	}
+	if c.Value == "" {
+		return db.Author{}, false, nil
 	}
 
 	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(c.Value)
@@ -317,7 +320,12 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 
 	ap.Post.ParseDate()
 
-	if _, ok, _ := s.authenticated(r); ok {
+	_, ok, err := s.authenticated(r)
+	if err != nil {
+		s.handleHTMLError(w, "authenticated", http.StatusInternalServerError, err)
+		return
+	}
+	if ok {
 		ap.Auth = true
 		ap.Today = time.Now()
 	}
