@@ -12,7 +12,6 @@ import (
 
 //go:embed static/*
 var static embed.FS
-
 var t = template.Must(template.ParseFS(static, "static/*"))
 
 func main() {
@@ -28,16 +27,16 @@ func main() {
 		log.Fatalf("Failed to create new db %v", err)
 	}
 
-	err = d.Fill()
-	if err != nil {
+	if err = d.Fill(); err != nil {
 		log.Fatalf("error filling posts into db: %v", err)
 	}
 
-	var s http.Server
-	s.EmbedRootDir = static
-	s.DB = d
-	s.Template = t
-	s.Key = key
+	s := http.Server{
+		EmbedRootDir: static,
+		DB:           d,
+		Template:     t,
+		Key:          key,
+	}
 
 	mux := s.SetupMux()
 	http.Run(mux)
