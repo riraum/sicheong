@@ -92,6 +92,7 @@ func (s Server) authenticated(r *http.Request) (db.Author, bool, error) {
 	if err != nil {
 		return db.Author{}, false, nil
 	}
+
 	if c.Value == "" {
 		return db.Author{}, false, nil
 	}
@@ -132,7 +133,7 @@ func (s Server) authenticated(r *http.Request) (db.Author, bool, error) {
 		return db.Author{}, false, err
 	}
 
-	// to be extra safe, added a conditional auth check, maybe will remove once more certain of check logic
+	// to be extra safe, conditional auth check, should remove once more certain of check logic
 	if authorName == author.Name && authorPassword == author.Password {
 		return author, true, nil
 	}
@@ -277,19 +278,18 @@ func (s Server) getIndex(w http.ResponseWriter, r *http.Request) {
 		Posts: p,
 	}
 
+	// TODO: find way to handle error, while still showing index when not logged in
 	author, ok, _ := s.authenticated(r)
 	if ok {
 		ap.Auth = true
 		ap.Today = time.Now()
 		ap.AuthorName = author.Name
-
 	}
 
 	if err = s.Template.ExecuteTemplate(w, "index.html.tmpl", ap); err != nil {
 		s.handleHTMLError(w, "execute", http.StatusInternalServerError, err)
 		return
 	}
-
 }
 
 func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
@@ -299,6 +299,15 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		handleJSONError(w, "read posts", http.StatusInternalServerError, err)
 		return
+	}
+
+	for _, post := range p.Posts {
+		author, err := s.DB.ReadAuthorByID(post.ID)
+		if err != nil {
+			handleJSONError(w, "read author name", http.StatusInternalServerError, err)
+			return
+		}
+		post.AuthorName = author.Name
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -329,10 +338,6 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if _, ok, _ := s.authenticated(r); ok {
-		p.Authenticated = true
-	}
-
 	author, err := s.DB.ReadAuthorByID(p.AuthorID)
 	if err != nil {
 		s.handleHTMLError(w, "read author", http.StatusInternalServerError, err)
@@ -347,11 +352,8 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 
 	ap.Post.ParseDate()
 
-	_, ok, err := s.authenticated(r)
-	if err != nil {
-		s.handleHTMLError(w, "authenticated", http.StatusInternalServerError, err)
-		return
-	}
+	// TODO: add error condition that doesn't fire when not logged in
+	_, ok, _ := s.authenticated(r)
 	if ok {
 		ap.Auth = true
 		ap.Today = time.Now()
@@ -388,13 +390,8 @@ func (s Server) viewAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
-	c, err := r.Cookie("authorName")
-	if err != nil {
-		s.handleHTMLError(w, "no author cookie", http.StatusInternalServerError, err)
-		return
-	}
-
-	if _, ok, err := s.authenticated(r); !ok {
+	author, ok, err := s.authenticated(r)
+	if !ok {
 		s.handleHTMLError(w, "failed to authenticate", http.StatusUnauthorized, err)
 		return
 	}
@@ -402,24 +399,6 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 	p, err := parsePostRValues(r)
 	if err != nil {
 		s.handleHTMLError(w, "parse values", http.StatusInternalServerError, err)
-		return
-	}
-
-	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(c.Value)
-	if err != nil {
-		s.handleHTMLError(w, "decode base64 string ", http.StatusInternalServerError, err)
-		return
-	}
-
-	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
-	if err != nil {
-		s.handleHTMLError(w, "decrypt", http.StatusInternalServerError, err)
-		return
-	}
-
-	author, err := s.DB.ReadAuthorByName(string(decryptedAuthorByte))
-	if err != nil {
-		s.handleHTMLError(w, "string to float conversion", http.StatusInternalServerError, err)
 		return
 	}
 
@@ -438,14 +417,20 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
-	c, err := r.Cookie("authorName")
-	if err != nil {
-		handleJSONError(w, "no author cookie", http.StatusUnauthorized, err)
+	// c, err := r.Cookie("authorName")
+	// if err != nil {
+	// 	handleJSONError(w, "no author cookie", http.StatusUnauthorized, err)
+	// 	return
+	// }
+
+	author, ok, err := s.authenticated(r)
+	if !ok {
+		handleJSONError(w, "authenticate", http.StatusUnauthorized, err)
 		return
 	}
 
-	if _, ok, err := s.authenticated(r); !ok {
-		handleJSONError(w, "authenticate", http.StatusUnauthorized, err)
+	if err != nil {
+		handleJSONError(w, "authenticate", http.StatusInternalServerError, err)
 		return
 	}
 
@@ -455,30 +440,30 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	encryptedAuthorByte, err := base64.StdEncoding.DecodeString(c.Value)
-	if err != nil {
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusNotAcceptable)
+	// encryptedAuthorByte, err := base64.StdEncoding.DecodeString(c.Value)
+	// if err != nil {
+	// 	w.Header().Set("Content-Type", "application/json")
+	// 	w.WriteHeader(http.StatusNotAcceptable)
 
-		if err = json.NewEncoder(w).Encode(c.Value); err != nil {
-			handleJSONError(w, "encode", http.StatusInternalServerError, err)
-			return
-		}
+	// 	if err = json.NewEncoder(w).Encode(author); err != nil {
+	// 		handleJSONError(w, "encode", http.StatusInternalServerError, err)
+	// 		return
+	// 	}
 
-		return
-	}
+	// 	return
+	// }
 
-	decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
-	if err != nil {
-		handleJSONError(w, "decrypt", http.StatusInternalServerError, err)
-		return
-	}
+	// decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
+	// if err != nil {
+	// 	handleJSONError(w, "decrypt", http.StatusInternalServerError, err)
+	// 	return
+	// }
 
-	author, err := s.DB.ReadAuthorByName(string(decryptedAuthorByte))
-	if err != nil {
-		handleJSONError(w, "decode base64 string to byte", http.StatusInternalServerError, err)
-		return
-	}
+	// author, err := s.DB.ReadAuthorByName(string(decryptedAuthorByte))
+	// if err != nil {
+	// 	handleJSONError(w, "decode base64 string to byte", http.StatusInternalServerError, err)
+	// 	return
+	// }
 
 	p.AuthorID = author.ID
 
@@ -501,7 +486,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
-	if _, ok, err := s.authenticated(r); !ok {
+	if _, ok, err := s.authenticated(r); !ok || err != nil {
 		s.handleHTMLError(w, "not authenticated", http.StatusUnauthorized, err)
 		return
 	}
@@ -521,7 +506,7 @@ func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
-	if _, ok, err := s.authenticated(r); !ok {
+	if _, ok, err := s.authenticated(r); !ok || err != nil {
 		handleJSONError(w, "not authenticated", http.StatusUnauthorized, err)
 		return
 	}
@@ -548,7 +533,7 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 
 func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 	author, ok, err := s.authenticated(r)
-	if !ok {
+	if !ok || err != nil {
 		s.handleHTMLError(w, "not authenticated", http.StatusUnauthorized, err)
 		return
 	}
@@ -575,7 +560,7 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
-	if _, ok, err := s.authenticated(r); !ok {
+	if _, ok, err := s.authenticated(r); !ok || err != nil {
 		handleJSONError(w, "not authenticated", http.StatusUnauthorized, err)
 		return
 	}
@@ -631,45 +616,45 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		Secure: true,
 	}
 
+	if authorInput == "" && passwordInput == "" {
+		s.handleHTMLError(w, "fields are empty", http.StatusUnauthorized, err)
+		return
+	}
+
+	if passwordInput == "" || authorInput == "" {
+		s.handleHTMLError(w, "one field is empty", http.StatusUnauthorized, err)
+		return
+	}
+
 	author, err := s.DB.ReadAuthorByName(authorInput)
-	if err != nil {
-		s.handleHTMLError(w, "read author", http.StatusUnauthorized, err)
-	}
+	// TODO: adjust to not give away that user doesn't exist
+	// if err != nil {
+	// 	s.handleHTMLError(w, "read author", http.StatusUnauthorized, err)
+	// }
 
-	if author.Name == "" {
-		s.handleHTMLError(w, "author is empty", http.StatusUnauthorized, err)
+	if authorInput != author.Name || passwordInput != author.Password {
+		s.handleHTMLError(w, "user password combination not correct", http.StatusUnauthorized, err)
 		return
 	}
 
-	if passwordInput == "" {
-		s.handleHTMLError(w, "password is empty", http.StatusUnauthorized, err)
-		return
-	}
-
-	if authorInput != author.Name {
-		s.handleHTMLError(w, "author doesn't match", http.StatusUnauthorized, err)
-		return
-	}
-
-	if passwordInput != author.Password {
-		s.handleHTMLError(w, "password doesn't match", http.StatusUnauthorized, err)
-		return
-	}
-
-	// to be extra safe, added a conditional auth check, maybe will remove once more certain of check logic
+	// to be extra safe, conditional auth check, should remove once more certain of check logic
 	if authorInput == author.Name && passwordInput == author.Password {
 		http.SetCookie(w, &c)
 		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
 		return
 	}
 
-	s.handleHTMLError(w, "end of postLogin", http.StatusUnauthorized, err)
+	log.Print("end of postLogin")
+	s.handleHTMLError(w, "user login combination not correct", http.StatusUnauthorized, err)
 }
 
 func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
 	authorInput := r.FormValue("author")
+	passwordInput := r.FormValue("password")
 
-	encryptedAuthorByte, err := security.Encrypt([]byte(authorInput), s.Key)
+	plaintxt := fmt.Sprintf("%s:%s", authorInput, passwordInput)
+
+	encryptedValue, err := security.Encrypt([]byte(plaintxt), s.Key)
 	if err != nil {
 		handleJSONError(w, "encrypt error", http.StatusInternalServerError, err)
 		return
@@ -677,23 +662,45 @@ func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
 
 	c := http.Cookie{
 		Name:   "authorName",
-		Value:  base64.StdEncoding.EncodeToString(encryptedAuthorByte),
+		Value:  base64.StdEncoding.EncodeToString(encryptedValue),
 		Path:   "/",
 		Secure: true,
 	}
 
-	if author, _ := s.DB.ReadAuthorByName(authorInput); author.Name == "" {
-		handleJSONError(w, "author doesn't exist", http.StatusUnauthorized, err)
+	author, err := s.DB.ReadAuthorByName(authorInput)
+	if author.Name == "" {
+		handleJSONError(w, "author is empty", http.StatusUnauthorized, err)
 		return
 	}
 
-	http.SetCookie(w, &c)
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-
-	if err = json.NewEncoder(w).Encode("logged in"); err != nil {
-		handleJSONError(w, "encode", http.StatusInternalServerError, err)
+	if passwordInput == "" {
+		handleJSONError(w, "password is empty", http.StatusUnauthorized, err)
+		return
 	}
+
+	if authorInput != author.Name {
+		handleJSONError(w, "author doesn't match", http.StatusUnauthorized, err)
+		return
+	}
+
+	if passwordInput != author.Password {
+		handleJSONError(w, "password doesn't match", http.StatusUnauthorized, err)
+		return
+	}
+
+	// to be extra safe, conditional auth check, should remove once more certain of check logic
+	if authorInput == author.Name && passwordInput == author.Password {
+		http.SetCookie(w, &c)
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+
+		if err = json.NewEncoder(w).Encode("logged in"); err != nil {
+			handleJSONError(w, "encode", http.StatusInternalServerError, err)
+		}
+		return
+	}
+
+	handleJSONError(w, "end of postLogin", http.StatusUnauthorized, err)
 }
 
 func (s Server) getLogout(w http.ResponseWriter, r *http.Request) {

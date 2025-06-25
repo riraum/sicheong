@@ -6,16 +6,14 @@ import (
 )
 
 type Post struct {
-	ID            float32
-	Date          int64
-	ParsedDate    time.Time
-	Title         string
-	Link          string
-	Content       string
-	AuthorID      float32 // Author.ID
-	Authenticated bool
-	Today         time.Time
-	AuthorName    string
+	ID         float32
+	Date       int64
+	ParsedDate time.Time
+	Title      string
+	Link       string
+	Content    string
+	AuthorID   float32 // Author.ID
+	AuthorName string  // Author.Name
 }
 
 func (p *Post) ParseDate() {
