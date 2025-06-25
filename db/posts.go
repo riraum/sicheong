@@ -72,13 +72,16 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 func (d DB) Fill() error {
 	authors := []Author{
 		{
-			Name: "Alpha",
+			Name:     "Alpha",
+			Password: "abc",
 		},
 		{
-			Name: "Bravo",
+			Name:     "Bravo",
+			Password: "abc",
 		},
 		{
-			Name: "Charlie",
+			Name:     "Charlie",
+			Password: "abc",
 		},
 	}
 	for _, a := range authors {
