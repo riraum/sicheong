@@ -302,7 +302,7 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, post := range p.Posts {
-		author, err := s.DB.ReadAuthorByID(post.ID)
+		author, err := s.DB.ReadAuthorByID(post.AuthorID)
 		if err != nil {
 			handleJSONError(w, "read author name", http.StatusInternalServerError, err)
 			return
@@ -391,7 +391,7 @@ func (s Server) viewAPIPost(w http.ResponseWriter, r *http.Request) {
 
 func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 	author, ok, err := s.authenticated(r)
-	if !ok {
+	if !ok || err != nil {
 		s.handleHTMLError(w, "failed to authenticate", http.StatusUnauthorized, err)
 		return
 	}
@@ -417,20 +417,9 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
-	// c, err := r.Cookie("authorName")
-	// if err != nil {
-	// 	handleJSONError(w, "no author cookie", http.StatusUnauthorized, err)
-	// 	return
-	// }
-
 	author, ok, err := s.authenticated(r)
-	if !ok {
+	if !ok || err != nil {
 		handleJSONError(w, "authenticate", http.StatusUnauthorized, err)
-		return
-	}
-
-	if err != nil {
-		handleJSONError(w, "authenticate", http.StatusInternalServerError, err)
 		return
 	}
 
@@ -439,31 +428,6 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		handleJSONError(w, "parse value", http.StatusInternalServerError, err)
 		return
 	}
-
-	// encryptedAuthorByte, err := base64.StdEncoding.DecodeString(c.Value)
-	// if err != nil {
-	// 	w.Header().Set("Content-Type", "application/json")
-	// 	w.WriteHeader(http.StatusNotAcceptable)
-
-	// 	if err = json.NewEncoder(w).Encode(author); err != nil {
-	// 		handleJSONError(w, "encode", http.StatusInternalServerError, err)
-	// 		return
-	// 	}
-
-	// 	return
-	// }
-
-	// decryptedAuthorByte, err := security.Decrypt(encryptedAuthorByte, s.Key)
-	// if err != nil {
-	// 	handleJSONError(w, "decrypt", http.StatusInternalServerError, err)
-	// 	return
-	// }
-
-	// author, err := s.DB.ReadAuthorByName(string(decryptedAuthorByte))
-	// if err != nil {
-	// 	handleJSONError(w, "decode base64 string to byte", http.StatusInternalServerError, err)
-	// 	return
-	// }
 
 	p.AuthorID = author.ID
 
@@ -601,6 +565,27 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	authorInput := r.FormValue("author")
 	passwordInput := r.FormValue("password")
 
+	if authorInput == "" && passwordInput == "" {
+		s.handleHTMLError(w, "fields are empty", http.StatusUnauthorized, nil)
+		return
+	}
+
+	if passwordInput == "" || authorInput == "" {
+		s.handleHTMLError(w, "one field is empty", http.StatusUnauthorized, nil)
+		return
+	}
+
+	// TODO: handle error, adjust to not give away that user doesn't exist
+	author, _ := s.DB.ReadAuthorByName(authorInput)
+	// if err != nil {
+	// 	s.handleHTMLError(w, "read author", http.StatusUnauthorized, err)
+	// }
+
+	if authorInput != author.Name || passwordInput != author.Password {
+		s.handleHTMLError(w, "user password combination not correct", http.StatusUnauthorized, nil)
+		return
+	}
+
 	plaintxt := fmt.Sprintf("%s:%s", authorInput, passwordInput)
 
 	encryptedValue, err := security.Encrypt([]byte(plaintxt), s.Key)
@@ -614,27 +599,6 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		Value:  base64.StdEncoding.EncodeToString(encryptedValue),
 		Path:   "/",
 		Secure: true,
-	}
-
-	if authorInput == "" && passwordInput == "" {
-		s.handleHTMLError(w, "fields are empty", http.StatusUnauthorized, err)
-		return
-	}
-
-	if passwordInput == "" || authorInput == "" {
-		s.handleHTMLError(w, "one field is empty", http.StatusUnauthorized, err)
-		return
-	}
-
-	author, err := s.DB.ReadAuthorByName(authorInput)
-	// TODO: adjust to not give away that user doesn't exist
-	// if err != nil {
-	// 	s.handleHTMLError(w, "read author", http.StatusUnauthorized, err)
-	// }
-
-	if authorInput != author.Name || passwordInput != author.Password {
-		s.handleHTMLError(w, "user password combination not correct", http.StatusUnauthorized, err)
-		return
 	}
 
 	// to be extra safe, conditional auth check, should remove once more certain of check logic
@@ -652,6 +616,27 @@ func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
 	authorInput := r.FormValue("author")
 	passwordInput := r.FormValue("password")
 
+	if passwordInput == "" && authorInput == "" {
+		handleJSONError(w, "fields are empty", http.StatusUnauthorized, nil)
+		return
+	}
+
+	if passwordInput == "" || authorInput == "" {
+		handleJSONError(w, "one field is empty", http.StatusUnauthorized, nil)
+		return
+	}
+
+	// TODO: handle error, adjust to not give away that user doesn't exist
+	author, _ := s.DB.ReadAuthorByName(authorInput)
+	// 	 if err != nil {
+	// 	handleJSONError(w, "read author", http.StatusUnauthorized, err)
+	// }
+
+	if authorInput != author.Name || passwordInput != author.Password {
+		handleJSONError(w, "author doesn't match", http.StatusUnauthorized, nil)
+		return
+	}
+
 	plaintxt := fmt.Sprintf("%s:%s", authorInput, passwordInput)
 
 	encryptedValue, err := security.Encrypt([]byte(plaintxt), s.Key)
@@ -665,27 +650,6 @@ func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
 		Value:  base64.StdEncoding.EncodeToString(encryptedValue),
 		Path:   "/",
 		Secure: true,
-	}
-
-	author, err := s.DB.ReadAuthorByName(authorInput)
-	if author.Name == "" {
-		handleJSONError(w, "author is empty", http.StatusUnauthorized, err)
-		return
-	}
-
-	if passwordInput == "" {
-		handleJSONError(w, "password is empty", http.StatusUnauthorized, err)
-		return
-	}
-
-	if authorInput != author.Name {
-		handleJSONError(w, "author doesn't match", http.StatusUnauthorized, err)
-		return
-	}
-
-	if passwordInput != author.Password {
-		handleJSONError(w, "password doesn't match", http.StatusUnauthorized, err)
-		return
 	}
 
 	// to be extra safe, conditional auth check, should remove once more certain of check logic
