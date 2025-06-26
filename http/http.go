@@ -301,13 +301,13 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, post := range p.Posts {
+	for i, post := range p.Posts {
 		author, err := s.DB.ReadAuthorByID(post.AuthorID)
 		if err != nil {
 			handleJSONError(w, "read author name", http.StatusInternalServerError, err)
 			return
 		}
-		post.AuthorName = author.Name
+		p.Posts[i].AuthorName = author.Name
 	}
 
 	w.Header().Set("Content-Type", "application/json")
