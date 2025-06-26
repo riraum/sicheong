@@ -391,7 +391,7 @@ func (s Server) viewAPIPost(w http.ResponseWriter, r *http.Request) {
 
 func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 	author, ok, err := s.authenticated(r)
-	if !ok {
+	if !ok || err != nil {
 		s.handleHTMLError(w, "failed to authenticate", http.StatusUnauthorized, err)
 		return
 	}
@@ -575,14 +575,14 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	author, err := s.DB.ReadAuthorByName(authorInput)
-	// TODO: adjust to not give away that user doesn't exist
+	// TODO: handle error, adjust to not give away that user doesn't exist
+	author, _ := s.DB.ReadAuthorByName(authorInput)
 	// if err != nil {
 	// 	s.handleHTMLError(w, "read author", http.StatusUnauthorized, err)
 	// }
 
 	if authorInput != author.Name || passwordInput != author.Password {
-		s.handleHTMLError(w, "user password combination not correct", http.StatusUnauthorized, err)
+		s.handleHTMLError(w, "user password combination not correct", http.StatusUnauthorized, nil)
 		return
 	}
 
@@ -626,14 +626,14 @@ func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	author, err := s.DB.ReadAuthorByName(authorInput)
-	// TODO: adjust to not give away that user doesn't exist
+	// TODO: handle error, adjust to not give away that user doesn't exist
+	author, _ := s.DB.ReadAuthorByName(authorInput)
 	// 	 if err != nil {
 	// 	handleJSONError(w, "read author", http.StatusUnauthorized, err)
 	// }
 
 	if authorInput != author.Name || passwordInput != author.Password {
-		handleJSONError(w, "author doesn't match", http.StatusUnauthorized, err)
+		handleJSONError(w, "author doesn't match", http.StatusUnauthorized, nil)
 		return
 	}
 
