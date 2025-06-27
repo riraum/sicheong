@@ -595,10 +595,11 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := http.Cookie{
-		Name:   "authorName",
-		Value:  base64.StdEncoding.EncodeToString(encryptedValue),
-		Path:   "/",
-		Secure: true,
+		Name:     "authorName",
+		Value:    base64.StdEncoding.EncodeToString(encryptedValue),
+		Path:     "/",
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
 	}
 
 	// to be extra safe, conditional auth check, should remove once more certain of check logic
@@ -646,10 +647,11 @@ func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	c := http.Cookie{
-		Name:   "authorName",
-		Value:  base64.StdEncoding.EncodeToString(encryptedValue),
-		Path:   "/",
-		Secure: true,
+		Name:     "authorName",
+		Value:    base64.StdEncoding.EncodeToString(encryptedValue),
+		Path:     "/",
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
 	}
 
 	// to be extra safe, conditional auth check, should remove once more certain of check logic
