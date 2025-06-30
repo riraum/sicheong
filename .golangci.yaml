@@ -11,14 +11,18 @@ linters:
     - revive
     - usestdlibvars
     - wrapcheck
-    - wsl
+    - wsl_v5
   settings:
+    wsl_v5:
+      allow-first-in-block: true
+      allow-whole-block: false
+      branch-max-lines: 2
     revive:
       rules:
         - name: blank-imports
         - name: context-as-argument
           arguments:
-            - allowTypesBefore: '*testing.T'
+            - allowTypesBefore: "*testing.T"
         - name: context-keys-type
         - name: dot-imports
         - name: empty-block
