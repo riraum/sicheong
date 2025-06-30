@@ -1,7 +1,7 @@
 # 시청 (Sicheong) / City hall
 
 # Description
-Go project to learn ([CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete)).
+> Go project to learn ([CRUD](https://en.wikipedia.org/wiki/Create,_read,_update_and_delete)).
 
 # Install
 Requires
