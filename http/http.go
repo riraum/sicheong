@@ -3,7 +3,6 @@ package http
 import (
 	"embed"
 	"encoding/base64"
-	"encoding/json"
 	"fmt"
 	"html/template"
 	"log"
@@ -54,35 +53,6 @@ func (s Server) SetupMux() *http.ServeMux {
 func Run(mux *http.ServeMux) {
 	if err := (http.ListenAndServe(":8080", mux)); err != nil {
 		log.Fatal("failed to http serve")
-	}
-}
-
-func (s Server) handleHTMLError(w http.ResponseWriter, msg string, statusCode int, err error) {
-	log.Printf("failed: %s \n code %v \n %s", msg, statusCode, err)
-
-	w.WriteHeader(statusCode)
-
-	if err = s.Template.ExecuteTemplate(w, "fail.html.tmpl", msg); err != nil {
-		log.Fatalf("failed to execute %v", err)
-	}
-}
-
-func handleJSONError(w http.ResponseWriter, msg string, statusCode int, err error) {
-	log.Printf("failed: %s \n code %v \n %s", msg, statusCode, err)
-
-	errorData := struct {
-		Message string
-		Error   string
-	}{
-		Message: msg,
-		Error:   err.Error(),
-	}
-
-	w.WriteHeader(statusCode)
-	w.Header().Set("Content-Type", "application/json")
-
-	if err = json.NewEncoder(w).Encode(errorData); err != nil {
-		log.Fatalf("failed to encode %v", err)
 	}
 }
 

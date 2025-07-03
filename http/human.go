@@ -13,6 +13,16 @@ import (
 	"github.com/riraum/si-cheong/security"
 )
 
+func (s Server) handleHTMLError(w http.ResponseWriter, msg string, statusCode int, err error) {
+	log.Printf("failed: %s \n code %v \n %s", msg, statusCode, err)
+
+	w.WriteHeader(statusCode)
+
+	if err = s.Template.ExecuteTemplate(w, "fail.html.tmpl", msg); err != nil {
+		log.Fatalf("failed to execute %v", err)
+	}
+}
+
 func (s Server) getStaticAsset(w http.ResponseWriter, r *http.Request) {
 	u, err := url.Parse(r.URL.String())
 	if err != nil {
