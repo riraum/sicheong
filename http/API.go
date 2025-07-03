@@ -4,10 +4,30 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/riraum/si-cheong/security"
 )
+
+func handleJSONError(w http.ResponseWriter, msg string, statusCode int, err error) {
+	log.Printf("failed: %s \n code %v \n %s", msg, statusCode, err)
+
+	errorData := struct {
+		Message string
+		Error   string
+	}{
+		Message: msg,
+		Error:   err.Error(),
+	}
+
+	w.WriteHeader(statusCode)
+	w.Header().Set("Content-Type", "application/json")
+
+	if err = json.NewEncoder(w).Encode(errorData); err != nil {
+		log.Fatalf("failed to encode %v", err)
+	}
+}
 
 func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 	par := parseQueryParams(r)
