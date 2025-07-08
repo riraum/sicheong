@@ -22,7 +22,7 @@ func main() {
 		log.Fatalf("key fail: %v", err)
 	}
 
-	d, err := db.New("./sq.db")
+	d, err := db.New("/litefs/sq.db")
 	if err != nil {
 		log.Fatalf("Failed to create new db %v", err)
 	}
