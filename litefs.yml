@@ -22,7 +22,7 @@ exit-on-error: false
 proxy:
   addr: ":8080"
   target: "localhost:8081"
-  db: "db"
+  db: "sq.db"
   passthrough:
     - "*.ico"
     - "*.png"
@@ -32,7 +32,7 @@ proxy:
 # the last command to be long-running (e.g. an application server). When the
 # last command exits, LiteFS is shut down.
 exec:
-  - cmd: ["/usr/local/bin/run-app", "-port", "8081"]
+  - cmd: "/usr/local/bin/run-app"
 
 # The lease section specifies how the cluster will be managed. We're using the
 # "consul" lease type so that our application can dynamically change the primary.
@@ -47,3 +47,7 @@ lease:
   consul:
     url: "${FLY_CONSUL_URL}"
     key: "litefs/${FLY_APP_NAME}"
+
+# If true, then LiteFS will not wait until the node becomes the
+# primary or connects to the primary before starting the subprocess.
+skip-sync: true
