@@ -11,7 +11,7 @@ primary_region = 'nrt'
 GO_VERSION = '1.24.1'
 
 [env]
-PORT = '8080'
+PORT = '8081'
 
 [http_service]
 internal_port = 8080
