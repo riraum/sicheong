@@ -1,3 +1,4 @@
 !.github
 coverage*
+litefs/*
 sq.db

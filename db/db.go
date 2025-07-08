@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
-	"os"
 
 	_ "github.com/mattn/go-sqlite3" //revive be gone
 )
@@ -28,7 +27,7 @@ type DB struct {
 }
 
 func New(dbPath string) (DB, error) {
-	os.Remove(dbPath)
+	// os.Remove(dbPath)
 
 	d, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
@@ -43,16 +42,15 @@ func New(dbPath string) (DB, error) {
 }
 
 func createTables(d *sql.DB) error {
-	stmt := `create table authors
-	(id integer not null primary key, name text, password text); delete from authors;`
+	stmt := `create table if not exists authors
+	(id integer not null primary key, name text, password text)`
 
 	if _, err := d.Exec(stmt); err != nil {
 		return fmt.Errorf("%w: %s", err, stmt)
 	}
 
-	stmt = `create table posts
-		(id integer not null primary key, date	integer, title text, link text, content text, author integer);
-		delete from posts;`
+	stmt = `create table if not exists posts
+		(id integer not null primary key, date	integer, title text, link text, content text, author integer)`
 
 	if _, err := d.Exec(stmt); err != nil {
 		return fmt.Errorf("%w: %s",
