@@ -12,3 +12,10 @@ FROM debian:bookworm
 
 COPY --from=builder /run-app /usr/local/bin/
 CMD ["run-app"]
+
+### LiteFS
+RUN apt-get update -y && apt-get install -y ca-certificates fuse3 sqlite3
+
+COPY --from=flyio/litefs:0.5 /usr/local/bin/litefs /usr/local/bin/litefs
+
+ENTRYPOINT litefs mount
