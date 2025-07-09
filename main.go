@@ -22,14 +22,22 @@ func main() {
 		log.Fatalf("key fail: %v", err)
 	}
 
-	d, err := db.New("litefs/sq.db")
+	dbPath := "litefs/sq.db"
+
+	// Uncomment to reset/remove db.
+	// TODO: make this easier to run, maybe CLI flag.
+	// os.Remove(dbPath)
+
+	d, err := db.New(dbPath)
 	if err != nil {
-		log.Printf("Failed to create new db, most likely because it already exists o.o %v", err)
+		log.Printf("failed to open db %v", err)
 	}
 
-	if err = d.Fill(); err != nil {
-		log.Fatalf("error filling posts into db: %v", err)
-	}
+	// Uncomment to pre-fill db after reset.
+	// TODO: TODO: make this easier to run, maybe CLI flag.
+	// if err = d.Fill(); err != nil {
+	// 	log.Fatalf("error filling posts into db: %v", err)
+	// }
 
 	s := http.Server{
 		EmbedRootDir: static,

@@ -27,8 +27,6 @@ type DB struct {
 }
 
 func New(dbPath string) (DB, error) {
-	// os.Remove(dbPath)
-
 	d, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		return DB{}, fmt.Errorf("failed to open sql %w", err)
