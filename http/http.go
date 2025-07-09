@@ -15,8 +15,6 @@ import (
 	"github.com/riraum/si-cheong/security"
 )
 
-const invalidID = -1
-
 type Server struct {
 	EmbedRootDir embed.FS
 	DB           db.DB
@@ -68,38 +66,38 @@ func (s Server) authenticated(r *http.Request) (db.Author, bool, error) {
 
 	encrypted, err := base64.StdEncoding.DecodeString(c.Value)
 	if err != nil {
-		return db.Author{}, false, err
+		return db.Author{}, false, fmt.Errorf("failed to decode string %w", err)
 	}
 
 	plaintxt, err := security.Decrypt(encrypted, s.Key)
 	if err != nil {
-		return db.Author{}, false, err
+		return db.Author{}, false, fmt.Errorf("failed to decrypt byte %w", err)
 	}
 
 	authorName, authorPassword, ok := strings.Cut(string(plaintxt), ":")
 	if !ok {
-		return db.Author{}, false, err
+		return db.Author{}, false, fmt.Errorf("failed to cut string %w", err)
 	}
 
 	if authorName == "" {
-		return db.Author{}, false, err
+		return db.Author{}, false, nil
 	}
 
 	if authorPassword == "" {
-		return db.Author{}, false, err
+		return db.Author{}, false, nil
 	}
 
 	author, err := s.DB.ReadAuthorByName(string(authorName))
 	if err != nil {
-		return db.Author{}, false, err
+		return db.Author{}, false, fmt.Errorf("failed to read author name %w", err)
 	}
 
 	if authorName != author.Name {
-		return db.Author{}, false, err
+		return db.Author{}, false, nil
 	}
 
 	if authorPassword != author.Password {
-		return db.Author{}, false, err
+		return db.Author{}, false, nil
 	}
 
 	// to be extra safe, conditional auth check, should remove once more certain of check logic

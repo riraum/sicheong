@@ -31,7 +31,8 @@ func (d DB) NewPost(p Post) error {
 }
 
 func (d DB) UpdatePost(p Post) error {
-	if _, err := d.client.Exec(`UPDATE posts SET date = ?, title = ?, link = ?, content = ?, author = ? WHERE id = ?`, p.Date, p.Title, p.Link, p.Content, p.AuthorID, p.ID); err != nil {
+	if _, err := d.client.Exec(`UPDATE posts SET date = ?, title = ?, link = ?, content = ?, author = ? WHERE id = ?`,
+		p.Date, p.Title, p.Link, p.Content, p.AuthorID, p.ID); err != nil {
 		return fmt.Errorf("failed to update %w", err)
 	}
 

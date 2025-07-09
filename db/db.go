@@ -8,8 +8,6 @@ import (
 	_ "github.com/mattn/go-sqlite3" //revive be gone
 )
 
-const invalidID = -1
-
 type Author struct {
 	ID       float32
 	Name     string
@@ -140,7 +138,8 @@ func (p Params) Query() string {
 		author = "WHERE author = ?"
 	}
 
-	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts %s ORDER BY %s %s", author, sort, direction)
+	queryString := fmt.Sprintf("SELECT id, date, title, link, content, author FROM posts %s ORDER BY %s %s",
+		author, sort, direction)
 
 	return queryString
 }

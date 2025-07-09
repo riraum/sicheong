@@ -228,7 +228,7 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-func (s Server) getLogin(w http.ResponseWriter, r *http.Request) {
+func (s Server) getLogin(w http.ResponseWriter, _ *http.Request) {
 	if err := s.Template.ExecuteTemplate(w, "login.html.tmpl", nil); err != nil {
 		s.handleHTMLError(w, "execute", http.StatusInternalServerError, err)
 		return
@@ -280,6 +280,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 	if authorInput == author.Name && passwordInput == author.Password {
 		http.SetCookie(w, &c)
 		http.Redirect(w, r, "/?loggedinOkay", http.StatusSeeOther)
+
 		return
 	}
 
