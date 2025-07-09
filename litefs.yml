@@ -50,4 +50,4 @@ lease:
 
 # If true, then LiteFS will not wait until the node becomes the
 # primary or connects to the primary before starting the subprocess.
-skip-sync: true
+skip-sync: false
