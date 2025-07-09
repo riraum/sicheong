@@ -62,7 +62,6 @@ func Decrypt(ciphertxt []byte, key *[32]byte) (plaintxt []byte, err error) {
 		ciphertxt[gcm.NonceSize():],
 		nil,
 	)
-
 	if err != nil {
 		return decrypted, fmt.Errorf("failed to gcmOpen: %w", err)
 	}

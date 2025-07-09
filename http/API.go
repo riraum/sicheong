@@ -44,6 +44,7 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 			handleJSONError(w, "read author name", http.StatusInternalServerError, err)
 			return
 		}
+
 		p.Posts[i].AuthorName = author.Name
 	}
 
@@ -194,13 +195,14 @@ func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
 		if err = json.NewEncoder(w).Encode("logged in"); err != nil {
 			handleJSONError(w, "encode", http.StatusInternalServerError, err)
 		}
+
 		return
 	}
 
 	handleJSONError(w, "end of postLogin", http.StatusUnauthorized, err)
 }
 
-func (s Server) getAPILogout(w http.ResponseWriter, r *http.Request) {
+func (s Server) getAPILogout(w http.ResponseWriter, _ *http.Request) {
 	c := http.Cookie{
 		Name:   "authorName",
 		MaxAge: 0,

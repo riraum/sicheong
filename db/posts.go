@@ -53,12 +53,13 @@ func (d DB) ReadPosts(p Params) (Posts, error) {
 	rows, err = stmt.Query()
 	for rows.Next() {
 		err = rows.Scan(&post.ID, &post.Date, &post.Title, &post.Link, &post.Content, &post.AuthorID)
-		if err != nil {
-			return posts, fmt.Errorf("failed to scan %w", err)
-		}
 
 		post.ParseDate()
 		posts.Posts = append(posts.Posts, post)
+	}
+
+	if err != nil {
+		return posts, fmt.Errorf("failed to scan %w", err)
 	}
 
 	return posts, nil
