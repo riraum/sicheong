@@ -35,9 +35,9 @@ func main() {
 
 	// Uncomment to pre-fill db after reset.
 	// TODO: TODO: make this easier to run, maybe CLI flag.
-	// if err = d.Fill(); err != nil {
-	// 	log.Fatalf("error filling posts into db: %v", err)
-	// }
+	if err = d.Fill(); err != nil {
+		log.Fatalf("error filling posts into db: %v", err)
+	}
 
 	s := http.Server{
 		EmbedRootDir: static,
