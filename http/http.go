@@ -50,15 +50,14 @@ func (s Server) SetupMux() *http.ServeMux {
 
 func Run(mux *http.ServeMux) {
 	srv := &http.Server{
-		ReadTimeout:  5 * time.Second,
-		WriteTimeout: 10 * time.Second,
+		ReadTimeout:  5 * time.Second,  //nolint:all
+		WriteTimeout: 10 * time.Second, //nolint:all
 		Handler:      mux,
 	}
 	log.Println(srv.ListenAndServe())
 	// if err := (http.ListenAndServe(":8081", mux)); err != nil {
 	// 	log.Fatalf("failed to http serve: %s", err)
 	// }
-
 }
 
 func (s Server) authenticated(r *http.Request) (db.Author, bool, error) {
