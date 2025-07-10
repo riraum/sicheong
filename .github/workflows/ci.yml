@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [master]
 
+permissions:
+  contents: read
+  pull-requests: read
+
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -71,9 +75,6 @@ jobs:
         uses: golangci/golangci-lint-action@v8
 
   Gosec:
-    permissions:
-      contents: read
-      pull-requests: read
     runs-on: ubuntu-latest
     env:
       GO111MODULE: on
