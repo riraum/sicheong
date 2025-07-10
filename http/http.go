@@ -50,11 +50,12 @@ func (s Server) SetupMux() *http.ServeMux {
 
 func Run(mux *http.ServeMux) {
 	srv := &http.Server{
-		ReadTimeout:  5 * time.Second,   //nolint:mnd
-		WriteTimeout: 10 * time.Second,  //nolint:mnd
-		IdleTimeout:  120 * time.Second, //nolint:mnd
-		Handler:      mux,
-		Addr:         ":8081",
+		ReadHeaderTimeout: 4 * time.Second,   //nolint:mnd
+		ReadTimeout:       5 * time.Second,   //nolint:mnd
+		WriteTimeout:      10 * time.Second,  //nolint:mnd
+		IdleTimeout:       120 * time.Second, //nolint:mnd
+		Handler:           mux,
+		Addr:              ":8081",
 	}
 	log.Println(srv.ListenAndServe())
 }
