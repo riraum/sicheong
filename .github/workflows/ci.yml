@@ -71,6 +71,9 @@ jobs:
         uses: golangci/golangci-lint-action@v8
 
   Gosec:
+    permissions:
+      contents: read
+      pull-requests: read
     runs-on: ubuntu-latest
     env:
       GO111MODULE: on
