@@ -6,9 +6,11 @@ import (
 	"log"
 
 	_ "github.com/mattn/go-sqlite3" //revive be gone
+	"gorm.io/gorm"
 )
 
 type Author struct {
+	gorm.Model
 	ID       float32
 	Name     string
 	Password string
