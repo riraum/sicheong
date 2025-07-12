@@ -32,9 +32,17 @@ func NewGORM(dbPath string) (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to open sql %w", err)
 	}
 
-	d.AutoMigrate(Author{})
-	d.AutoMigrate(Post{})
-	d.AutoMigrate(Posts{})
+	if err = d.AutoMigrate(Author{}); err != nil {
+		return nil, fmt.Errorf("failed to automigrate %w", err)
+	}
+
+	if err = d.AutoMigrate(Post{}); err != nil {
+		return nil, fmt.Errorf("failed to automigrate %w", err)
+	}
+
+	if err = d.AutoMigrate(Posts{}); err != nil {
+		return nil, fmt.Errorf("failed to automigrate %w", err)
+	}
 
 	return d, nil
 }
