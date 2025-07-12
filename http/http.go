@@ -15,6 +15,13 @@ import (
 	"github.com/riraum/si-cheong/security"
 )
 
+// type GORMServer struct {
+// 	EmbedRootDir embed.FS
+// 	DB           db.GORMDB
+// 	Template     *template.Template
+// 	Key          *[32]byte
+// }
+
 type Server struct {
 	EmbedRootDir embed.FS
 	DB           db.DB

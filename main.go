@@ -28,16 +28,16 @@ func main() {
 	// TODO: make this easier to run, maybe CLI flag.
 	// os.Remove(dbPath)
 
-	d, err := db.New(dbPath)
-	if err != nil {
-		log.Printf("failed to open db %v", err)
-	}
-
-	// GORM db initialization
-	// dGORM, err := db.NewGORM(dbPath)
+	// d, err := db.New(dbPath)
 	// if err != nil {
 	// 	log.Printf("failed to open db %v", err)
 	// }
+
+	// GORM db initialization
+	d, err := db.NewGORM(dbPath)
+	if err != nil {
+		log.Printf("failed to open db %v", err)
+	}
 
 	// GORM test query
 	// dGORM.Create(&db.Author{Name: "GORMTest", Password: "test"})
@@ -48,12 +48,27 @@ func main() {
 	// 	log.Fatalf("error filling posts into db: %v", err)
 	// }
 
+	if err = d.Fill(); err != nil {
+		log.Fatalf("error filling posts into db: %v", err)
+	}
+
 	s := http.Server{
 		EmbedRootDir: static,
 		DB:           d,
 		Template:     t,
 		Key:          key,
 	}
+
+	// s := http.GORMServer{
+	// 	EmbedRootDir: static,
+	// 	DB:           dGORM,
+	// 	Template:     t,
+	// 	Key:          key,
+	// }
+
+	// mux := s.GORMSetupMux()
+	// http.Run(mux)
+	// }
 
 	mux := s.SetupMux()
 	http.Run(mux)

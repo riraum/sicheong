@@ -3,9 +3,12 @@ package db
 import (
 	"database/sql"
 	"fmt"
+
+	"gorm.io/gorm"
 )
 
 type Posts struct {
+	gorm.Model
 	Posts []Post
 }
 

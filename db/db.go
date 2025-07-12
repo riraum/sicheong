@@ -3,7 +3,6 @@ package db
 import (
 	"database/sql"
 	"fmt"
-	"log"
 
 	_ "github.com/mattn/go-sqlite3" //revive be gone
 	"gorm.io/driver/sqlite"
@@ -11,7 +10,8 @@ import (
 )
 
 type Author struct {
-	ID       float32
+	gorm.Model
+	ID       uint
 	Name     string
 	Password string
 }
@@ -22,43 +22,47 @@ type Params struct {
 	Author    string
 }
 
+// type DB struct {
+// 	client *sql.DB
+// }
+
 type DB struct {
-	client *sql.DB
-}
-
-func NewGORM(dbPath string) (*gorm.DB, error) {
-	d, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
-	if err != nil {
-		return nil, fmt.Errorf("failed to open sql %w", err)
-	}
-
-	if err = d.AutoMigrate(Author{}); err != nil {
-		return nil, fmt.Errorf("failed to automigrate %w", err)
-	}
-
-	if err = d.AutoMigrate(Post{}); err != nil {
-		return nil, fmt.Errorf("failed to automigrate %w", err)
-	}
-
-	if err = d.AutoMigrate(Posts{}); err != nil {
-		return nil, fmt.Errorf("failed to automigrate %w", err)
-	}
-
-	return d, nil
+	client *gorm.DB
 }
 
 func New(dbPath string) (DB, error) {
-	d, err := sql.Open("sqlite3", dbPath)
+	d, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
 	if err != nil {
 		return DB{}, fmt.Errorf("failed to open sql %w", err)
 	}
 
-	if err = createTables(d); err != nil {
-		return DB{}, fmt.Errorf("failed to create tables %w", err)
+	if err = d.AutoMigrate(Author{}); err != nil {
+		return DB{}, fmt.Errorf("failed to automigrate %w", err)
 	}
 
-	return DB{d}, nil
+	if err = d.AutoMigrate(Post{}); err != nil {
+		return DB{}, fmt.Errorf("failed to automigrate %w", err)
+	}
+
+	if err = d.AutoMigrate(Posts{}); err != nil {
+		return DB{}, fmt.Errorf("failed to automigrate %w", err)
+	}
+
+	return DB{}, nil
 }
+
+// func New(dbPath string) (DB, error) {
+// 	d, err := sql.Open("sqlite3", dbPath)
+// 	if err != nil {
+// 		return DB{}, fmt.Errorf("failed to open sql %w", err)
+// 	}
+
+// 	if err = createTables(d); err != nil {
+// 		return DB{}, fmt.Errorf("failed to create tables %w", err)
+// 	}
+
+// 	return DB{d}, nil
+// }
 
 func createTables(d *sql.DB) error {
 	stmt := `create table if not exists authors
@@ -80,7 +84,7 @@ func createTables(d *sql.DB) error {
 }
 
 func (d DB) Fill() error {
-	authors := []Author{
+	authors := []*Author{
 		{
 			Name:     "Alpha",
 			Password: "abc",
@@ -94,14 +98,10 @@ func (d DB) Fill() error {
 			Password: "abc",
 		},
 	}
-	for _, a := range authors {
-		err := d.NewAuthor(a)
-		if err != nil {
-			log.Fatalf("create new author in db: %v", err)
-		}
-	}
 
-	posts := []Post{
+	d.client.Create(&authors)
+
+	posts := []*Post{
 		{
 			Date:     1748000743, //nolint:mnd
 			Title:    "Status 200",
@@ -124,14 +124,65 @@ func (d DB) Fill() error {
 			AuthorID: 3, //nolint:mnd
 		},
 	}
-	for _, p := range posts {
-		if err := d.NewPost(p); err != nil {
-			log.Fatalf("create new post in db: %v", err)
-		}
-	}
+
+	d.client.Create(&posts)
 
 	return nil
 }
+
+// func (d DB) Fill() error {
+// 	authors := []Author{
+// 		{
+// 			Name:     "Alpha",
+// 			Password: "abc",
+// 		},
+// 		{
+// 			Name:     "Bravo",
+// 			Password: "abc",
+// 		},
+// 		{
+// 			Name:     "Charlie",
+// 			Password: "abc",
+// 		},
+// 	}
+// 	for _, a := range authors {
+// 		err := d.NewAuthor(a)
+// 		if err != nil {
+// 			log.Fatalf("create new author in db: %v", err)
+// 		}
+// 	}
+
+// 	posts := []Post{
+// 		{
+// 			Date:     1748000743, //nolint:mnd
+// 			Title:    "Status 200",
+// 			Link:     "https://http.cat/status/200",
+// 			Content:  "Good HTTP status 200 explainer",
+// 			AuthorID: 1,
+// 		},
+// 		{
+// 			Date:     1684997010, //nolint:mnd
+// 			Title:    "Status 100",
+// 			Link:     "https://http.cat/status/100",
+// 			Content:  "Good HTTP status 100 explainer",
+// 			AuthorID: 2, //nolint:mnd
+// 		},
+// 		{
+// 			Date:     1727780130, //nolint:mnd
+// 			Title:    "Status 301",
+// 			Link:     "https://http.cat/status/301",
+// 			Content:  "Good HTTP status 301 explainer",
+// 			AuthorID: 3, //nolint:mnd
+// 		},
+// 	}
+// 	for _, p := range posts {
+// 		if err := d.NewPost(p); err != nil {
+// 			log.Fatalf("create new post in db: %v", err)
+// 		}
+// 	}
+
+// 	return nil
+// }
 
 func (p Params) Query() string {
 	var (
@@ -168,39 +219,59 @@ func (p Params) Query() string {
 }
 
 func (d DB) NewAuthor(a Author) error {
-	if _, err := d.client.Exec("insert into authors(name, password) values (?,?)", a.Name, a.Password); err != nil {
-		return fmt.Errorf("failed to insert %w", err)
-	}
-
+	d.client.Create(a)
 	return nil
 }
 
+// func (d DB) NewAuthor(a Author) error {
+// 	if _, err := d.client.Exec("insert into authors(name, password) values (?,?)", a.Name, a.Password); err != nil {
+// 		return fmt.Errorf("failed to insert %w", err)
+// 	}
+
+//		return nil
+//	}
 func (d DB) ReadAuthorByName(name string) (Author, error) {
 	var author Author
 
-	stmt, err := d.client.Prepare("SELECT id, name, password FROM authors WHERE name = ?")
-	if err != nil {
-		return author, fmt.Errorf("failed query * from author: %w", err)
-	}
-
-	if err = stmt.QueryRow(name).Scan(&author.ID, &author.Name, &author.Password); err != nil {
-		return author, fmt.Errorf("failed to query: %w", err)
-	}
+	d.client.Table("author").Select(author.ID, author.Name, author.Password).Scan(&author)
 
 	return author, nil
 }
 
-func (d DB) ReadAuthorByID(id float32) (Author, error) {
+// func (d DB) ReadAuthorByName(name string) (Author, error) {
+// 	var author Author
+
+// 	stmt, err := d.client.Prepare("SELECT id, name, password FROM authors WHERE name = ?")
+// 	if err != nil {
+// 		return author, fmt.Errorf("failed query * from author: %w", err)
+// 	}
+
+// 	if err = stmt.QueryRow(name).Scan(&author.ID, &author.Name, &author.Password); err != nil {
+// 		return author, fmt.Errorf("failed to query: %w", err)
+// 	}
+
+// 	return author, nil
+// }
+
+func (d DB) ReadAuthorByID(id uint) (Author, error) {
 	var author Author
 
-	stmt, err := d.client.Prepare("SELECT id, name FROM authors WHERE id = ?")
-	if err != nil {
-		return author, fmt.Errorf("failed query * from author: %w", err)
-	}
-
-	if err = stmt.QueryRow(id).Scan(&author.ID, &author.Name); err != nil {
-		return author, fmt.Errorf("failed to query: %w", err)
-	}
+	d.client.Table("author").Select(author.ID, author.Name).Scan(&author)
 
 	return author, nil
 }
+
+// func (d DB) ReadAuthorByID(id float32) (Author, error) {
+// 	var author Author
+
+// 	stmt, err := d.client.Prepare("SELECT id, name FROM authors WHERE id = ?")
+// 	if err != nil {
+// 		return author, fmt.Errorf("failed query * from author: %w", err)
+// 	}
+
+// 	if err = stmt.QueryRow(id).Scan(&author.ID, &author.Name); err != nil {
+// 		return author, fmt.Errorf("failed to query: %w", err)
+// 	}
+
+// 	return author, nil
+// }
