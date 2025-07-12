@@ -3,12 +3,9 @@ package db
 import (
 	"fmt"
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type Post struct {
-	gorm.Model
 	ID         float32
 	Date       int64
 	ParsedDate time.Time

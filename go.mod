@@ -6,6 +6,7 @@ require github.com/mattn/go-sqlite3 v1.14.28
 
 require (
 	golang.org/x/crypto v0.38.0
+	gorm.io/driver/sqlite v1.6.0
 	gorm.io/gorm v1.30.0
 )
 
