@@ -6,6 +6,8 @@ import (
 	"log"
 
 	_ "github.com/mattn/go-sqlite3" //revive be gone
+	"gorm.io/driver/sqlite"
+	"gorm.io/gorm"
 )
 
 type Author struct {
@@ -22,6 +24,27 @@ type Params struct {
 
 type DB struct {
 	client *sql.DB
+}
+
+func NewGORM(dbPath string) (*gorm.DB, error) {
+	d, err := gorm.Open(sqlite.Open(dbPath), &gorm.Config{})
+	if err != nil {
+		return nil, fmt.Errorf("failed to open sql %w", err)
+	}
+
+	if err = d.AutoMigrate(Author{}); err != nil {
+		return nil, fmt.Errorf("failed to automigrate %w", err)
+	}
+
+	if err = d.AutoMigrate(Post{}); err != nil {
+		return nil, fmt.Errorf("failed to automigrate %w", err)
+	}
+
+	if err = d.AutoMigrate(Posts{}); err != nil {
+		return nil, fmt.Errorf("failed to automigrate %w", err)
+	}
+
+	return d, nil
 }
 
 func New(dbPath string) (DB, error) {
