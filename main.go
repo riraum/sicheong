@@ -33,15 +33,6 @@ func main() {
 		log.Printf("failed to open db %v", err)
 	}
 
-	// GORM db initialization
-	// dGORM, err := db.NewGORM(dbPath)
-	// if err != nil {
-	// 	log.Printf("failed to open db %v", err)
-	// }
-
-	// GORM test query
-	// dGORM.Create(&db.Author{Name: "GORMTest", Password: "test"})
-
 	// Uncomment to pre-fill db after reset.
 	// TODO: TODO: make this easier to run, maybe CLI flag.
 	// if err = d.Fill(); err != nil {
