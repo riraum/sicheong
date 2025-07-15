@@ -156,7 +156,7 @@ func parseGetRValues(r *http.Request) (db.Post, error) {
 			return p, fmt.Errorf("ID convert to float %w", err)
 		}
 
-		p.ID = float32(ID)
+		p.PostsID = uint(ID)
 	}
 
 	if r.FormValue("author") != "" {
@@ -165,7 +165,7 @@ func parseGetRValues(r *http.Request) (db.Post, error) {
 			return p, fmt.Errorf("author convert to float: %w", err)
 		}
 
-		p.AuthorID = float32(author)
+		p.Author.ID = uint(author)
 	}
 
 	p.Title = r.FormValue("title")
@@ -184,7 +184,7 @@ func parsePostRValues(r *http.Request) (db.Post, error) {
 			return p, fmt.Errorf("ID convert to float %w", err)
 		}
 
-		p.ID = float32(ID)
+		p.PostsID = uint(ID)
 	}
 
 	if r.FormValue("date") != "" {
@@ -204,7 +204,7 @@ func parsePostRValues(r *http.Request) (db.Post, error) {
 			return p, fmt.Errorf("author convert to float: %w", err)
 		}
 
-		p.AuthorID = float32(author)
+		p.Author.ID = uint(author)
 	}
 
 	p.Title = r.FormValue("title")

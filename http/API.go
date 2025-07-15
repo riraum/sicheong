@@ -39,13 +39,13 @@ func (s Server) getAPIPosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for i, post := range p.Posts {
-		author, err := s.DB.ReadAuthorByID(post.AuthorID)
+		author, err := s.DB.ReadAuthorByID(post.Author.ID)
 		if err != nil {
 			handleJSONError(w, "read author name", http.StatusInternalServerError, err)
 			return
 		}
 
-		p.Posts[i].AuthorName = author.Name
+		p.Posts[i].Author.Name = author.Name
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -64,7 +64,7 @@ func (s Server) viewAPIPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p, err = s.DB.ReadPost(int(p.ID))
+	p, err = s.DB.ReadPost(p.PostsID)
 	if err != nil {
 		handleJSONError(w, "read posts", http.StatusNotFound, err)
 		return
@@ -94,7 +94,7 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p.AuthorID = author.ID
+	p.Author.ID = author.ID
 
 	if p.Content == "" {
 		handleJSONError(w, "post is empty", http.StatusInternalServerError, err)

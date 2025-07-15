@@ -94,19 +94,19 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p, err = s.DB.ReadPost(int(p.ID))
+	p, err = s.DB.ReadPost(p.PostsID)
 	if err != nil {
 		s.handleHTMLError(w, "read post", http.StatusNotFound, err)
 		return
 	}
 
-	author, err := s.DB.ReadAuthorByID(p.AuthorID)
+	author, err := s.DB.ReadAuthorByID(p.Author.ID)
 	if err != nil {
 		s.handleHTMLError(w, "read author", http.StatusInternalServerError, err)
 		return
 	}
 
-	p.AuthorName = author.Name
+	p.Author.Name = author.Name
 
 	ap := authedPost{
 		Post: p,
@@ -140,7 +140,7 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p.AuthorID = author.ID
+	p.Author.ID = author.ID
 
 	if p.Content == "" {
 		s.handleHTMLError(w, "post is empty", http.StatusInternalServerError, err)
@@ -218,7 +218,7 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p.AuthorID = author.ID
+	p.Author.ID = author.ID
 
 	if err = s.DB.UpdatePost(p); err != nil {
 		s.handleHTMLError(w, "edit post in db", http.StatusInternalServerError, err)

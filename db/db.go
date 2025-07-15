@@ -11,7 +11,8 @@ import (
 
 type Author struct {
 	gorm.Model
-	ID       uint
+	ID uint
+	// PostID   uint
 	Name     string
 	Password string
 }
@@ -48,7 +49,7 @@ func New(dbPath string) (DB, error) {
 		return DB{}, fmt.Errorf("failed to automigrate %w", err)
 	}
 
-	return DB{}, nil
+	return DB{d}, nil
 }
 
 // func New(dbPath string) (DB, error) {
@@ -84,6 +85,8 @@ func createTables(d *sql.DB) error {
 }
 
 func (d DB) Fill() error {
+	// d.client.Preload("Posts").Find(&Post)
+
 	authors := []*Author{
 		{
 			Name:     "Alpha",
@@ -103,25 +106,25 @@ func (d DB) Fill() error {
 
 	posts := []*Post{
 		{
-			Date:     1748000743, //nolint:mnd
-			Title:    "Status 200",
-			Link:     "https://http.cat/status/200",
-			Content:  "Good HTTP status 200 explainer",
-			AuthorID: 1,
+			Date:    1748000743, //nolint:mnd
+			Title:   "Status 200",
+			Link:    "https://http.cat/status/200",
+			Content: "Good HTTP status 200 explainer",
+			// AuthorID: 1,
 		},
 		{
-			Date:     1684997010, //nolint:mnd
-			Title:    "Status 100",
-			Link:     "https://http.cat/status/100",
-			Content:  "Good HTTP status 100 explainer",
-			AuthorID: 2, //nolint:mnd
+			Date:    1684997010, //nolint:mnd
+			Title:   "Status 100",
+			Link:    "https://http.cat/status/100",
+			Content: "Good HTTP status 100 explainer",
+			// AuthorID: 2, //nolint:mnd
 		},
 		{
-			Date:     1727780130, //nolint:mnd
-			Title:    "Status 301",
-			Link:     "https://http.cat/status/301",
-			Content:  "Good HTTP status 301 explainer",
-			AuthorID: 3, //nolint:mnd
+			Date:    1727780130, //nolint:mnd
+			Title:   "Status 301",
+			Link:    "https://http.cat/status/301",
+			Content: "Good HTTP status 301 explainer",
+			// AuthorID: 3, //nolint:mnd
 		},
 	}
 
@@ -218,9 +221,8 @@ func (p Params) Query() string {
 	return queryString
 }
 
-func (d DB) NewAuthor(a Author) error {
-	d.client.Create(a)
-	return nil
+func (d DB) NewAuthor(a Author) {
+	d.client.Create(&a)
 }
 
 // func (d DB) NewAuthor(a Author) error {
@@ -233,7 +235,7 @@ func (d DB) NewAuthor(a Author) error {
 func (d DB) ReadAuthorByName(name string) (Author, error) {
 	var author Author
 
-	d.client.Table("author").Select(author.ID, author.Name, author.Password).Scan(&author)
+	d.client.Table("author").Select(author.ID, author.Name, author.Password).Where("name = ?", name).Scan(&author)
 
 	return author, nil
 }
@@ -256,7 +258,15 @@ func (d DB) ReadAuthorByName(name string) (Author, error) {
 func (d DB) ReadAuthorByID(id uint) (Author, error) {
 	var author Author
 
-	d.client.Table("author").Select(author.ID, author.Name).Scan(&author)
+	// 	var result User
+	// db.Model(User{ID: 10}).First(&result)
+
+	// d.client.First(&author, id)
+	// log.Print(author)
+
+	// d.client.Model(Author{ID: id}).First(&author)
+
+	d.client.Table("authors").Select("id", "name").Where("id = ?", id).Scan(&author)
 
 	return author, nil
 }

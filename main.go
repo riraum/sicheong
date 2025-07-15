@@ -34,7 +34,7 @@ func main() {
 	// }
 
 	// GORM db initialization
-	d, err := db.NewGORM(dbPath)
+	d, err := db.New(dbPath)
 	if err != nil {
 		log.Printf("failed to open db %v", err)
 	}
