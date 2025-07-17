@@ -1,0 +1,21 @@
+.color-scheme {
+    background: beige;
+    color: #0d0101;
+}
+@media (prefers-color-scheme: dark) {
+    .color-scheme.hackerman {
+        background: #150101;
+        color: #f7f765;
+    }
+}
+
+.button-scheme {
+    background: beige;
+    color: #0d0101;
+}
+@media (prefers-color-scheme: dark) {
+    .button-scheme {
+        background: #150101;
+        color: #f7f765;
+    }
+}

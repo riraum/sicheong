@@ -38,7 +38,7 @@ func (s Server) getStaticAsset(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if fp == "static/pico.min.css" {
+	if fp == "static/pico.min.css" || fp == "static/custom.css" {
 		w.Header().Add("Content-Type", "text/css")
 	}
 
