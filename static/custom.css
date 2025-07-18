@@ -42,3 +42,13 @@
         color: #e6cf17;
     }
 }
+
+button,
+input,
+select,
+textarea,
+[type="submit"] {
+    background: #ffcb004a;
+    background-color: #ffcb004a;
+    color: #1f68a8;
+}
