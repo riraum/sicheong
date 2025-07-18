@@ -1,3 +1,20 @@
+:root {
+    background: beige;
+    color: #0d0101;
+    :any-link {
+        color: #971c83;
+    }
+}
+@media (prefers-color-scheme: dark) {
+    :root {
+        background: #150101;
+        color: #f7f765;
+        :any-link {
+            color: grey;
+        }
+    }
+}
+
 .color-scheme {
     background: beige;
     color: #0d0101;

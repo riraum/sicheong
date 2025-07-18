@@ -5,6 +5,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link href="../static/pico.min.css" rel="stylesheet" />
+  <link href="../static/custom.css" rel="stylesheet" />
   <link rel="apple-touch-icon" sizes="180x180" href="../static/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="../static/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="../static/favicon-16x16.png">
@@ -13,6 +14,8 @@
 </head>
 
 <body>
+    <div class="color-scheme">
+    <div class="color-scheme hackerman">
     <main class="container">
   <div>
    {{.Post.ParsedDate.Format "2006/01/02"}}
@@ -50,10 +53,12 @@
   {{end}}
   <div>
       <a href="/">
-      <button>Back to index</button>
+      <button class="button-scheme">Back to index</button>
       </a>
   </div>
     </main>
+    </div>
+    </div>
 </body>
 
 </html>
