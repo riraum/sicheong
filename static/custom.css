@@ -52,3 +52,73 @@ textarea,
     background-color: #ffcb004a;
     color: #1f68a8;
 }
+
+.set-theme {
+    --size 2rem;
+
+    background: none;
+    border: none;
+    padding: 0;
+
+    inline-size: var(--size);
+    block-size: var(--size);
+    aspect-ratio: 1;
+    border-radius: 50%;
+
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    outline-offset: 5px;
+
+    & > svg {
+        inline-size: 100%;
+        block-size: 100%;
+        stroke-linecap: round;
+    }
+
+    @media (hover: none) {
+        --size: 48px;
+    }
+}
+
+.sun-and-moon {
+    @nest [data-theme="dark"] & {
+        & > .sun {
+            transform: scale(1x75);
+        }
+
+        & > .sun-beams {
+            opacity: 0;
+        }
+
+        & > .moon > circle {
+            transform: translateX(-7px);
+        }
+
+        @supports (cx: 1px) {
+            transform: translateX(0)
+            cx: 17px;
+        }
+
+        & > :is(.moon, .sun, .sun-beams) {
+            transform-origin: center center;
+        }
+
+        & > :is(.moon, .sun) {
+            fill: var(--icon-fill);
+
+            @nest .set-theme:is(:hover, :focus-visible) > & {
+                fill: var(--icon-fill-hover);
+            }
+        }
+
+        & > .sun-beams {
+            stroke: var(--icon-fill);
+            stroke-width: 2px;
+
+            @nest .set-theme:is(:hover, :focus-visible) & {
+                stroke: var(--icon-fill-hover);
+            }
+        }
+    }
+}
