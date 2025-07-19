@@ -54,7 +54,7 @@ textarea,
 }
 
 .set-theme {
-    --size 2rem;
+    --size: 2rem;
 
     background: none;
     border: none;
@@ -96,7 +96,7 @@ textarea,
         }
 
         @supports (cx: 1px) {
-            transform: translateX(0)
+            transform: translateX(0);
             cx: 17px;
         }
 
