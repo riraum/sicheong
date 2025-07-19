@@ -1,29 +1,22 @@
-:root {
+:root,
+:root[data-theme="light"] {
     background: beige;
     color: #0d0101;
     :any-link {
         color: #971c83;
-    }
-}
-@media (prefers-color-scheme: dark) {
-    :root {
-        background: #150101;
-        color: #f7f765;
-        :any-link {
-            color: grey;
-        }
     }
 }
 
-.color-scheme {
-    background: beige;
-    color: #0d0101;
+:root[data-theme="dark"] {
+    background: #150101;
+    color: #f7f765;
     :any-link {
-        color: #971c83;
+        color: grey;
     }
 }
+
 @media (prefers-color-scheme: dark) {
-    .color-scheme.hackerman {
+    :root {
         background: #150101;
         color: #f7f765;
         :any-link {
@@ -36,6 +29,17 @@
     background: #ffcb004a;
     color: #1f68a8;
 }
+
+.button-scheme[data-theme="light"] {
+    background: #ffcb004a;
+    color: #1f68a8;
+}
+
+.button-scheme[data-theme="dark"] {
+    background: #372f3791;
+    color: #e6cf17;
+}
+
 @media (prefers-color-scheme: dark) {
     .button-scheme {
         background: #372f3791;
@@ -74,6 +78,11 @@ textarea,
         inline-size: 100%;
         block-size: 100%;
         stroke-linecap: round;
+    }
+
+    @nest [data-theme="dark"] & {
+        --icon-fill: hsl(210 10% 70%);
+        --icon-fill-hover: hsl(210 15% 90%);
     }
 
     @media (hover: none) {

@@ -19,10 +19,16 @@ const reflectPref = () => {
   document.querySelector("#set-theme")?.setAttribute("aria-label", theme.value);
 };
 
+const theme = {
+  value: getColorPref(),
+};
+
 reflectPref();
 
 window.onload = () => {
-  reflectPref().querySelector("#set-theme").addEventListener("click", onClick);
+  reflectPref();
+
+  document.querySelector("#set-theme").addEventListener("click", onClick);
 };
 
 const onClick = () => {
