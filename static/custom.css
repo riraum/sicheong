@@ -25,11 +25,7 @@
     }
 }
 
-.button-scheme {
-    background: #ffcb004a;
-    color: #1f68a8;
-}
-
+.button-scheme,
 .button-scheme[data-theme="light"] {
     background: #ffcb004a;
     color: #1f68a8;
