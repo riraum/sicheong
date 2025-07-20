@@ -69,61 +69,57 @@ textarea,
     touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     outline-offset: 5px;
+}
 
-    & > svg {
-        inline-size: 100%;
-        block-size: 100%;
-        stroke-linecap: round;
-    }
+.set-theme > svg {
+    inline-size: 100%;
+    block-size: 100%;
+    stroke-linecap: round;
+}
 
-    @nest [data-theme="dark"] & {
-        --icon-fill: hsl(210 10% 70%);
-        --icon-fill-hover: hsl(210 15% 90%);
-    }
+[data-theme="dark"] .set-theme > svg {
+    --icon-fill: hsl(210 10% 70%);
+    --icon-fill-hover: hsl(210 15% 90%);
 
     @media (hover: none) {
         --size: 48px;
     }
 }
 
-.sun-and-moon {
-    @nest [data-theme="dark"] & {
-        & > .sun {
-            transform: scale(1x75);
-        }
+.sun-and-moon > :is(.moon, .sun, .sun-beams) {
+    transform-origin: center center;
+}
 
-        & > .sun-beams {
-            opacity: 0;
-        }
+.sun-and-moon > :is(.moon, .sun) {
+    fill: var(--icon-fill);
+}
 
-        & > .moon > circle {
-            transform: translateX(-7px);
-        }
+.sun-and-moon > :is(.moon, .sun) .set-theme:is(:hover, :focus-visible) {
+    fill: var(--icon-fill-hover);
+}
 
-        @supports (cx: 1px) {
-            transform: translateX(0);
-            cx: 17px;
-        }
+.sun-and-moon > .sun-beams {
+    opacity: 1;
+    stroke: var(--icon-fill);
+    stroke-width: 2px;
+}
+.sun-and-moon > .sun-beams .set-theme:is(:hover, :focus-visible) {
+    stroke: var(--icon-fill-hover);
+}
 
-        & > :is(.moon, .sun, .sun-beams) {
-            transform-origin: center center;
-        }
+.sun-and-moon [data-theme="dark"] > .sun {
+    transform: scale(1.75);
+}
 
-        & > :is(.moon, .sun) {
-            fill: var(--icon-fill);
+.sun-and-moon [data-theme="dark"] > .sun-beams {
+    opacity: 0;
+}
 
-            @nest .set-theme:is(:hover, :focus-visible) > & {
-                fill: var(--icon-fill-hover);
-            }
-        }
+.sun-and-moon [data-theme="dark"] > .moon > circle {
+    transform: translateX(-7px);
 
-        & > .sun-beams {
-            stroke: var(--icon-fill);
-            stroke-width: 2px;
-
-            @nest .set-theme:is(:hover, :focus-visible) & {
-                stroke: var(--icon-fill-hover);
-            }
-        }
+    @supports (cx: 1px) {
+        transform: translateX(0);
+        cx: 17px;
     }
 }
