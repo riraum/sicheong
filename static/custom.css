@@ -29,17 +29,20 @@
 .button-scheme[data-theme="light"] {
     background: #ffcb004a;
     color: #1f68a8;
+    border-color: black;
 }
 
 .button-scheme[data-theme="dark"] {
     background: #372f3791;
     color: #e6cf17;
+    border-color: white;
 }
 
 @media (prefers-color-scheme: dark) {
     .button-scheme {
         background: #372f3791;
         color: #e6cf17;
+        border-color: white;
     }
 }
 
