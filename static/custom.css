@@ -77,13 +77,9 @@ textarea,
     stroke-linecap: round;
 }
 
-[data-theme="dark"] .set-theme > svg {
+.set-theme > svg {
     --icon-fill: hsl(210 10% 70%);
     --icon-fill-hover: hsl(210 15% 90%);
-
-    @media (hover: none) {
-        --size: 48px;
-    }
 }
 
 .sun-and-moon > :is(.moon, .sun, .sun-beams) {
@@ -94,28 +90,25 @@ textarea,
     fill: var(--icon-fill);
 }
 
-.sun-and-moon > :is(.moon, .sun) .set-theme:is(:hover, :focus-visible) {
+.set-theme:is(:hover, :focus-visible) .sun-and-moon > :is(.moon, .sun) {
     fill: var(--icon-fill-hover);
 }
 
 .sun-and-moon > .sun-beams {
-    opacity: 1;
     stroke: var(--icon-fill);
     stroke-width: 2px;
-}
-.sun-and-moon > .sun-beams .set-theme:is(:hover, :focus-visible) {
-    stroke: var(--icon-fill-hover);
-}
-
-.sun-and-moon [data-theme="dark"] > .sun {
-    transform: scale(1.75);
-}
-
-.sun-and-moon [data-theme="dark"] > .sun-beams {
     opacity: 0;
 }
 
-.sun-and-moon [data-theme="dark"] > .moon > circle {
+.set-theme:is(:hover, :focus-visible) .sun-and-moon > .sun-beams {
+    stroke: var(--icon-fill-hover);
+}
+
+[data-theme="dark"] .sun-and-moon > .sun-beams {
+    opacity: 1;
+}
+
+[data-theme="light"] .sun-and-moon > .moon > circle {
     transform: translateX(-7px);
 
     @supports (cx: 1px) {
