@@ -42,7 +42,7 @@ func (s Server) getStaticAsset(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "text/css")
 	}
 
-	if fp == "static/script.js" {
+	if fp == "static/set_theme.js" {
 		w.Header().Add("Content-Type", "text/javascript")
 	}
 
