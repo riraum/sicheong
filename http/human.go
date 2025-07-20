@@ -42,6 +42,10 @@ func (s Server) getStaticAsset(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "text/css")
 	}
 
+	if fp == "static/script.js" {
+		w.Header().Add("Content-Type", "text/javascript")
+	}
+
 	if _, err = w.Write(asset); err != nil {
 		s.handleHTMLError(w, "write asset", http.StatusInternalServerError, err)
 	}
