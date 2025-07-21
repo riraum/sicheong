@@ -28,18 +28,21 @@
 .button-scheme,
 .button-scheme[data-theme="light"] {
     background: #ffcb004a;
-    color: #1f68a8;
+    color: #dadf34;
+    border-color: black;
 }
 
 .button-scheme[data-theme="dark"] {
-    background: #372f3791;
-    color: #e6cf17;
+    background: #5b4c5b91;
+    color: #b5b552;
+    border-color: white;
 }
 
 @media (prefers-color-scheme: dark) {
     .button-scheme {
-        background: #372f3791;
-        color: #e6cf17;
+        background: #5b4c5b91;
+        color: #b5b552;
+        border-color: white;
     }
 }
 
@@ -51,6 +54,19 @@ textarea,
     background: #ffcb004a;
     background-color: #ffcb004a;
     color: #1f68a8;
+}
+
+@media (prefers-color-scheme: dark) {
+    button,
+    input,
+    select,
+    textarea,
+    [type="submit"] {
+        background-color: #ffcb004a;
+        background: #5b4c5b91;
+        color: #b5b552;
+        border-color: white;
+    }
 }
 
 .set-theme {
