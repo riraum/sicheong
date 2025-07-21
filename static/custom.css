@@ -1,0 +1,134 @@
+:root,
+:root[data-theme="light"] {
+    background: beige;
+    color: #0d0101;
+    :any-link {
+        color: #971c83;
+    }
+}
+
+:root[data-theme="dark"] {
+    background: #150101;
+    color: #f7f765;
+    :any-link {
+        color: grey;
+    }
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        background: #150101;
+        color: #f7f765;
+        :any-link {
+            color: grey;
+        }
+    }
+}
+
+.button-scheme,
+.button-scheme[data-theme="light"] {
+    background: #ffcb004a;
+    color: #dadf34;
+    border-color: black;
+}
+
+.button-scheme[data-theme="dark"] {
+    background: #5b4c5b91;
+    color: #b5b552;
+    border-color: white;
+}
+
+@media (prefers-color-scheme: dark) {
+    .button-scheme {
+        background: #5b4c5b91;
+        color: #b5b552;
+        border-color: white;
+    }
+}
+
+button,
+input,
+select,
+textarea,
+[type="submit"] {
+    background: #ffcb004a;
+    background-color: #ffcb004a;
+    color: #1f68a8;
+}
+
+@media (prefers-color-scheme: dark) {
+    button,
+    input,
+    select,
+    textarea,
+    [type="submit"] {
+        background-color: #ffcb004a;
+        background: #5b4c5b91;
+        color: #b5b552;
+        border-color: white;
+    }
+}
+
+.set-theme {
+    --size: 2rem;
+
+    background: none;
+    border: none;
+    padding: 0;
+
+    inline-size: var(--size);
+    block-size: var(--size);
+    aspect-ratio: 1;
+    border-radius: 50%;
+
+    cursor: pointer;
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+    outline-offset: 5px;
+}
+
+.set-theme > svg {
+    inline-size: 100%;
+    block-size: 100%;
+    stroke-linecap: round;
+}
+
+.set-theme > svg {
+    --icon-fill: hsl(210 10% 70%);
+    --icon-fill-hover: hsl(210 15% 90%);
+}
+
+.sun-and-moon > :is(.moon, .sun, .sun-beams) {
+    transform-origin: center center;
+}
+
+.sun-and-moon > :is(.moon, .sun) {
+    fill: var(--icon-fill);
+}
+
+.set-theme:is(:hover, :focus-visible) .sun-and-moon > :is(.moon, .sun) {
+    fill: var(--icon-fill-hover);
+}
+
+.sun-and-moon > .sun-beams {
+    stroke: var(--icon-fill);
+    stroke-width: 2px;
+    opacity: 0;
+}
+
+.set-theme:is(:hover, :focus-visible) .sun-and-moon > .sun-beams {
+    stroke: var(--icon-fill-hover);
+}
+
+[data-theme="dark"] .sun-and-moon > .sun-beams {
+    opacity: 1;
+}
+
+[data-theme="light"] .sun-and-moon > .moon > circle {
+    transform: translateX(-7px);
+
+    @supports (cx: 1px) {
+        transform: translateX(0);
+        cx: 17px;
+    }
+}
