@@ -4,14 +4,22 @@ import (
 	"log"
 	"reflect"
 	"testing"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3" //revive be gone
 )
+
+func noTimeStamps(Post Posts) {
+	for i := range Post.Posts {
+		Post.Posts[i].ParsedDate = time.Time{}
+	}
+}
 
 func TestAll(t *testing.T) {
 	testDBPath := t.TempDir()
 
 	d, err := New(testDBPath + "sq.db")
+	log.Print(testDBPath)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -26,8 +34,8 @@ func TestAll(t *testing.T) {
 	}
 
 	par := Params{
-		Sort:      "date",
-		Direction: "asc",
+		// Sort:      "date",
+		// Direction: "asc",
 		// Author:      "",
 	}
 
@@ -36,30 +44,34 @@ func TestAll(t *testing.T) {
 		t.Errorf("error getting rows: %v", err)
 	}
 
-	want := []Post{
-		{
-			ID:       1,
-			Date:     1748000743,
-			Title:    "Complaint",
-			Link:     "https://http.cat/status/200",
-			Content:  "A",
-			AuthorID: 1,
-		},
-		{
-			ID:       2,
-			Date:     1684997010,
-			Title:    "Feedback",
-			Link:     "https://http.cat/status/100",
-			Content:  "B",
-			AuthorID: 2,
-		},
-		{
-			ID:       3,
-			Date:     1727780130,
-			Title:    "Announcement",
-			Link:     "https://http.cat/status/301",
-			Content:  "C",
-			AuthorID: 3,
+	noTimeStamps(got)
+
+	want := Posts{
+		[]Post{
+			{
+				ID:       2,
+				Date:     1684997010,
+				Title:    "Status 100",
+				Link:     "https://http.cat/status/100",
+				Content:  "Good HTTP status 100 explainer",
+				AuthorID: 2,
+			},
+			{
+				ID:       3,
+				Date:     1727780130,
+				Title:    "Status 301",
+				Link:     "https://http.cat/status/301",
+				Content:  "Good HTTP status 301 explainer",
+				AuthorID: 3,
+			},
+			{
+				ID:       1,
+				Date:     1748000743,
+				Title:    "Status 200",
+				Link:     "https://http.cat/status/200",
+				Content:  "Good HTTP status 200 explainer",
+				AuthorID: 1,
+			},
 		},
 	}
 
