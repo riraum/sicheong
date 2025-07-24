@@ -17,10 +17,10 @@ func noTimeStamps(Post Posts) {
 }
 
 func TestAll(t *testing.T) {
-	testDBPath := filepath.Join(t.TempDir(), "test.db")
+	testDB := filepath.Join(t.TempDir(), "test.db")
 
-	d, err := New(testDBPath)
-	log.Print(testDBPath)
+	d, err := New(testDB)
+	log.Print(testDB)
 
 	if err != nil {
 		log.Fatal(err)
