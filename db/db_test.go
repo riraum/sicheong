@@ -17,7 +17,7 @@ func noTimeStamps(Post Posts) {
 }
 
 func TestAll(t *testing.T) {
-	testDBPath := fmt.Sprint(t.TempDir() + "sq.db")
+	testDBPath := fmt.Sprint(t.TempDir() + "/sq.db")
 
 	d, err := New(testDBPath)
 	log.Print(testDBPath)
