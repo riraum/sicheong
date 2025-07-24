@@ -1,8 +1,8 @@
 package db
 
 import (
-	"fmt"
 	"log"
+	"path/filepath"
 	"reflect"
 	"testing"
 	"time"
@@ -17,7 +17,7 @@ func noTimeStamps(Post Posts) {
 }
 
 func TestAll(t *testing.T) {
-	testDBPath := fmt.Sprint(t.TempDir(), "/sq.db")
+	testDBPath := filepath.Join(t.TempDir(), "test.db")
 
 	d, err := New(testDBPath)
 	log.Print(testDBPath)
