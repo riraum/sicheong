@@ -4,16 +4,15 @@ import (
 	"log"
 	"os"
 	"testing"
-	"time"
 
 	_ "github.com/mattn/go-sqlite3" //revive be gone
 )
 
-func noTimeStamps(Post Posts) {
-	for i := range Post.Posts {
-		Post.Posts[i].ParsedDate = time.Time{}
-	}
-}
+// func noTimeStamps(Post Posts) {
+// 	for i := range Post.Posts {
+// 		Post.Posts[i].ParsedDate = time.Time{}
+// 	}
+// }
 
 func TestAll(t *testing.T) {
 	testFile, err := os.CreateTemp("", "testFile")
