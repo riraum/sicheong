@@ -31,7 +31,6 @@ func New(dbPath string) (DB, error) {
 	// 		return DB{}, fmt.Errorf("failed to create db file %w", err)
 	// 	}
 	// }
-
 	d, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		return DB{}, fmt.Errorf("failed to open sql %w", err)
