@@ -2,8 +2,10 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
+	"os"
 
 	_ "github.com/mattn/go-sqlite3" //revive be gone
 )
@@ -25,6 +27,12 @@ type DB struct {
 }
 
 func New(dbPath string) (DB, error) {
+	if _, err := os.Stat(dbPath); errors.Is(err, os.ErrNotExist) {
+		if _, err = os.Create(dbPath); err != nil {
+			return DB{}, fmt.Errorf("failed to create db file %w", err)
+		}
+	}
+
 	d, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		return DB{}, fmt.Errorf("failed to open sql %w", err)
