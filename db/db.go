@@ -27,13 +27,14 @@ type DB struct {
 }
 
 func New(dbPath string) (DB, error) {
+	testDBPath := "litefs/test.db"
 	if _, err := os.Stat(dbPath); errors.Is(err, os.ErrNotExist) {
-		if _, err = os.Create(dbPath); err != nil {
+		if _, err = os.Create(testDBPath); err != nil {
 			return DB{}, fmt.Errorf("failed to create db file %w", err)
 		}
 	}
 
-	d, err := sql.Open("sqlite3", dbPath)
+	d, err := sql.Open("sqlite3", testDBPath)
 	if err != nil {
 		return DB{}, fmt.Errorf("failed to open sql %w", err)
 	}
