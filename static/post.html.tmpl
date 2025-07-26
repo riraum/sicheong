@@ -34,16 +34,16 @@
   </form>
   <form action="/post/{{.Post.ID}}" method="POST" novalidate>
     <div>
-      <input type="text" name="title" required value="{{.Post.Title}}"/>
+      <input type="text" name="title" required aria-required="true" value="{{.Post.Title}}"/>
     </div>
     <div>
-      <input type="date" name="date" required value="{{.Today.Format "2006-01-02"}}"/>
+      <input type="date" name="date" required aria-required="true" value="{{.Today.Format "2006-01-02"}}"/>
     </div>
     <div>
-      <input type="text" name="link" required value="{{.Post.Link}}"/>
+      <input type="text" name="link" required aria-required="true" value="{{.Post.Link}}"/>
     </div>
     <div>
-      <input type="text" name="content" required value="{{.Post.Content}}"/>
+      <input type="text" name="content" required aria-required="true" value="{{.Post.Content}}"/>
     </div>
     <div>
       <input type="submit" value="Edit" />

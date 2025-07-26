@@ -19,8 +19,8 @@
     <form action="/login" method="POST" novalidate>
     <fieldset class="grid">
 <div>
-    <input type="text" name="author" required placeholder="author name"/>
-    <input type="password" name="password" required placeholder="password" />
+    <input type="text" name="author" required aria-required="true" placeholder="author name"/>
+    <input type="password" name="password" required aria-required="true" placeholder="password" />
 </div>
 
 <div>
@@ -31,7 +31,7 @@
 
   <div>
       <a href="/">
-       <button class="button-scheme">Back to index</button>
+       <button class="button-scheme" title="Navigate to index" aria-label="auto">Back to index</button>
       </a>
   </div>
   <button class="set-theme" id="set-theme" title="Set dark & light theme" aria-label="auto" aria-live="polite">

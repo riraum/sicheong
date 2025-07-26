@@ -23,7 +23,7 @@
         </a>
         {{else}}
         <a href="login">
-<button class="button-scheme">Login</button>
+<button class="button-scheme" title="Navigate to login" aria-label="auto">Login</button>
         </a>
         {{end}}
     </div>
@@ -49,16 +49,16 @@
   Create new post
   <form action="/post" method="POST" novalidate>
     <div>
-      <input type="text" name="title" required placeholder="enter title"/>
+      <input type="text" name="title" required aria-required="true" placeholder="enter title" aria-label="Fill in title"/>
     </div>
     <div>
-      <input type="date" name="date" required value="{{.Today.Format "2006-01-02"}}" />
+      <input type="date" name="date" required aria-required="true" value="{{.Today.Format "2006-01-02"}}" />
     </div>
     <div>
-      <input type="text" name="link" required placeholder="enter link"/>
+      <input type="text" name="link" required aria-required="true" placeholder="enter link"/>
     </div>
     <div>
-      <input type="text" name="content" required placeholder="enter content"/>
+      <input type="text" name="content" required aria-required="true" placeholder="enter content"/>
     </div>
     <div>
       <input type="submit" value="Submit" />
