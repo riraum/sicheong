@@ -25,30 +25,36 @@ type DB struct {
 }
 
 func New(dbPath string) (DB, error) {
+	// testDBPath := "litefs/test.db"
+	// if _, err := os.Stat(dbPath); errors.Is(err, os.ErrNotExist) {
+	// 	if _, err = os.Create(dbPath); err != nil {
+	// 		return DB{}, fmt.Errorf("failed to create db file %w", err)
+	// 	}
+	// }
 	d, err := sql.Open("sqlite3", dbPath)
 	if err != nil {
 		return DB{}, fmt.Errorf("failed to open sql %w", err)
 	}
 
-	if err = createTables(d); err != nil {
-		return DB{}, fmt.Errorf("failed to create tables %w", err)
-	}
+	// if err = createTables(d); err != nil {
+	// 	return DB{}, fmt.Errorf("failed to create tables %w", err)
+	// }
 
 	return DB{d}, nil
 }
 
-func createTables(d *sql.DB) error {
+func createTables(d DB) error {
 	stmt := `create table if not exists authors
 	(id integer not null primary key, name text, password text)`
 
-	if _, err := d.Exec(stmt); err != nil {
+	if _, err := d.client.Exec(stmt); err != nil {
 		return fmt.Errorf("%w: %s", err, stmt)
 	}
 
 	stmt = `create table if not exists posts
 		(id integer not null primary key, date	integer, title text, link text, content text, author integer)`
 
-	if _, err := d.Exec(stmt); err != nil {
+	if _, err := d.client.Exec(stmt); err != nil {
 		return fmt.Errorf("%w: %s",
 			err, stmt)
 	}
@@ -57,6 +63,10 @@ func createTables(d *sql.DB) error {
 }
 
 func (d DB) Fill() error {
+	if err := createTables(d); err != nil {
+		return fmt.Errorf("failed to create tables %w", err)
+	}
+
 	authors := []Author{
 		{
 			Name:     "Alpha",

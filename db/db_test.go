@@ -2,7 +2,6 @@ package db
 
 import (
 	"log"
-	"os"
 	"path/filepath"
 	"reflect"
 	"testing"
@@ -17,45 +16,22 @@ func noTimeStamps(Post Posts) {
 	}
 }
 
-func TestTest(t *testing.T) {
-	testPath := filepath.Join(t.TempDir(), "file")
-	if err := os.WriteFile(testPath, []byte("test"), 0644); err != nil {
-		t.Fatalf("err writing: %v", err)
-	}
-
-	data, err := os.ReadFile(testPath)
-	if err != nil {
-		t.Fatalf("err reading: %v", err)
-	}
-
-	if string(data) != "test" {
-		t.Fatalf("missmatch data test: %v", err)
-	}
-}
-
 func TestAll(t *testing.T) {
 	testDB := filepath.Join(t.TempDir(), "test.db")
 
 	d, err := New(testDB)
-	log.Print(testDB)
-
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	// _, err = d.client.Query("select ID, Date, Title, Link, Content, Author from posts")
-	// if err != nil {
-	// 	t.Errorf("error selecting rows %v", err)
-	// }
 
 	if err = d.Fill(); err != nil {
 		t.Errorf("error filling db: %v", err)
 	}
 
 	par := Params{
-		// Sort:      "date",
-		// Direction: "asc",
-		// Author:      "",
+		Sort:      "date",
+		Direction: "asc",
+		Author:    "",
 	}
 
 	got, err := d.ReadPosts(par)
