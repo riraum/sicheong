@@ -16,7 +16,7 @@ func TestAllHttp(t *testing.T) {
 
 	RootDir := t.TempDir()
 
-	d, err := db.New(t.TempDir())
+	d, err := db.New(t.TempDir() + "test.db")
 	if err != nil {
 		log.Fatalf("error creating db: %v", err)
 	}
