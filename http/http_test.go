@@ -38,7 +38,7 @@ func TestAllHttp(t *testing.T) {
 
 	// mux := s.SetupMux()
 	// Create a testing server with the ServeMux
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {}))
+	ts := httptest.NewServer(http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {}))
 	defer ts.Close()
 
 	// Test GET request
