@@ -33,7 +33,7 @@ type InitialDB struct {
 
 func New(db InitialDB) (DB, error) {
 	if _, err := os.Stat(db.Directory); errors.Is(err, os.ErrNotExist) {
-		if err := os.Mkdir(db.Directory, 0755); err != nil {
+		if err := os.Mkdir(db.Directory, 0750); err != nil {
 			return DB{}, fmt.Errorf("failed to create dir %w", err)
 		}
 	}
