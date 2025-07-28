@@ -22,13 +22,16 @@ func main() {
 		log.Fatalf("key fail: %v", err)
 	}
 
-	dbPath := "litefs/sq.db"
+	dbPrefs := db.InitialDB{
+		Directory: "litefs",
+		Name:      "sq.db",
+	}
 
 	// Uncomment to reset/remove db.
 	// TODO: make this easier to run, maybe CLI flag.
 	// os.Remove(dbPath)
 
-	d, err := db.New(dbPath)
+	d, err := db.New(dbPrefs)
 	if err != nil {
 		log.Printf("failed to open db %v", err)
 	}

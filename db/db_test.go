@@ -2,7 +2,6 @@ package db
 
 import (
 	"log"
-	"path/filepath"
 	"reflect"
 	"testing"
 	"time"
@@ -17,7 +16,10 @@ func noTimeStamps(Post Posts) {
 }
 
 func TestAll(t *testing.T) {
-	testDB := filepath.Join(t.TempDir(), "test.db")
+	testDB := InitialDB{
+		Directory: t.TempDir(),
+		Name:      "test.db",
+	}
 
 	d, err := New(testDB)
 	if err != nil {
