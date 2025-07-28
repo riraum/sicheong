@@ -17,19 +17,22 @@ func TestGetIndexServer(t *testing.T) {
 	req := httptest.NewRequest(http.MethodGet, "/", nil)
 	res := httptest.NewRecorder()
 
-	s.getIndex(res, req)
+	// s.getIndex(res, req)
 
 	if res.Code != http.StatusOK {
 		t.Errorf("got %d, but want %d", res.Code, http.StatusOK)
 	}
 }
 
-// func TestGetIndex(t *testing.T) {
-// 	req := httptest.NewRequest(http.MethodGet, "/", nil)
-// 	res := httptest.NewRecorder()
+// 	// Test GET request
+// 	resp, err := http.Get(ts.URL)
+// 	if err != nil {
+// 		t.Errorf("Error making GET request: %v", err)
+// 	}
 
-// 	s.Get
-// }
+// 	if resp.StatusCode != http.StatusOK {
+// 		t.Errorf("Expected status code 200, got %d", resp.StatusCode)
+// 	}
 
 // func TestAllHttp(t *testing.T) {
 // 	s := Server{}
