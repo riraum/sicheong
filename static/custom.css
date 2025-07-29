@@ -51,9 +51,23 @@ input,
 select,
 textarea,
 [type="submit"] {
-    background: #ffcb004a;
+    /* background: #ffcb004a; */
     background-color: #ffcb004a;
     color: #1f68a8;
+    border-color: black;
+}
+
+[data-theme="dark"] {
+    button,
+    input,
+    select,
+    textarea,
+    [type="submit"] {
+        /* background: #5b4c5b91; */
+        background-color: #ffcb004a;
+        color: #b5b552;
+        border-color: white;
+    }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -62,8 +76,8 @@ textarea,
     select,
     textarea,
     [type="submit"] {
+        /* background: #5b4c5b91; */
         background-color: #ffcb004a;
-        background: #5b4c5b91;
         color: #b5b552;
         border-color: white;
     }
