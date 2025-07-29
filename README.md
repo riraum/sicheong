@@ -36,7 +36,6 @@ Requires
 
 Then
 - Clone repo
-- Create `litefs` directory for local usage
 - Run it with `go run main.go`
 
 For deployment on fly.io

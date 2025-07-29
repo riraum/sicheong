@@ -2,8 +2,11 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3" //revive be gone
 )
@@ -24,21 +27,36 @@ type DB struct {
 	client *sql.DB
 }
 
-func New(dbPath string) (DB, error) {
-	// testDBPath := "litefs/test.db"
-	// if _, err := os.Stat(dbPath); errors.Is(err, os.ErrNotExist) {
-	// 	if _, err = os.Create(dbPath); err != nil {
-	// 		return DB{}, fmt.Errorf("failed to create db file %w", err)
-	// 	}
-	// }
-	d, err := sql.Open("sqlite3", dbPath)
+type DBCfg struct {
+	Directory    string
+	Name         string
+	IsTest       bool
+	IsFirstStart bool
+}
+
+func New(db DBCfg) (DB, error) {
+	if _, err := os.Stat(db.Directory); errors.Is(err, os.ErrNotExist) {
+		if err := os.Mkdir(db.Directory, 0750); err != nil {
+			return DB{}, fmt.Errorf("failed to create dir %w", err)
+		}
+	}
+
+	if _, err := os.Stat(filepath.Join(db.Directory, db.Name)); errors.Is(err, os.ErrNotExist) && !db.IsTest {
+		db.IsFirstStart = true
+	}
+
+	d, err := sql.Open("sqlite3", filepath.Join(db.Directory, db.Name))
 	if err != nil {
 		return DB{}, fmt.Errorf("failed to open sql %w", err)
 	}
 
-	// if err = createTables(d); err != nil {
-	// 	return DB{}, fmt.Errorf("failed to create tables %w", err)
-	// }
+	if db.IsFirstStart {
+		err = DB{d}.Fill()
+		if err != nil {
+			return DB{}, fmt.Errorf("failed to fill posts %w", err)
+		}
+		return DB{d}, nil
+	}
 
 	return DB{d}, nil
 }
