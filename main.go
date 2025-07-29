@@ -22,7 +22,7 @@ func main() {
 		log.Fatalf("key fail: %v", err)
 	}
 
-	dbPrefs := db.InitialDB{
+	dbPrefs := db.DBCfg{
 		Directory: "litefs",
 		Name:      "sq.db",
 	}
