@@ -78,6 +78,16 @@ textarea,
         color: #b5b552;
         border-color: white;
     }
+
+    [data-theme="light"] button,
+    input,
+    select,
+    textarea,
+    [type="submit"] {
+        background-color: #ffcb004a;
+        color: #30333e;
+        border-color: black;
+    }
 }
 
 .set-theme {
