@@ -28,7 +28,7 @@
 .button-scheme,
 .button-scheme[data-theme="light"] {
     background: #ffcb004a;
-    color: #dadf34;
+    color: #424235;
     border-color: black;
 }
 
@@ -51,9 +51,21 @@ input,
 select,
 textarea,
 [type="submit"] {
-    background: #ffcb004a;
     background-color: #ffcb004a;
-    color: #1f68a8;
+    color: #30333e;
+    border-color: black;
+}
+
+[data-theme="dark"] {
+    button,
+    input,
+    select,
+    textarea,
+    [type="submit"] {
+        background-color: #7d78644a;
+        color: #b5b552;
+        border-color: white;
+    }
 }
 
 @media (prefers-color-scheme: dark) {
@@ -63,7 +75,6 @@ textarea,
     textarea,
     [type="submit"] {
         background-color: #ffcb004a;
-        background: #5b4c5b91;
         color: #b5b552;
         border-color: white;
     }
