@@ -25,7 +25,7 @@ func main() {
 	dbPrefs := db.DBCfg{
 		Directory: "litefs",
 		Name:      "sq.db",
-		Test:      false,
+		IsTest:    false,
 	}
 
 	// Uncomment to reset/remove db.
