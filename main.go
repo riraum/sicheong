@@ -25,12 +25,12 @@ func main() {
 	dbPrefs := db.DBCfg{
 		Directory: "litefs",
 		Name:      "sq.db",
-		Test:      false,
+		IsTest:    false,
 	}
 
 	// Uncomment to reset/remove db.
 	// TODO: make this easier to run, maybe CLI flag.
-	// os.Remove(dbPath)
+	// os.Remove(filepath.Join(dbPrefs.Directory, dbPrefs.Name))
 
 	d, err := db.New(dbPrefs)
 	if err != nil {

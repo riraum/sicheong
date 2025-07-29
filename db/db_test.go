@@ -19,7 +19,7 @@ func TestAll(t *testing.T) {
 	testDB := DBCfg{
 		Directory: t.TempDir(),
 		Name:      "test.db",
-		Test:      true,
+		IsTest:    true,
 	}
 
 	d, err := New(testDB)
