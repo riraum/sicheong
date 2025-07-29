@@ -29,19 +29,17 @@ type DB struct {
 type DBCfg struct {
 	Directory string
 	Name      string
-	// InitialDB bool
+	Test      bool
 }
 
 func New(db DBCfg) (DB, error) {
-	// var dbOut DB
 	if _, err := os.Stat(db.Directory); errors.Is(err, os.ErrNotExist) {
 		if err := os.Mkdir(db.Directory, 0750); err != nil {
 			return DB{}, fmt.Errorf("failed to create dir %w", err)
 		}
 	}
 
-	if _, err := os.Stat(db.Directory + "/" + db.Name); errors.Is(err, os.ErrNotExist) {
-		// db.InitialDB = true
+	if _, err := os.Stat(db.Directory + "/" + db.Name); errors.Is(err, os.ErrNotExist) && !db.Test {
 		d, err := sql.Open("sqlite3", (db.Directory + "/" + db.Name))
 		if err != nil {
 			return DB{}, fmt.Errorf("failed to open sql %w", err)

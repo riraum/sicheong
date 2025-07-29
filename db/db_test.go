@@ -16,9 +16,10 @@ func noTimeStamps(Post Posts) {
 }
 
 func TestAll(t *testing.T) {
-	testDB := InitialDB{
+	testDB := DBCfg{
 		Directory: t.TempDir(),
 		Name:      "test.db",
+		Test:      true,
 	}
 
 	d, err := New(testDB)
