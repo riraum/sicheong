@@ -28,9 +28,8 @@ type DB struct {
 }
 
 type DBCfg struct {
-	Directory string
-	Name      string
-	// FilePath   filepath.Join(*DBDBCfg.)
+	Directory    string
+	Name         string
 	IsTest       bool
 	IsFirstStart bool
 }
