@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3" //revive be gone
 )
 
@@ -85,18 +86,23 @@ func (d DB) Fill() error {
 		return fmt.Errorf("failed to create tables %w", err)
 	}
 
+	err := godotenv.Load()
+	if err != nil {
+		return fmt.Errorf("failed to load env %w", err)
+	}
+
 	authors := []Author{
 		{
 			Name:     "Alpha",
-			Password: "abc",
+			Password: os.Getenv("ALPHA_PW"),
 		},
 		{
 			Name:     "Bravo",
-			Password: "abc",
+			Password: os.Getenv("BETA_PW"),
 		},
 		{
 			Name:     "Charlie",
-			Password: "abc",
+			Password: os.Getenv("CHARLIE_PW"),
 		},
 	}
 	for _, a := range authors {

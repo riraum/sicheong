@@ -87,3 +87,10 @@ jobs:
         uses: securego/gosec@v2.22.5
         with:
           args: ./...
+
+  SetAuthorPassword:
+    runs-on: ubuntu-latest
+    env:
+      ALPHA_PW: ${{ secrets.ALPHA_PW}}
+      BETA_PW: ${{ secrets.BETA_PW}}
+      CHARLIE_PW: ${{ secrets.CHARLIE_PW}}
