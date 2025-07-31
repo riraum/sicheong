@@ -2,4 +2,5 @@
 coverage*
 litefs/*
 sq.db
-.env*
+.env
+.env.keys
