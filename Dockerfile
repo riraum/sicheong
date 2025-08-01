@@ -5,11 +5,12 @@ WORKDIR /usr/src/app
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
+#### Copy LiteFS cfg & env cfg explicitly
 COPY litefs.yml .
+COPY .env* .
 
 COPY . .
 RUN go build -v -o /run-app .
-
 
 FROM debian:bookworm
 
