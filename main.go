@@ -4,6 +4,8 @@ import (
 	"embed"
 	"html/template"
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/riraum/si-cheong/db"
 	"github.com/riraum/si-cheong/http"
@@ -16,6 +18,7 @@ var t = template.Must(template.ParseFS(static, "static/*"))
 
 func main() {
 	log.Print("Hello si-cheong user")
+	log.Println("ALPHA_PW:", os.Getenv("ALPHA_PW"))
 
 	key, err := security.NewEncryptionKey()
 	if err != nil {
@@ -30,7 +33,7 @@ func main() {
 
 	// Uncomment to reset/remove db.
 	// TODO: make this easier to run, maybe CLI flag.
-	// os.Remove(filepath.Join(dbPrefs.Directory, dbPrefs.Name))
+	os.Remove(filepath.Join(dbPrefs.Directory, dbPrefs.Name))
 
 	d, err := db.New(dbPrefs)
 	if err != nil {

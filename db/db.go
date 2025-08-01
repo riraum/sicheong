@@ -90,17 +90,20 @@ func (d DB) Fill() error {
 	// 	return fmt.Errorf("failed to load env %w", err)
 	// }
 
+	ALPHA_PW_DECRYPTED := os.Getenv("ALPHA_PW")
+	log.Println("print decrypted A PW", ALPHA_PW_DECRYPTED)
+
 	authors := []Author{
 		{
-			Name:     "Alpha",
-			Password: os.Getenv("ALPHA_PW"),
+			Name:     "A",
+			Password: ALPHA_PW_DECRYPTED,
 		},
 		{
-			Name:     "Bravo",
-			Password: os.Getenv("BETA_PW"),
+			Name:     "B",
+			Password: os.Getenv("BRAVO_PW"),
 		},
 		{
-			Name:     "Charlie",
+			Name:     "C",
 			Password: os.Getenv("CHARLIE_PW"),
 		},
 	}
@@ -114,7 +117,7 @@ func (d DB) Fill() error {
 	posts := []Post{
 		{
 			Date:     1748000743, //nolint:mnd
-			Title:    "Status 200",
+			Title:    "LOG DOTENV Status 200",
 			Link:     "https://http.cat/status/200",
 			Content:  "Good HTTP status 200 explainer",
 			AuthorID: 1,
