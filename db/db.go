@@ -117,7 +117,7 @@ func (d DB) Fill() error {
 	posts := []Post{
 		{
 			Date:     1748000743, //nolint:mnd
-			Title:    "LOG DOTENV Status 200",
+			Title:    "DOTENV SCRIPT Status 200",
 			Link:     "https://http.cat/status/200",
 			Content:  "Good HTTP status 200 explainer",
 			AuthorID: 1,
