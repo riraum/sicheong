@@ -18,7 +18,6 @@ var t = template.Must(template.ParseFS(static, "static/*"))
 
 func main() {
 	log.Print("Hello si-cheong user")
-	log.Println("ALPHA_PW:", os.Getenv("ALPHA_PW"))
 
 	key, err := security.NewEncryptionKey()
 	if err != nil {
