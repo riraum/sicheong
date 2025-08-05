@@ -90,15 +90,15 @@ func (d DB) Fill() error {
 	// 	return fmt.Errorf("failed to load env %w", err)
 	// }
 
-	// ALPHA_PW_DECRYPTED := os.Getenv("ALPHA_PW")
-	// log.Println("print decrypted A PW", ALPHA_PW_DECRYPTED)
+	ALPHA_PW_DECRYPTED := os.Getenv("ALPHA_PW")
+	log.Println("print decrypted A PW", ALPHA_PW_DECRYPTED)
 	// log.Printf("ALPHA_PW length: %d", len(ALPHA_PW_DECRYPTED))
 	// log.Printf("ALPHA_PW bytes: %v", []byte(ALPHA_PW_DECRYPTED))
 
 	authors := []Author{
 		{
 			Name:     "Alpha",
-			Password: os.Getenv("ALPHA_PW"),
+			Password: ALPHA_PW_DECRYPTED,
 		},
 		{
 			Name:     "Bravo",
@@ -192,6 +192,7 @@ func (d DB) NewAuthor(a Author) error {
 	if _, err := d.client.Exec("insert into authors(name, password) values (?,?)", a.Name, a.Password); err != nil {
 		return fmt.Errorf("failed to insert %w", err)
 	}
+	log.Println("NewAuthor:", a)
 
 	return nil
 }
