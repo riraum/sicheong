@@ -4,6 +4,8 @@ import (
 	"embed"
 	"html/template"
 	"log"
+	"os"
+	"path/filepath"
 
 	"github.com/riraum/si-cheong/db"
 	"github.com/riraum/si-cheong/http"
@@ -30,7 +32,7 @@ func main() {
 
 	// Uncomment to reset/remove db.
 	// TODO: make this easier to run, maybe CLI flag.
-	// os.Remove(filepath.Join(dbPrefs.Directory, dbPrefs.Name))
+	os.Remove(filepath.Join(dbPrefs.Directory, dbPrefs.Name))
 
 	d, err := db.New(dbPrefs)
 	if err != nil {

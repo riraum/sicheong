@@ -1,0 +1,4 @@
+# .dockerignore
+.env.keys
+.env
+.env.local

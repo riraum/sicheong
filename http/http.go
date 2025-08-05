@@ -85,6 +85,8 @@ func (s Server) authenticated(r *http.Request) (db.Author, bool, error) {
 		return db.Author{}, false, fmt.Errorf("failed to cut string %w", err)
 	}
 
+	log.Println("print auth decrypted:", authorName, authorPassword)
+
 	if authorName == "" {
 		return db.Author{}, false, nil
 	}

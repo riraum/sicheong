@@ -85,18 +85,32 @@ func (d DB) Fill() error {
 		return fmt.Errorf("failed to create tables %w", err)
 	}
 
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	return fmt.Errorf("failed to load env %w", err)
+	// }
+
+	ALPHA_PW_DECRYPTED := os.Getenv("ALPHA_PW")
+	log.Println("print decrypted A PW", ALPHA_PW_DECRYPTED)
+	// log.Printf("ALPHA_PW length: %d", len(ALPHA_PW_DECRYPTED))
+	// log.Printf("ALPHA_PW bytes: %v", []byte(ALPHA_PW_DECRYPTED))
+
 	authors := []Author{
 		{
 			Name:     "Alpha",
-			Password: "abc",
+			Password: ALPHA_PW_DECRYPTED,
 		},
 		{
 			Name:     "Bravo",
-			Password: "abc",
+			Password: os.Getenv("BRAVO_PW"),
 		},
 		{
 			Name:     "Charlie",
-			Password: "abc",
+			Password: os.Getenv("CHARLIE_PW"),
+		},
+		{
+			Name:     "Delta",
+			Password: "abcd",
 		},
 	}
 	for _, a := range authors {
@@ -105,6 +119,8 @@ func (d DB) Fill() error {
 			log.Fatalf("create new author in db: %v", err)
 		}
 	}
+
+	log.Println("author struct:", authors)
 
 	posts := []Post{
 		{
@@ -176,6 +192,7 @@ func (d DB) NewAuthor(a Author) error {
 	if _, err := d.client.Exec("insert into authors(name, password) values (?,?)", a.Name, a.Password); err != nil {
 		return fmt.Errorf("failed to insert %w", err)
 	}
+	log.Println("NewAuthor:", a)
 
 	return nil
 }

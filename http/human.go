@@ -280,6 +280,8 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteStrictMode,
 	}
 
+	log.Println("print postlogin:", author)
+
 	// to be extra safe, conditional auth check, should remove once more certain of check logic
 	if authorInput == author.Name && passwordInput == author.Password {
 		http.SetCookie(w, &c)
