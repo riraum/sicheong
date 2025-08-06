@@ -6,7 +6,7 @@ Before, focused on the basics in Go and wrote a Hackernews CLI.
 Had also done basic, static sites, with HTML, CSS and JavaScript.
 Now, a simple CRUD project, in Go.
 
-The Pico CSS framework is used, instead of writing my own CSS rules as before.
+Wrote some basic CSS rules and for the rest used Pico CSS framework.
 Instead a lot of time was used to learn about authentication and deployment.
 
 Authentication should has quite some room for improvement, but deployment feels alright.
