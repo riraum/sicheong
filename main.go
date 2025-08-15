@@ -12,7 +12,7 @@ import (
 
 //go:embed static/*
 var static embed.FS
-var t = template.Must(template.ParseFS(static, "static/*"))
+var t = template.Must(template.ParseFS(static, "static/template/*"))
 
 func main() {
 	log.Print("Hello si-cheong user")
