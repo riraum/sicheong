@@ -125,7 +125,7 @@ func (s Server) viewPost(w http.ResponseWriter, r *http.Request) {
 		ap.Today = time.Now()
 	}
 
-	if err = s.Template.ExecuteTemplate(w, "template/post.html.tmpl", ap); err != nil {
+	if err = s.Template.ExecuteTemplate(w, "post.html.tmpl", ap); err != nil {
 		s.handleHTMLError(w, "execute", http.StatusInternalServerError, err)
 		return
 	}
