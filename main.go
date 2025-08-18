@@ -10,9 +10,9 @@ import (
 	"github.com/riraum/si-cheong/security"
 )
 
-//go:embed static/*
-var static embed.FS
-var t = template.Must(template.ParseFS(static, "static/*"))
+//go:embed static/* template/*
+var e embed.FS
+var t = template.Must(template.ParseFS(e, "template/*"))
 
 func main() {
 	log.Print("Hello si-cheong user")
@@ -38,7 +38,7 @@ func main() {
 	}
 
 	s := http.Server{
-		EmbedRootDir: static,
+		EmbedRootDir: e,
 		DB:           d,
 		Template:     t,
 		Key:          key,
