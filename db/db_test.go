@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	_ "github.com/mattn/go-sqlite3" //revive be gone
+	_ "github.com/tursodatabase/turso-go" //revive be gone
 )
 
 func noTimeStamps(Post Posts) {
