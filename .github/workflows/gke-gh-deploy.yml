@@ -42,6 +42,7 @@ on:
 
 env:
   PROJECT_ID: "sicheong-1" # TODO: update to your Google Cloud project ID
+  PROJECT_NUMBER: "441148660907"
   GAR_LOCATION: "asia-northeast3" # TODO: update to your region
   GKE_CLUSTER: "sicheong-cluster" # TODO: update to your cluster name
   GKE_ZONE: "asia-northeast3" # TODO: update to your cluster zone
@@ -72,8 +73,10 @@ jobs:
         name: "Authenticate to Google Cloud"
         uses: "google-github-actions/auth@f112390a2df9932162083945e46d439060d66ec2" # google-github-actions/auth@v2
         with:
-          workload_identity_provider: "${{ env.WORKLOAD_IDENTITY_PROVIDER }}"
-          service_account: "my-service-account@sicheong-1.iam.gserviceaccount.com"
+          create_credentials_file: true
+          token_format: access_token
+          workload_identity_provider: projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-actions/providers/github-actions-oidc
+          service_account: github-actions-workflow@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
 
       # Authenticate Docker to Google Cloud Artifact Registry
       - name: "Docker Auth"
