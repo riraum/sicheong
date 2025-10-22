@@ -36,9 +36,9 @@ name: "Build and Deploy to GKE"
 
 on:
   - push
-  - pull_request
-    # branches:
-    #  - "master"
+  # - pull_request
+  # branches:
+  #  - "master"
 
 env:
   PROJECT_ID: "sicheong-1" # TODO: update to your Google Cloud project ID
