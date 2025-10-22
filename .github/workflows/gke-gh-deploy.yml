@@ -48,8 +48,8 @@ env:
   GKE_ZONE: "asia-northeast3" # TODO: update to your cluster zone
   DEPLOYMENT_NAME: "sicheong" # TODO: update to your deployment name
   REPOSITORY: "sicheong-docker-repo" # TODO: update to your Artifact Registry docker repository name
-  IMAGE: "sicheong"
-  WORKLOAD_IDENTITY_PROVIDER: "projects/441148660907/locations/global/workloadIdentityPools/github/providers/my-repo" # TODO: update to your workload identity provider
+  IMAGE: "sicheong-docker-repo"
+  # WORKLOAD_IDENTITY_PROVIDER: "projects/441148660907/locations/global/workloadIdentityPools/github/providers/my-repo" # TODO: update to your workload identity provider
 
 jobs:
   setup-build-publish-deploy:
