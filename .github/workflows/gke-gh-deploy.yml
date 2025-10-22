@@ -35,19 +35,21 @@
 name: "Build and Deploy to GKE"
 
 on:
-  push:
-    branches:
-      - "$default-branch"
+  - push
+  - pull_request
+    # branches:
+    #  - "master"
 
 env:
   PROJECT_ID: "sicheong-1" # TODO: update to your Google Cloud project ID
+  PROJECT_NUMBER: "441148660907"
   GAR_LOCATION: "asia-northeast3" # TODO: update to your region
   GKE_CLUSTER: "sicheong-cluster" # TODO: update to your cluster name
   GKE_ZONE: "asia-northeast3" # TODO: update to your cluster zone
   DEPLOYMENT_NAME: "sicheong" # TODO: update to your deployment name
   REPOSITORY: "sicheong-docker-repo" # TODO: update to your Artifact Registry docker repository name
-  IMAGE: "sicheong"
-  WORKLOAD_IDENTITY_PROVIDER: "projects/441148660907/locations/global/workloadIdentityPools/github/providers/my-repo" # TODO: update to your workload identity provider
+  IMAGE: "sicheong-docker-repo"
+  # WORKLOAD_IDENTITY_PROVIDER: "projects/441148660907/locations/global/workloadIdentityPools/github/providers/my-repo" # TODO: update to your workload identity provider
 
 jobs:
   setup-build-publish-deploy:
@@ -69,9 +71,12 @@ jobs:
       # including authenticating via a JSON credentials file.
       - id: "auth"
         name: "Authenticate to Google Cloud"
-        uses: "google-github-actions/auth@f112390a2df9932162083945e46d439060d66ec2" # google-github-actions/auth@v2
+        uses: "google-github-actions/auth@v0" # google-github-actions/auth@v2
         with:
-          workload_identity_provider: "${{ env.WORKLOAD_IDENTITY_PROVIDER }}"
+          create_credentials_file: true
+          token_format: access_token
+          workload_identity_provider: projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-actions/providers/github-actions-oidc
+          service_account: github-actions-workflow@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
 
       # Authenticate Docker to Google Cloud Artifact Registry
       - name: "Docker Auth"
@@ -85,6 +90,7 @@ jobs:
       - name: "Set up GKE credentials"
         uses: "google-github-actions/get-gke-credentials@6051de21ad50fbb1767bc93c11357a49082ad116" # google-github-actions/get-gke-credentials@v2
         with:
+          project_id: "${{ env.PROJECT_ID }}"
           cluster_name: "${{ env.GKE_CLUSTER }}"
           location: "${{ env.GKE_ZONE }}"
 
