@@ -73,12 +73,12 @@ jobs:
         name: "Authenticate to Google Cloud"
         uses: "google-github-actions/auth@f112390a2df9932162083945e46d439060d66ec2" # google-github-actions/auth@v2
         with:
-          # create_credentials_file: true
-          # token_format: access_token
-          # workload_identity_provider: projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-actions/providers/github-actions-oidc
-          # service_account: github-actions-workflow@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
+          create_credentials_file: true
+          token_format: access_token
+          workload_identity_provider: projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-actions/providers/github-actions-oidc
+          service_account: github-actions-workflow@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
           #
-          credentials_json: ${{ secrets.GCP_SA_KEY }}
+          # credentials_json: ${{ secrets.GCP_SA_KEY }}
 
       # Authenticate Docker to Google Cloud Artifact Registry
       - name: "Docker Auth"
@@ -92,7 +92,7 @@ jobs:
       - name: "Set up GKE credentials"
         uses: "google-github-actions/get-gke-credentials@6051de21ad50fbb1767bc93c11357a49082ad116" # google-github-actions/get-gke-credentials@v2
         with:
-          project_id: "${{ env.PROJECT_ID }}"
+          # project_id: "${{ env.PROJECT_ID }}"
           cluster_name: "${{ env.GKE_CLUSTER }}"
           location: "${{ env.GKE_ZONE }}"
 
