@@ -118,7 +118,6 @@ jobs:
           curl -sLo kustomize.tar.gz "$URL"
           tar -xzf kustomize.tar.gz
           chmod +x kustomize
-          # sudo mv kustomize /usr/local/bin/kustomize
           kustomize version
 
       # Deploy the Docker image to the GKE cluster
