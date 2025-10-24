@@ -13,12 +13,13 @@ FROM debian:bookworm
 COPY --from=builder /run-app /usr/local/bin/
 CMD ["run-app"]
 
-### LiteFS
-RUN apt-get update -y && apt-get install -y ca-certificates fuse3 sqlite3
+# Removed for GKE
+# ### LiteFS
+# RUN apt-get update -y && apt-get install -y ca-certificates fuse3 sqlite3
 
-COPY --from=flyio/litefs:0.5 /usr/local/bin/litefs /usr/local/bin/litefs
+# COPY --from=flyio/litefs:0.5 /usr/local/bin/litefs /usr/local/bin/litefs
 
-### Copy LiteFS cfg
-COPY --from=builder /usr/src/app/litefs.yml /etc/litefs.yml
+# ### Copy LiteFS cfg
+# COPY --from=builder /usr/src/app/litefs.yml /etc/litefs.yml
 
-ENTRYPOINT litefs mount
+# ENTRYPOINT litefs mount
