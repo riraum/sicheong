@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: sicheong
+spec:
+  selector:
+    app: sicheong
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8080
