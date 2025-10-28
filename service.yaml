@@ -5,7 +5,7 @@ metadata:
 spec:
   selector:
     app: sicheong
-  type: ClusterIP
+  type: LoadBalancer
   ports:
     - port: 80
       targetPort: 8080
