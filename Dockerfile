@@ -1,13 +1,12 @@
 ARG GO_VERSION=1
-FROM golang:${GO_VERSION}-bookworm as builder
+FROM --platform=$BUILDPLATFORM golang:${GO_VERSION}-bookworm AS builder
 
 WORKDIR /usr/src/app
 COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
 COPY . .
-RUN go build -v -o /run-app .
-
+RUN CGO_ENABLED=0 GOOS=linux go build -v -o /run-app .
 FROM debian:bookworm
 
 COPY --from=builder /run-app /usr/local/bin/
@@ -15,11 +14,11 @@ CMD ["run-app"]
 
 # To remove or adjust for GKE
 ### LiteFS
-RUN apt-get update -y && apt-get install -y ca-certificates fuse3 sqlite3
+# RUN apt-get update -y && apt-get install -y ca-certificates fuse3 sqlite3
 
-COPY --from=flyio/litefs:0.5 /usr/local/bin/litefs /usr/local/bin/litefs
+# COPY --from=flyio/litefs:0.5 /usr/local/bin/litefs /usr/local/bin/litefs
 
-### Copy LiteFS cfg
-COPY --from=builder /usr/src/app/litefs.yml /etc/litefs.yml
+# ### Copy LiteFS cfg
+# COPY --from=builder /usr/src/app/litefs.yml /etc/litefs.yml
 
-ENTRYPOINT litefs mount
+# ENTRYPOINT litefs mount
