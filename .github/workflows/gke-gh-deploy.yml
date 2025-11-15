@@ -41,14 +41,14 @@ on:
   #  - "master"
 
 env:
-  PROJECT_ID: "sicheong-1" # TODO: update to your Google Cloud project ID
+  PROJECT_ID: "sicheong" # TODO: update to your Google Cloud project ID
   PROJECT_NUMBER: "441148660907"
   GAR_LOCATION: "asia-northeast3" # TODO: update to your region
   GKE_CLUSTER: "sicheong-cluster" # TODO: update to your cluster name
   GKE_ZONE: "asia-northeast3" # TODO: update to your cluster zone
   DEPLOYMENT_NAME: "sicheong" # TODO: update to your deployment name
-  REPOSITORY: "sicheong-docker-repo" # TODO: update to your Artifact Registry docker repository name
-  IMAGE: "sicheong-docker-repo"
+  REPOSITORY: "sicheong-repo" # TODO: update to your Artifact Registry docker repository name
+  IMAGE: "sicheong"
   # WORKLOAD_IDENTITY_PROVIDER: "projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-actions/providers/github-actions-oidc" # TODO: update to your workload identity provider
 
 jobs:
