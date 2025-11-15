@@ -16,6 +16,6 @@ spec:
         - name: sicheong
           # Put the same base image path that your workflow will replace.
           # Using the env values from your workflow by default:
-          image: asia-northeast3-docker.pkg.dev/sicheong-1/sicheong-docker-repo/sicheong:latest
+          image: asia-northeast3-docker.pkg.dev/soy-ascent-473205-g4/sicheong-repo/sicheong:13
           ports:
             - containerPort: 8080
