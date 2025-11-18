@@ -42,7 +42,7 @@ on:
 
 env:
   PROJECT_ID: "sicheong" # TODO: update to your Google Cloud project ID
-  PROJECT_NUMBER: "441148660907"
+  PROJECT_NUMBER: "334566194741"
   GAR_LOCATION: "asia-northeast3" # TODO: update to your region
   GKE_CLUSTER: "sicheong-cluster" # TODO: update to your cluster name
   GKE_ZONE: "asia-northeast3" # TODO: update to your cluster zone
@@ -76,8 +76,8 @@ jobs:
           # workload_identity_provider: "${{ env.WORKLOAD_IDENTITY_PROVIDER }}"
           create_credentials_file: true
           token_format: access_token
-          workload_identity_provider: projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github-actions/providers/github-actions-oidc
-          service_account: github-actions-workflow@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
+          workload_identity_provider: projects/${{ env.PROJECT_NUMBER }}/locations/global/workloadIdentityPools/github/providers/my-repo
+          # service_account: github-actions-workflow@${{ env.PROJECT_ID }}.iam.gserviceaccount.com
           #
           # credentials_json: ${{ secrets.GCP_SA_KEY }}
 
