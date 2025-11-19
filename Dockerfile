@@ -6,11 +6,12 @@ COPY go.mod go.sum ./
 RUN go mod download && go mod verify
 
 COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -v -o /run-app .
-FROM debian:bookworm
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -v -o /run-app .
 
+FROM --platform=linux/amd64 debian:bookworm
 COPY --from=builder /run-app /usr/local/bin/
 CMD ["run-app"]
+
 
 # To remove or adjust for GKE
 ### LiteFS
