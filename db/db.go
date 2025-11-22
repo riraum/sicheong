@@ -8,7 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
-	_ "github.com/mattn/go-sqlite3" //revive be gone
+	_ "github.com/tursodatabase/turso-go" //revive be gone
 )
 
 type Author struct {
@@ -45,7 +45,7 @@ func New(db DBCfg) (DB, error) {
 		db.IsFirstStart = true
 	}
 
-	d, err := sql.Open("sqlite3", filepath.Join(db.Directory, db.Name))
+	d, err := sql.Open("turso", filepath.Join(db.Directory, db.Name))
 	if err != nil {
 		return DB{}, fmt.Errorf("failed to open sql %w", err)
 	}
