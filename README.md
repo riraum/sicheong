@@ -27,7 +27,8 @@ https://kentcdodds.com/blog/i-migrated-from-a-postgres-cluster-to-distributed-sq
 Other sources that helped apart from the Go documentation, are linked in the respective PRs.
 
 # External packages/assets used
-- Go sqlite driver: https://github.com/mattn/go-sqlite3
+- Turso Go SQLite driver: https://github.com/tursodatabase/turso-go
+  - Requires purego: https://github.com/ebitengine/purego
 - Pico CSS framework: https://picocss.com/
 
 # Install
