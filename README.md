@@ -46,6 +46,6 @@ For deployment on fly.io
 
 # Deployed:
 - On fly.io
-https://si-cheong.fly.dev/
+https://sicheong.fly.dev/
 - On render.com
 https://si-cheong.onrender.com/

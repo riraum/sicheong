@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sicheong
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sicheong
+  template:
+    metadata:
+      labels:
+        app: sicheong
+    spec:
+      containers:
+        - name: sicheong
+          # Put the same base image path that your workflow will replace.
+          # Using the env values from your workflow by default:
+          image: asia-northeast3-docker.pkg.dev/soy-ascent-473205-g4/sicheong-repo/sicheong:latest
+          # command: ["tail", "-f", "/dev/null"] # This line should be indented the same as 'image'
+          ports:
+            - containerPort: 8080
