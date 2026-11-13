@@ -277,6 +277,7 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 		Value:    base64.StdEncoding.EncodeToString(encryptedValue),
 		Path:     "/",
 		Secure:   true,
+		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 	}
 
@@ -294,8 +295,12 @@ func (s Server) postLogin(w http.ResponseWriter, r *http.Request) {
 
 func (s Server) getLogout(w http.ResponseWriter, r *http.Request) {
 	c := http.Cookie{
-		Name:  "authorName",
-		Value: "",
+		Name:     "authorName",
+		Value:    "",
+		Path:     "/",
+		Secure:   true,
+		HttpOnly: true,
+		SameSite: http.SameSiteStrictMode,
 	}
 
 	http.SetCookie(w, &c)
