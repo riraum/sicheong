@@ -204,8 +204,11 @@ func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
 
 func (s Server) getAPILogout(w http.ResponseWriter, _ *http.Request) {
 	c := http.Cookie{
-		Name:   "authorName",
-		MaxAge: 0,
+		Name:     "authorName",
+		MaxAge:   0,
+		Path:     "/",
+		Secure:   true,
+		SameSite: http.SameSiteStrictMode,
 	}
 
 	http.SetCookie(w, &c)
