@@ -50,3 +50,5 @@ For deployment on fly.io
 https://sicheong.fly.dev/
 - On render.com
 https://si-cheong.onrender.com/
+- On Google Cloud Computing (GCP)
+Deployed in the past on GCP's Google Kubernetes Engine (GKE)
