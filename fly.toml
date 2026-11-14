@@ -7,6 +7,7 @@ app = 'sicheong'
 primary_region = 'nrt'
 
 [build]
+dockerfile = "Dockerfile-litefs"
 
 [env]
   PORT = '8081'
