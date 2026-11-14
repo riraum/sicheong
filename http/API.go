@@ -3,6 +3,7 @@ package http
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -115,19 +116,25 @@ func (s Server) postAPIPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) editAPIPost(w http.ResponseWriter, r *http.Request) {
-	if _, ok, err := s.authenticated(r); !ok || err != nil {
-		handleJSONError(w, "not authenticated", http.StatusUnauthorized, err)
-		return
-	}
-
 	p, err := parsePostRValues(r)
 	if err != nil {
 		handleJSONError(w, "parse values", http.StatusInternalServerError, err)
 		return
 	}
 
+	existing, err := s.ownedPost(r, int(p.ID))
+	if err != nil {
+		handleJSONError(w, "edit post", ownerErrorStatus(err), err)
+		return
+	}
+
+	p.AuthorID = existing.AuthorID // never take the author from the request
+	if p.Date == 0 {
+		p.Date = existing.Date // keep the old date if none was sent
+	}
+
 	if p.Content == "" {
-		handleJSONError(w, "post is empty", http.StatusInternalServerError, err)
+		handleJSONError(w, "post is empty", http.StatusBadRequest, errors.New("empty content"))
 		return
 	}
 
