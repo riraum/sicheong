@@ -50,15 +50,11 @@ func New(db DBCfg) (DB, error) {
 		return DB{}, fmt.Errorf("failed to open sql %w", err)
 	}
 
-	if db.IsFirstStart {
-		err = DB{d}.Fill()
-		if err != nil {
-			return DB{}, fmt.Errorf("failed to fill posts %w", err)
+	if !db.IsFirstStart {
+		if err := createTables(DB{d}); err != nil {
+			return DB{}, fmt.Errorf("failed to create tables %w", err)
 		}
-
-		return DB{d}, nil
 	}
-
 	return DB{d}, nil
 }
 
@@ -76,6 +72,12 @@ func createTables(d DB) error {
 	if _, err := d.client.Exec(stmt); err != nil {
 		return fmt.Errorf("%w: %s",
 			err, stmt)
+	}
+
+	stmt = `create table if not exists votes (author integer not null references authors(id), post integer not null references posts(id), primary key (author, post))`
+
+	if _, err := d.client.Exec(stmt); err != nil {
+		return fmt.Errorf("%w: %s", err, stmt)
 	}
 
 	return nil
