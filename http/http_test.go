@@ -1,6 +1,7 @@
 package http
 
 import (
+	"html/template"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -34,6 +35,8 @@ func TestAllHttp(t *testing.T) {
 	if err != nil {
 		log.Fatalf("Failed to create new db %v", err)
 	}
+
+	s.Template = template.Must(template.ParseGlob("../template/*.tmpl"))
 
 	f, err := os.Create(path.Join(RootDir, "index.html"))
 	if err != nil {

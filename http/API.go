@@ -183,6 +183,7 @@ func (s Server) postAPILogin(w http.ResponseWriter, r *http.Request) {
 		Value:    base64.StdEncoding.EncodeToString(encryptedValue),
 		Path:     "/",
 		Secure:   true,
+		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 	}
 
@@ -208,6 +209,7 @@ func (s Server) getAPILogout(w http.ResponseWriter, _ *http.Request) {
 		MaxAge:   0,
 		Path:     "/",
 		Secure:   true,
+		HttpOnly: true,
 		SameSite: http.SameSiteStrictMode,
 	}
 

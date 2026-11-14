@@ -36,7 +36,7 @@ type DBCfg struct {
 
 func New(db DBCfg) (DB, error) {
 	if _, err := os.Stat(db.Directory); errors.Is(err, os.ErrNotExist) {
-		if err := os.Mkdir(db.Directory, 0750); err != nil {
+		if err := os.Mkdir(db.Directory, 0750); err != nil { //nolint:mnd
 			return DB{}, fmt.Errorf("failed to create dir %w", err)
 		}
 	}
@@ -55,6 +55,7 @@ func New(db DBCfg) (DB, error) {
 		if err != nil {
 			return DB{}, fmt.Errorf("failed to fill posts %w", err)
 		}
+
 		return DB{d}, nil
 	}
 
