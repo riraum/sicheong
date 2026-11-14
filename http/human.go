@@ -45,7 +45,8 @@ func (s Server) getStaticAsset(w http.ResponseWriter, r *http.Request) {
 	if fp == "static/set_theme.js" {
 		w.Header().Add("Content-Type", "text/javascript")
 	}
-
+	// Embedded static asset, not user input.
+	// #nosec G705
 	if _, err = w.Write(asset); err != nil {
 		s.handleHTMLError(w, "write asset", http.StatusInternalServerError, err)
 	}
