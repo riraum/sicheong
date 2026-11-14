@@ -55,8 +55,10 @@ func New(db DBCfg) (DB, error) {
 		if err != nil {
 			return DB{}, fmt.Errorf("failed to fill posts %w", err)
 		}
+
 		return DB{d}, nil
 	}
+
 	return DB{d}, nil
 }
 
