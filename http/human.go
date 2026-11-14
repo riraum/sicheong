@@ -3,7 +3,6 @@ package http
 import (
 	"encoding/base64"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"log"
 	"net/http"
@@ -227,7 +226,7 @@ func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if p.Content == "" {
-		s.handleHTMLError(w, "post is empty", http.StatusBadRequest, errors.New("empty content"))
+		s.handleHTMLError(w, "post is empty", http.StatusInternalServerError, err)
 		return
 	}
 
