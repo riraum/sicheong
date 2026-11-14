@@ -57,7 +57,6 @@ func New(db DBCfg) (DB, error) {
 		}
 		return DB{d}, nil
 	}
-
 	return DB{d}, nil
 }
 
