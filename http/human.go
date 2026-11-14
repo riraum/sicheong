@@ -160,18 +160,19 @@ func (s Server) postPost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
-	if _, ok, err := s.authenticated(r); !ok || err != nil {
-		s.handleHTMLError(w, "not authenticated", http.StatusUnauthorized, err)
-		return
-	}
-
 	p, err := parsePostRValues(r)
 	if err != nil {
 		s.handleHTMLError(w, "parse values", http.StatusInternalServerError, err)
 		return
 	}
 
-	if err = s.DB.DeletePost(p); err != nil {
+	owned, err := s.ownedPost(r, int(p.ID))
+	if err != nil {
+		s.handleHTMLError(w, "delete post", ownerErrorStatus(err), err)
+		return
+	}
+
+	if err = s.DB.DeletePost(owned); err != nil {
 		s.handleHTMLError(w, "delete post in db", http.StatusInternalServerError, err)
 		return
 	}
@@ -180,18 +181,19 @@ func (s Server) deletePost(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
-	if _, ok, err := s.authenticated(r); !ok || err != nil {
-		handleJSONError(w, "not authenticated", http.StatusUnauthorized, err)
-		return
-	}
-
 	p, err := parsePostRValues(r)
 	if err != nil {
 		handleJSONError(w, "parse values", http.StatusInternalServerError, err)
 		return
 	}
 
-	if err = s.DB.DeletePost(p); err != nil {
+	owned, err := s.ownedPost(r, int(p.ID))
+	if err != nil {
+		handleJSONError(w, "delete post", ownerErrorStatus(err), err)
+		return
+	}
+
+	if err = s.DB.DeletePost(owned); err != nil {
 		handleJSONError(w, "delete post in db", http.StatusInternalServerError, err)
 		return
 	}
@@ -199,31 +201,34 @@ func (s Server) deleteAPIPost(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
 
-	if err = json.NewEncoder(w).Encode(p); err != nil {
+	if err = json.NewEncoder(w).Encode(owned); err != nil {
 		handleJSONError(w, "encode", http.StatusInternalServerError, err)
 		return
 	}
 }
 
 func (s Server) editPost(w http.ResponseWriter, r *http.Request) {
-	author, ok, err := s.authenticated(r)
-	if !ok || err != nil {
-		s.handleHTMLError(w, "not authenticated", http.StatusUnauthorized, err)
-		return
-	}
-
 	p, err := parsePostRValues(r)
 	if err != nil {
 		s.handleHTMLError(w, "parse values", http.StatusInternalServerError, err)
 		return
 	}
 
+	existing, err := s.ownedPost(r, int(p.ID))
+	if err != nil {
+		s.handleHTMLError(w, "edit post", ownerErrorStatus(err), err)
+		return
+	}
+
+	p.AuthorID = existing.AuthorID // never take the author from the request
+	if p.Date == 0 {
+		p.Date = existing.Date // keep the old date if none was sent
+	}
+
 	if p.Content == "" {
 		s.handleHTMLError(w, "post is empty", http.StatusInternalServerError, err)
 		return
 	}
-
-	p.AuthorID = author.ID
 
 	if err = s.DB.UpdatePost(p); err != nil {
 		s.handleHTMLError(w, "edit post in db", http.StatusInternalServerError, err)
