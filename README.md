@@ -26,8 +26,12 @@ https://kentcdodds.com/blog/i-migrated-from-a-postgres-cluster-to-distributed-sq
 
 Other sources that helped apart from the Go documentation, are linked in the respective PRs.
 
-# ER model
-See the [ER model](ER-MODEL.md).
+# Database
+
+- ER model
+See [ER model](ER-MODEL.md).
+- Use cases
+See [Use cases](USE-CASES.md)
 
 # External packages/assets used
 - Turso Go SQLite driver: https://github.com/tursodatabase/turso-go
