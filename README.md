@@ -44,6 +44,9 @@ Other sources that helped apart from the Go documentation, are linked in the res
 A fresh database holds 3 authors, 3 posts, and 0 votes. The fixed seed values are filled in `Fill` in `db/db.go`. The votes table starts empty, so the many-to-many relationship is shown by the schema, not by seed data.
 
 
+# Security
+- See [Threat Model](THREAT-MODEL.md)
+
 # Development
 Requires
   - Go >=1.25 installed
