@@ -2,7 +2,7 @@
 
 Sicheong is a small website where authors log in and post short links with a title and a comment. Visitors can read posts. The code is public on GitHub.
 
-This document answers three questions: what we protect, who might attack it, and what is still open. The measures we have put in place are listed in [SECURITY-MEASURES.md](SECURITY-MEASURES.md).
+This document answers three questions: what should be protected, who might attack it, and what is still open. The measures put in place are listed in [SECURITY-MEASURES.md](SECURITY-MEASURES.md).
 
 ## What we protect
 
@@ -46,8 +46,6 @@ This document answers three questions: what we protect, who might attack it, and
 
 ## Smaller tasks
 
-These are hardening steps, not separate threats:
-
 - Add browser security headers, so other sites cannot embed Sicheong.
 - Stop the app running as root inside its container.
 - Limit how large a post can be.
@@ -58,7 +56,7 @@ These are hardening steps, not separate threats:
 - The code is public. Nothing in it is secret, so this is accepted.
 - Deploy credentials are long-lived. Accepted until they are rotated.
 
-## How we will check it works
+## How to check if it works
 
 1. Try to log in with `abc`. It should fail once threat 1 is fixed.
 2. Test that editing someone else's post is refused, and that the author filter works.

@@ -46,10 +46,11 @@ A fresh database holds 3 authors, 3 posts, and 0 votes. The fixed seed values ar
 
 # Security
 - See [Threat Model](THREAT-MODEL.md)
+- And [Security Measures](SECURITY-MEASURES.md)
 
 # Development
 Requires
-  - Go >=1.25 installed
+  - Go >=1.25
 
 Then
 - Clone repo
