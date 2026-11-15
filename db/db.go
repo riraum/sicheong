@@ -82,6 +82,16 @@ func createTables(d DB) error {
 		return fmt.Errorf("%w: %s", err, stmt)
 	}
 
+	stmt = `create index if not exists posts_author_idx on posts(author)`
+	if _, err := d.client.Exec(stmt); err != nil {
+		return fmt.Errorf("%w: %s", err, stmt)
+	}
+
+	stmt = `create index if not exists votes_post_idx on votes(post)`
+	if _, err := d.client.Exec(stmt); err != nil {
+		return fmt.Errorf("%w: %s", err, stmt)
+	}
+
 	return nil
 }
 
