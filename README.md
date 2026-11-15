@@ -28,14 +28,11 @@ Other sources that helped apart from the Go documentation, are linked in the res
 
 # Database
 
-- ER model
-See [ER model](ER-MODEL.md).
-- Use cases
-See [Use cases](USE-CASES.md)
+- [ER model](ER-MODEL.md).
+- [Use cases](USE-CASES.md).
 
 # External packages/assets used
-- Turso Go SQLite driver: https://github.com/tursodatabase/turso-go
-  - Requires purego: https://github.com/ebitengine/purego
+- Mattn Go SQLite driver: github.com/mattn/go-sqlite3
 - Pico CSS framework: https://picocss.com/
 
 # Install
